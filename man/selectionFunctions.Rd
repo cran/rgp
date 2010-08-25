@@ -1,36 +1,59 @@
 \name{selectionFunctions}
-\alias{tournamentSelection}
+\alias{makeTournamentSelection}
 \title{GP selection functions...}
-\usage{tournamentSelection(population, fitnessFunction, tournamentSize=2, tournamentDeterminism=1)
+\usage{makeTournamentSelection(tournamentSize=10, selectionSize=ceiling(tournamentSize/2),
+    tournamentDeterminism=1)
+makeMultiObjectiveTournamentSelection(tournamentSize=30, selectionSize=ceiling(tournamentSize/2),
+    tournamentDeterminism=1,
+    rankingStrategy=orderByParetoCrowdingDistance)
+makeComplexityTournamentSelection(tournamentSize=30, selectionSize=ceiling(tournamentSize/2),
+    tournamentDeterminism=1,
+    rankingStrategy=orderByParetoCrowdingDistance,
+    complexityMeasure=funcVisitationLength)
 }
 \description{GP selection functions}
-\details{A GP selection function determines which individuals in a population should
-survive, i.e. are selected for variation or cloning. Single-objective selection
-functions only base their selection decision on a single fitness function,
-whereas multi-objective selection functions support multiple fitness functions.
-Every selection function at least takes a population and a (list of) fitness
-functions as required arguments and returns a list containing the index of
-the selected individual and a table with columns \code{index} and
-\emph{fitness}, where the last column contains the value of the first fitness
-function in the argument \code{fitnessFunction}, of all individuals whose
-fitness where evaluated during selection.
+\details{\code{makeTournamentSelection}: A GP selection function determines which individuals in a population should
+survive, i.e. are selected for variation or cloning, and which individuals
+of a population should be replaced. Single-objective selection functions base
+their selection decision on scalar fitness function, whereas multi-objective
+selection functions support multiple vector-valued fitness functions.
+Every selection function takes a population and a (possibly vector-valued) fitness
+function as required arguments. It returns a list of two tables \code{selected}
+and \code{discarded}, with columns \code{index} and \code{fitness} each.
+The first table contains the population indices of the individuals selected as
+survivors, the second table contains the population indices of the individuals
+that should be discarded and replaced. This definition simplifies the implementation
+of \emph{steady-state} evolutionary strategies where most of the individuals of a
+population are unchanged in each selection step. In a GP context, these strategies
+are often more efficient than generational strategies. 
 
-\code{tournamentSelection} implements classic single-objective tournament selection.}
-\value{A list with the following two components:
-\code{selectedIndex} the index of the selected individual in \code{population}
-\code{fitnessValues} a table of index and fitness of each individual that was
-evaluated in the course of the selection procedure}
-\arguments{\item{population}{The population to select from. All indices returned refer to
-this population.}
-\item{fitnessFunction}{A single fitness function for single-objective selection
-functions.}
+\code{makeTournamentSelection} returns a classic single-objective tournament selection
+function.
+\code{makeMultiObjectiveTournamentSelection} returns a multi-objective tournament selection
+function that selects individuals based on multiple objectives.
+\code{makeComplexityTournamentSelection} returns a multi-objective selection function that
+implements the common case of dual-objective tournament selection with high solution
+quality as the first objective and low solution complexity as the second objective.
+
+}
+\value{\code{makeTournamentSelection}: A selection function.
+
+}
+\arguments{\item{complexityMeasure}{The function used to measure the complexity of an individual.}
 \item{tournamentSize}{The number of individuals to randomly select to form a
-tournament.}
+tournament, defaults to 10 in the single-objective case, 30 in the multi-objective case.}
+\item{selectionSize}{The number of individuals to return as selected.}
 \item{tournamentDeterminism}{The propability \emph{p} for selecting the best individual
 in a tournament, must be in the interval (0.0, 1.0]. The best individual is selected
 with propability \emph{p}, the second best individual is selected with propability
 \emph{p * (1 - p)}, the third best individual ist selected with propability
 \emph{p * (1 - p)^2}, and so on. Note that setting \code{tournamentDeterminism}
 to \code{1.0} (the default) yields determistic behavior.}
+\item{rankingStrategy}{The strategy used to rank individuals based on multiple objectives.
+This function must turn a fitness vector (one point per column) into an ordering
+permutation (similar to the one returned by \code{order}). Defaults to
+\code{orderByParetoCrowdingDistance}.}
 }
+\alias{makeMultiObjectiveTournamentSelection}
+\alias{makeComplexityTournamentSelection}
 

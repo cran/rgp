@@ -1,6 +1,6 @@
 \name{searchSpaceDefinition}
 \alias{functionSet}
-\title{Functions for defining the search space for symbolic regression...}
+\title{Functions for defining the search space for Genetic Programming...}
 \usage{functionSet(..., list)
 inputVariableSet(..., list)
 constantFactorySet(..., list)
@@ -8,7 +8,7 @@ c.functionSet(..., recursive=FALSE)
 c.inputVariableSet(..., recursive=FALSE)
 c.constantFactorySet(..., recursive=FALSE)
 }
-\description{Functions for defining the search space for symbolic regression}
+\description{Functions for defining the search space for Genetic Programming}
 \details{\code{functionSet}: The GP search space is defined by a set of functions, a set of
 input variables, a set of constant constructor functions, and some
 rules how these functions, input variables, and constants may be

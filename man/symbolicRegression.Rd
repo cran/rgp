@@ -5,8 +5,9 @@
     populationSize=500, individualSizeLimit=64,
     penalizeGenotypeConstantIndividuals=FALSE,
     functionSet=mathFunctionSet, constantSet=numericConstantSet,
-    selectionFunction=tournamentSelection, crossoverFunction=crossover,
-    mutationFunction, progressMonitor, verbose=TRUE)
+    selectionFunction=makeTournamentSelection(),
+    crossoverFunction=crossover, mutationFunction, progressMonitor,
+    verbose=TRUE)
 }
 \description{Symbolic regression via untyped genetic programming}
 \details{Perform symbolic regression via untyped genetic programming. The regression
@@ -15,8 +16,7 @@ without interactions are supported at this time. The result of the symbolic
 regression run is a symbolic regression model containing an untyped GP
 population of model functions.}
 \value{An symbolic regression model that contains an untyped GP population.}
-\seealso{\code{\link{predict.symbolicRegressionModel}}}
-\seealso{\code{\link{geneticProgramming}}}
+\seealso{\code{\link{predict.symbolicRegressionModel}}, \code{\link{geneticProgramming}}}
 \arguments{\item{formula}{A \code{\link{formula}} describing the regression task. Only
 simple formulas of the form \code{response ~ variable1 + ... + variableN}
 are supported at this point in time.}
@@ -37,7 +37,7 @@ any input variables will get a fitness of \code{Inf}.}
 \item{functionSet}{The function set.}
 \item{constantSet}{The set of constant factory functions.}
 \item{selectionFunction}{The selection function to use. Defaults to
-\code{tournamentSelection}. See \link{tournamentSelection} for details.}
+tournament selection. See \link{makeTournamentSelection} for details.}
 \item{crossoverFunction}{The crossover function.}
 \item{mutationFunction}{The mutation function.}
 \item{progressMonitor}{A function of signature

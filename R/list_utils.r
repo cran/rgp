@@ -50,6 +50,7 @@ is.composite <- function(x) length(x) > 1
 ##' Sort a vector or list by the result of applying a function
 ##'
 ##' Sorts a vector or a list by the numerical result of applying the function \code{byFunc}.
+##'
 ##' @param xs A vector or list.
 ##' @param byFunc A function from elements of \code{xs} to \code{numeric}.
 ##' @return The result of sorting \code{xs} by \code{byfunc}.
@@ -61,9 +62,37 @@ sortBy <- function(xs, byFunc) {
   xs[o]
 }
 
+##' Sort a vector or list via a given ranking
+##'
+##' Reorders a vector or list according to a given ranking \code{ranking}.
+##'
+##' @param xs The vector or list to reorder.
+##' @param ranking The ranking to sort \code{xs} by, defaults to \code{rank(xs)}.
+##' @return The result of reordering \code{xs} by \code{ranking}.
+sortByRanking <- function(xs, ranking = rank(xs)) {
+  sorted <- xs
+  sorted[ranking] <- xs
+  sorted
+}
+
+##' Calculate the inverse of a permutation
+##'
+##' Returns the inverse of a permutation \code{x} given as an integer vector.
+##' This function is useful to turn a ranking into an ordering and back, for example.
+##'
+##' @param x The permutation to return the inverse for.
+##' @return The inverse of the permutation \code{x}.
+##' @seealso \code{\link{rank}}, \code{\link{order}}
+inversePermutation <- function(x) {
+  l <- length(x); o <- numeric(l)
+  o[x] <- 1:l
+  o
+}
+
 ##' Choose a random element from a list or vector
 ##'	
 ##' Returns a unformly random chosen element of the vector or list \code{x}.
+##'
 ##' @param x The vector or list to chose an element from.
 ##' @return A uniformly random element of \code{x}.
 randelt <- function(x) {

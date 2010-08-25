@@ -92,13 +92,13 @@ plotPopulationFitnessComplexity <- function(pop, fitnessFunction,
     if (hideOutliers)
       c(0, min(max(popCpx), quantile(popCpx, 0.75) + hideOutliers * IQR(popCpx)))
     else NULL
-#  popNds <- nds_rank(rbind(popFit, popCpx))
+  popNds <- nds_rank(rbind(popFit, popCpx))
   points <- cbind(popFit, popCpx)
   colnames(points) <- c("Fitness", "Complexity")
   popPch <- rep(1, length(pop))
   if (showParetoFront) stop("showParetoFront not implemented") # TODO
-#  if (showParetoFront) popPch <- replace(popPch, which(popNds == 1), 16)
-#  plot(points, pch = popPch, xlim = popFitLim, ylim = popCpxLim, ...)
+  if (showParetoFront) popPch <- replace(popPch, which(popNds == 1), 16)
+  plot(points, pch = popPch, xlim = popFitLim, ylim = popCpxLim, ...)
   if (showIndices) text(x = popFit, y = popCpx, pos = 1, cex = 0.6,
                         xlim = popFitLim, ylim = popCpxLim, ...)
 }

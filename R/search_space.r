@@ -1,5 +1,5 @@
 ## search_space.r
-##   - Functions for defining the search space for symbolic regression
+##   - Functions for defining the search space for Genetic Programming
 ##
 ## RGP - a GP system for R
 ## 2010 Oliver Flasch (oliver.flasch@fh-koeln.de)
@@ -10,7 +10,7 @@
 ##' @include stypes.r
 NA
 
-##' Functions for defining the search space for symbolic regression
+##' Functions for defining the search space for Genetic Programming
 ##'
 ##' The GP search space is defined by a set of functions, a set of
 ##' input variables, a set of constant constructor functions, and some
@@ -57,6 +57,7 @@ functionSet <- function(..., list = NULL) {
   funcset <- list()
   class(funcset) <- c("functionSet", "list")
   funcset$all <- lapply(ll, function(o) as.name(o) %::% sType(o)) # convert to names, keeping sTypes
+  funcset$byType <- sortByType(funcset$all)
   funcset$byRange <- sortByRange(funcset$all)
   funcset
 }
@@ -68,7 +69,8 @@ inputVariableSet <- function(..., list = NULL) {
   inset <- list()
   class(inset) <- c("inputVariableSet", "list")
   inset$all <- lapply(ll, function(o) as.name(o) %::% sType(o)) # convert to names, keeping sTypes
-  inset$byRange <- sortByRange(inset$all)
+  inset$byType <- sortByType(inset$all)
+  inset$byRange <- sortByRange(inset$all) # TODO remove this field
   inset
 }
 
@@ -79,7 +81,8 @@ constantFactorySet <- function(..., list = NULL) {
   constfacset <- list()
   class(constfacset) <- c("constantFactorySet", "list")
   constfacset$all <- ll
-  constfacset$byRange <- sortByRange(constfacset$all)
+  constfacset$byType <- sortByType(constfacset$all)
+  constfacset$byRange <- sortByRange(constfacset$all) # TODO remove this field
   constfacset
 }
 
@@ -110,10 +113,26 @@ c.constantFactorySet <- function(..., recursive = FALSE) {
   constantFactorySet(list = combinedCsets)
 }
 
-##' Tabulate a list of functions or input variables by their range sTypes
+##' Tabulate a list of functions or input variables by their sTypes
+##'
+##' @param x A list of functions or input variables to sort by sType.
+##' @return A table of the objects keyed by their sTypes.
+sortByType <- function(x) {
+  byTypeTable <- list()
+  for (o in x) {
+    if (hasStype(o)) {
+      oStype <- sType(o)
+      if (is.null(byTypeTable[[oStype$string]])) byTypeTable[[oStype$string]] <- list()
+      byTypeTable[[oStype$string]] <- append(byTypeTable[[oStype$string]], list(o))
+    }
+  }
+  byTypeTable
+}
+
+##' Tabulate a list of functions or input variables by the range part of their sTypes
 ##'
 ##' @param x A list of functions or input variables to sort by range sType.
-##' @return A table of the objects keyed by their range types.
+##' @return A table of the objects keyed by their range sTypes.
 sortByRange <- function(x) {
   byRangeTable <- list()
   for (o in x) {

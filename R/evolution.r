@@ -38,7 +38,7 @@ NA
 ##' @param inputVariables The input variable set.
 ##' @param constantSet The set of constant factory functions.
 ##' @param selectionFunction The selection function to use. Defaults to
-##'   \code{tournamentSelection}. See \link{tournamentSelection} for details.
+##'   tournament selection. See \link{makeTournamentSelection} for details.
 ##' @param crossoverFunction The crossover function.
 ##' @param mutationFunction The mutation function.
 ##' @param progressMonitor A function of signature
@@ -56,7 +56,7 @@ geneticProgramming <- function(fitnessFunction,
                                functionSet = mathFunctionSet,
                                inputVariables = inputVariableSet("x"),
                                constantSet = numericConstantSet,
-                               selectionFunction = tournamentSelection,
+                               selectionFunction = makeTournamentSelection(),
                                crossoverFunction = crossover,
                                mutationFunction = NULL,
                                progressMonitor = NULL,
@@ -90,18 +90,20 @@ geneticProgramming <- function(fitnessFunction,
   stepNumber <- 1
   startTime <- proc.time()["elapsed"]
   timeElapsed <- 0
-
+  
   logmsg("STARTING genetic programming evolution run...")
   while (!stopCondition(pop = pop, stepNumber = stepNumber, timeElapsed = timeElapsed)) {
-    selA <- selectionFunction(pop, fitnessFunction)
-    selB <- selectionFunction(pop, fitnessFunction)
-    winnerA <- selA$selectedIndex
-    winnerB <- selB$selectedIndex
-    losersA <- selA$fitnessValues[!(selA$fitnessValues[, 1] == selA$selectedIndex), 1]
-    losersB <- selA$fitnessValues[!(selA$fitnessValues[, 1] == selA$selectedIndex), 1]
+    # Select two sets of individuals and divide each into winners and losers...
+    selA <- selectionFunction(pop, fitnessFunction); selB <- selectionFunction(pop, fitnessFunction)
+    winnersA <- selA$selected[, 1]; winnersB <- selB$selected[, 1]
+    losersA <- selA$discarded[, 1]; losersB <- selB$discarded[, 1]
     losers <- c(losersA, losersB)
-    pop[losers] <-
-      replicate(length(losers), mutatefunc(crossoverFunction(pop[[winnerA]], pop[[winnerB]])))
+    # Create winner children...
+    winnerChildren <- Map(function(winnerA, winnerB)
+                            mutatefunc(crossoverFunction(pop[[winnerA]], pop[[winnerB]])),
+                          winnersA, winnersB)
+    # Replace losers by winner children (cycling the list of winner children if too short)...
+    suppressWarnings(pop[losers] <- winnerChildren)
     
     timeElapsed <- proc.time()["elapsed"] - startTime
     stepNumber <- 1 + stepNumber
@@ -147,7 +149,7 @@ geneticProgramming <- function(fitnessFunction,
 ##' @param functionSet The function set.
 ##' @param constantSet The set of constant factory functions.
 ##' @param selectionFunction The selection function to use. Defaults to
-##'   \code{tournamentSelection}. See \link{tournamentSelection} for details.
+##'   tournament selection. See \link{makeTournamentSelection} for details.
 ##' @param crossoverFunction The crossover function.
 ##' @param mutationFunction The mutation function.
 ##' @param progressMonitor A function of signature
@@ -156,8 +158,7 @@ geneticProgramming <- function(fitnessFunction,
 ##' @param verbose Whether to print progress messages.
 ##' @return An symbolic regression model that contains an untyped GP population.
 ##'
-##' @seealso \code{\link{predict.symbolicRegressionModel}}
-##' @seealso \code{\link{geneticProgramming}}
+##' @seealso \code{\link{predict.symbolicRegressionModel}}, \code{\link{geneticProgramming}}
 ##' @export
 symbolicRegression <- function(formula, data,
                                stopCondition = makeStepsStopCondition(1000),
@@ -167,7 +168,7 @@ symbolicRegression <- function(formula, data,
                                penalizeGenotypeConstantIndividuals = FALSE,
                                functionSet = mathFunctionSet,
                                constantSet = numericConstantSet,
-                               selectionFunction = tournamentSelection,
+                               selectionFunction = makeTournamentSelection(),
                                crossoverFunction = crossover,
                                mutationFunction = NULL,
                                progressMonitor = NULL,
@@ -356,10 +357,26 @@ ifThenElse <- function(x, thenbranch, elsebranch) ifelse(x, thenbranch, elsebran
 ##' "sqrt", "exp", and "ln".
 ##' \code{trigonometricFunctionSet} is an untyped function set containing the functions
 ##' "sin", "cos", and "tan".
-##' \code{mathFunctionSet} is an untyped function set containing all the above functions.
+##' \code{mathFunctionSet} is an untyped function set containing all of the above functions.
 ##'
 ##' \code{numericConstantSet} is an untyped constant factory set containing a single
 ##' constant factory that creates numeric constants via calls to \code{runif(1, -1, 1)}.
+##'
+##' \code{typedArithmeticFuncset} is a typed function set containing the functions
+##' "+", "-", "*", and "/".
+##' \code{typedExpLogFuncset} is a typed function set containing the functions
+##' "sqrt", "exp", and "ln".
+##' \code{typedTrigonometricFuncset} is a typed function set containing the functions
+##' "sin", "cos", and "tan".
+##' \code{typedMathFuncset} is a typed function set containing all of the typed functions above.
+##'
+##' \code{typedLogicalFuncset} is a typed function set containing the functions
+##' "<", ">", "==", "ifThenElse", "&", "|", and "!".
+##' \code{typedMathLogicalFuncset} is a typed function set containing all functions of
+##' \code{typedMathFuncset} and \code{typedLogicalFuncset}.
+##'
+##' \code{typedHigherOrderVectorFuncset} is a typed function set containing the functions
+##' "sapply" and "mean".
 ##'
 ##' @rdname defaultGPFunctionAndConstantSets
 ##' @export
@@ -380,3 +397,46 @@ mathFunctionSet <- c(arithmeticFunctionSet, expLogFunctionSet, trigonometricFunc
 ##' @rdname defaultGPFunctionAndConstantSets
 ##' @export
 numericConstantSet <- constantFactorySet(function() runif(1, -1, 1))
+
+##' @rdname defaultGPFunctionAndConstantSets
+##' @export
+typedArithmeticFuncset <- functionSet("+" %::% (list(st("numeric"), st("numeric")) %->% st("numeric")),
+                                      "-" %::% (list(st("numeric"), st("numeric")) %->% st("numeric")),
+                                      "*" %::% (list(st("numeric"), st("numeric")) %->% st("numeric")),
+                                      "/" %::% (list(st("numeric"), st("numeric")) %->% st("numeric")))
+
+##' @rdname defaultGPFunctionAndConstantSets
+##' @export
+typedExpLogFuncset <- functionSet("sqrt" %::% (list(st("numeric")) %->% st("numeric")),
+                                  "exp" %::% (list(st("numeric")) %->% st("numeric")),
+                                  "ln" %::% (list(st("numeric")) %->% st("numeric")))
+
+##' @rdname defaultGPFunctionAndConstantSets
+##' @export
+typedTrigonometricFuncset <- functionSet("sin" %::% (list(st("numeric")) %->% st("numeric")),
+                                         "cos" %::% (list(st("numeric")) %->% st("numeric")),
+                                         "tan" %::% (list(st("numeric")) %->% st("numeric")))
+
+##' @rdname defaultGPFunctionAndConstantSets
+##' @export
+typedMathFuncset <- c(typedArithmeticFuncset, typedExpLogFuncset, typedTrigonometricFuncset)
+
+##' @rdname defaultGPFunctionAndConstantSets
+##' @export
+typedLogicalFuncset <- functionSet("<" %::% (list(st("numeric"), st("numeric")) %->% st("logical")),
+                                   ">" %::% (list(st("numeric"), st("numeric")) %->% st("logical")),
+                                   "==" %::% (list(st("numeric"), st("numeric")) %->% st("logical")),
+                                   "ifThenElse" %::% (list(st("logical"), st("numeric"), st("numeric")) %->% st("numeric")),
+                                   "&" %::% (list(st("logical"), st("logical")) %->% st("logical")),
+                                   "|" %::% (list(st("logical"), st("logical")) %->% st("logical")),
+                                   "!" %::% (list(st("logical")) %->% st("logical")))
+
+##' @rdname defaultGPFunctionAndConstantSets
+##' @export
+typedMathLogicalFuncset <- c(typedMathFuncset, typedLogicalFuncset)
+
+##' @rdname defaultGPFunctionAndConstantSets
+##' @export
+typedHigherOrderVectorFuncset <- functionSet("sapply" %::% (list(st("numeric"), list(st("numeric")) %->% st("numeric")) %->% st("numeric")),
+                                             "mean" %::% (list(st("numeric")) %->% st("numeric")))
+

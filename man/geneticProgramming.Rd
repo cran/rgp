@@ -5,8 +5,9 @@
     populationSize=500, functionSet=mathFunctionSet,
     inputVariables=inputVariableSet("x"),
     constantSet=numericConstantSet,
-    selectionFunction=tournamentSelection, crossoverFunction=crossover,
-    mutationFunction, progressMonitor, verbose=TRUE)
+    selectionFunction=makeTournamentSelection(),
+    crossoverFunction=crossover, mutationFunction, progressMonitor,
+    verbose=TRUE)
 }
 \description{Genetic programming run}
 \details{Perform a genetic programming run. The required argument \code{fitnessFunction}
@@ -35,7 +36,7 @@ created.}
 \item{inputVariables}{The input variable set.}
 \item{constantSet}{The set of constant factory functions.}
 \item{selectionFunction}{The selection function to use. Defaults to
-\code{tournamentSelection}. See \link{tournamentSelection} for details.}
+tournament selection. See \link{makeTournamentSelection} for details.}
 \item{crossoverFunction}{The crossover function.}
 \item{mutationFunction}{The mutation function.}
 \item{progressMonitor}{A function of signature
