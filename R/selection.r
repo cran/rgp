@@ -16,13 +16,16 @@
 ##' selection functions support multiple vector-valued fitness functions.
 ##' Every selection function takes a population and a (possibly vector-valued) fitness
 ##' function as required arguments. It returns a list of two tables \code{selected}
-##' and \code{discarded}, with columns \code{index} and \code{fitness} each.
-##' The first table contains the population indices of the individuals selected as
-##' survivors, the second table contains the population indices of the individuals
-##' that should be discarded and replaced. This definition simplifies the implementation
-##' of \emph{steady-state} evolutionary strategies where most of the individuals of a
-##' population are unchanged in each selection step. In a GP context, these strategies
-##' are often more efficient than generational strategies. 
+##' and \code{discarded}, with columns \code{index} and \code{fitness} each. The
+##' returned list also contains a single integer \code{numberOfFitnessEvaluations}
+##' that contains the number of fitness evaluations used to make the selection (Note
+##' that in the multi-objective case, evaluating all fitness functions once counts
+##' as a single evaluation). The first table contains the population indices of the
+##' individuals selected as survivors, the second table contains the population indices
+##' of the individuals that should be discarded and replaced. This definition simplifies
+##' the implementation of \emph{steady-state} evolutionary strategies where most of the
+##' individuals in a population are unchanged in each selection step. In a GP context,
+##' steady-state strategies are often more efficient than generational strategies. 
 ##'
 ##' \code{makeTournamentSelection} returns a classic single-objective tournament selection
 ##'   function.
@@ -55,7 +58,8 @@ makeTournamentSelection <- function(tournamentSize = 10,
                                     tournamentDeterminism = 1.0)
   function(population, fitnessFunction) {
     poolIdxs <- sample(length(population), tournamentSize)
-    poolFitness <- sapply(population[poolIdxs], fitnessFunction)[1] # only the first fitness component
+    poolFitness <- sapply(population[poolIdxs], fitnessFunction)
+    poolFitness <- sapply(poolFitness, function(fitness) fitness[1]) # only use the first fitness component
     idxFitTable <- cbind(poolIdxs, poolFitness)
     colnames(idxFitTable) <- c("index", "fitness")
     # Sort by (single-objective) fitness...
@@ -65,7 +69,8 @@ makeTournamentSelection <- function(tournamentSize = 10,
       sortedIdxFitTable[inversePermutation(nondeterministicRanking(tournamentSize)),]
     # The first selectionSize individuals are selected, the rest are discarded:
     list(selected = matrix(shuffledSortedIdxFitTable[1:selectionSize,], nrow = selectionSize),
-         discarded = matrix(shuffledSortedIdxFitTable[-(1:selectionSize),], nrow = tournamentSize - selectionSize))
+         discarded = matrix(shuffledSortedIdxFitTable[-(1:selectionSize),], nrow = tournamentSize - selectionSize),
+         numberOfFitnessEvaluations = tournamentSize)
   }
 
 ##' @rdname selectionFunctions
@@ -86,7 +91,8 @@ makeMultiObjectiveTournamentSelection <- function(tournamentSize = 30,
       sortedIdxFitTable[inversePermutation(nondeterministicRanking(tournamentSize)),]
     # The first selectionSize individuals are selected, the rest are discarded:
     list(selected = matrix(shuffledSortedIdxFitTable[1:selectionSize,], nrow = selectionSize),
-         discarded = matrix(shuffledSortedIdxFitTable[-(1:selectionSize),], nrow = tournamentSize - selectionSize))
+         discarded = matrix(shuffledSortedIdxFitTable[-(1:selectionSize),], nrow = tournamentSize - selectionSize),
+         numberOfFitnessEvaluations = tournamentSize)
   }
 
 ##' @rdname selectionFunctions

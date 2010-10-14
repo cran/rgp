@@ -19,13 +19,16 @@ their selection decision on scalar fitness function, whereas multi-objective
 selection functions support multiple vector-valued fitness functions.
 Every selection function takes a population and a (possibly vector-valued) fitness
 function as required arguments. It returns a list of two tables \code{selected}
-and \code{discarded}, with columns \code{index} and \code{fitness} each.
-The first table contains the population indices of the individuals selected as
-survivors, the second table contains the population indices of the individuals
-that should be discarded and replaced. This definition simplifies the implementation
-of \emph{steady-state} evolutionary strategies where most of the individuals of a
-population are unchanged in each selection step. In a GP context, these strategies
-are often more efficient than generational strategies. 
+and \code{discarded}, with columns \code{index} and \code{fitness} each. The
+returned list also contains a single integer \code{numberOfFitnessEvaluations}
+that contains the number of fitness evaluations used to make the selection (Note
+that in the multi-objective case, evaluating all fitness functions once counts
+as a single evaluation). The first table contains the population indices of the
+individuals selected as survivors, the second table contains the population indices
+of the individuals that should be discarded and replaced. This definition simplifies
+the implementation of \emph{steady-state} evolutionary strategies where most of the
+individuals in a population are unchanged in each selection step. In a GP context,
+steady-state strategies are often more efficient than generational strategies. 
 
 \code{makeTournamentSelection} returns a classic single-objective tournament selection
 function.

@@ -153,12 +153,22 @@ randexprFull <- function(funcset, inset, conset,
 ##' @param maxdepth The maximum expression tree depth.
 ##' @param exprfactory The function to use for randomly creating the function's body.
 ##' @return A randomly generated R function.
+##' @rdname randomFunctionCreation
 ##' @export
 randfunc <- function(funcset, inset, conset, maxdepth = 16, exprfactory = randexprGrow) {
   newf <- new.function()
   formals(newf) <- new.alist(inset$all)
   body(newf) <- exprfactory(funcset, inset, conset, maxdepth)
   newf
+}
+
+##' @rdname randomFunctionCreation
+##' @export
+randfuncRampedHalfAndHalf <- function(funcset, inset, conset, maxdepth = 16) {
+  if (runif(1) > 0.5)
+    randfunc(funcset, inset, conset, maxdepth, exprfactory = randexprFull)
+  else
+    randfunc(funcset, inset, conset, maxdepth, exprfactory = randexprGrow)
 }
 
 ##' Creates an R expression by random growth respecting type constraints
@@ -235,12 +245,22 @@ randexprTypedFull <- function(type, funcset, inset, conset,
 ##' @param maxdepth The maximum expression tree depth.
 ##' @param exprfactory The function to use for randomly creating the function's body.
 ##' @return A randomly generated well-typed R function.
+##' @rdname randomFunctionCreationTyped
 ##' @export
 randfuncTyped <- function(type, funcset, inset, conset, maxdepth = 16, exprfactory = randexprTypedGrow) {
   newf <- new.function()
   formals(newf) <- new.alist(inset$all)
   body(newf) <- exprfactory(type, funcset, inset, conset, maxdepth)
   newf
+}
+
+##' @rdname randomFunctionCreationTyped
+##' @export
+randfuncTypedRampedHalfAndHalf <- function(type, funcset, inset, conset, maxdepth = 16) {
+  if (runif(1) > 0.5)
+    randfuncTyped(type, funcset, inset, conset, maxdepth, exprfactory = randexprTypedFull)
+  else
+    randfuncTyped(type, funcset, inset, conset, maxdepth, exprfactory = randexprTypedGrow)
 }
 
 ##' Create a random terminal node

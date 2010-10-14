@@ -102,3 +102,48 @@ randelt <- function(x) {
   else
     sample(x, 1)[[1]] # sample(x, 1) always yields a list of exactly one element
 }
+
+##' Splitting and grouping of lists
+##'
+##' Functions for splitting and grouping lists into sublists.
+##' \code{splitList} splits a list \code{l} into \code{max(groupAssignment)} groups.
+##' The integer indices of \code{groupAssignment} determine in which group each
+##' element of \code{l} goes.
+##' \code{groupListConsecutive} splits \code{l} into \code{numberOfGroups} consecutive
+##' sublists (or groups).
+##' \code{groupListDistributed} distributes \code{l} into \code{numberOfGroups}
+##' sublists (or groups).
+##'
+##' @param l A list.
+##' @param groupAssignment A vector of group assignment indices.
+##' @param numberOfGroups The number of groups to create, must be <= length(l)
+##' @return A list of lists, where each member represents a group.
+##'
+##' @rdname listSplittingAndGrouping
+splitList <- function(l, groupAssignment) {
+  groups <- Map(function(i) list(), 1:max(groupAssignment))
+  for (i in 1:length(groupAssignment))
+    groups[[groupAssignment[i]]] <- c(groups[[groupAssignment[i]]], l[[i]])
+  groups         
+}
+
+##' @rdname listSplittingAndGrouping
+groupListConsecutive <- function(l, numberOfGroups) {
+  ll <- length(l)
+  if (numberOfGroups > ll) stop("groupListConsecutive: numberOfGroups must be <= length(l)")
+  gl <- floor(ll / numberOfGroups)
+  glr <- ll %% numberOfGroups
+  gassign <- c(Reduce(c, lapply(1:numberOfGroups, function(gi) rep(gi, gl))), rep(numberOfGroups, glr))  
+  splitList(l, gassign)       
+}
+
+##' @rdname listSplittingAndGrouping
+groupListDistributed <- function(l, numberOfGroups) {
+  ll <- length(l)
+  if (numberOfGroups > ll) stop("groupListDistributed: numberOfGroups must be <= length(l)")
+  gl <- floor(ll / numberOfGroups)
+  gassign <- 1:ll
+  for (i in 1:ll) gassign[i] <- (i - 1) %% numberOfGroups + 1
+  splitList(l, gassign)
+}
+

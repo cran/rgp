@@ -1,23 +1,25 @@
-\name{symbolicRegression}
-\alias{symbolicRegression}
-\title{Symbolic regression via untyped standard genetic programming...}
-\usage{symbolicRegression(formula, data, stopCondition=makeTimeStopCondition(5), population,
-    populationSize=100, eliteSize=ceiling(0.1 * populationSize),
-    elite=list(), individualSizeLimit=64,
-    penalizeGenotypeConstantIndividuals=FALSE,
+\name{multiNicheSymbolicRegression}
+\alias{multiNicheSymbolicRegression}
+\title{Symbolic regression via multi-niche standard genetic programming...}
+\usage{multiNicheSymbolicRegression(formula, data, stopCondition=makeTimeStopCondition(25),
+    passStopCondition=makeTimeStopCondition(5), numberOfNiches=2,
+    clusterFunction=groupListConsecutive, joinFunction=function(niches)
+    Reduce(c, niches), population, populationSize=100,
+    eliteSize=ceiling(0.1 * populationSize), elite=list(),
+    individualSizeLimit=64, penalizeGenotypeConstantIndividuals=FALSE,
     functionSet=mathFunctionSet, constantSet=numericConstantSet,
     selectionFunction=makeTournamentSelection(),
     crossoverFunction=crossover, mutationFunction,
     restartCondition=makeEmptyRestartCondition(),
     restartStrategy=makeLocalRestartStrategy(), progressMonitor,
-    verbose=TRUE)
+    verbose=TRUE, clusterApply=sfClusterApplyLB, clusterExport=sfExport)
 }
-\description{Symbolic regression via untyped standard genetic programming}
-\details{Perform symbolic regression via untyped genetic programming. The regression
-task is specified as a \code{\link{formula}}. Only simple formulas without
-interactions are supported. The result of the symbolic regression run is a
-symbolic regression model containing an untyped GP population of model
-functions.}
+\description{Symbolic regression via multi-niche standard genetic programming}
+\details{Perform symbolic regression via untyped multi-niche genetic programming.
+The regression task is specified as a \code{\link{formula}}. Only simple
+formulas without interactions are supported. The result of the symbolic
+regression run is a symbolic regression model containing an untyped GP
+population of model functions.}
 \value{An symbolic regression model that contains an untyped GP population.}
 \seealso{\code{\link{predict.symbolicRegressionModel}}, \code{\link{geneticProgramming}}}
 \arguments{\item{formula}{A \code{\link{formula}} describing the regression task. Only
@@ -28,12 +30,22 @@ symbolic regression run. The variables in \code{formula} must match
 column names in this data frame.}
 \item{stopCondition}{The stop condition for the evolution main loop. See
 \link{makeStepsStopCondition} for details.}
+\item{passStopCondition}{The stop condition for each parallel pass. See
+\link{makeStepsStopCondition} for details.}
+\item{numberOfNiches}{The number of niches to cluster the population into.}
+\item{clusterFunction}{The function used to cluster the population into
+niches. The first parameter of this function is a GP population, the
+second paramater an integer representing the number of niches. Defaults
+to \code{\link{groupListConsecutive}}.}
+\item{joinFunction}{The function used to join all niches into a population
+again after a round of parallel passes. Defaults to a function that
+simply concatenates all niches.}
 \item{population}{The GP population to start the run with. If this parameter
 is missing, a new GP population of size \code{populationSize} is created
 through random growth.}
 \item{populationSize}{The number of individuals if a population is to be
 created.}
-\item{eliteSize}{The number of elite individuals to keep. Defaults to
+\item{eliteSize}{The number of "elite" individuals to keep. Defaults to
 \code{ceiling(0.1 * populationSize)}.}
 \item{elite}{The elite list, must be alist of individuals sorted in ascending
 order by their first fitness component.}
@@ -48,12 +60,16 @@ tournament selection. See \link{makeTournamentSelection} for details.}
 \item{crossoverFunction}{The crossover function.}
 \item{mutationFunction}{The mutation function.}
 \item{restartCondition}{The restart condition for the evolution main loop. See
-\link{makeEmptyRestartCondition} for details.}
+\link{makeFitnessStagnationRestartCondition} for details.}
 \item{restartStrategy}{The strategy for doing restarts. See
 \link{makeLocalRestartStrategy} for details.}
 \item{progressMonitor}{A function of signature
 \code{function(population, fitnessfunction, stepNumber, evaluationNumber,
 bestFitness, timeElapsed)} to be called with each evolution step.}
 \item{verbose}{Whether to print progress messages.}
+\item{clusterApply}{The cluster apply function that is used to distribute the
+parallel passes to CPUs in a compute cluster.}
+\item{clusterExport}{A function that is used to export R variables to the nodes of
+a CPU cluster, defaults to \code{\link{sfExport}}.}
 }
 

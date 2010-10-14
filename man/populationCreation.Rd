@@ -2,10 +2,10 @@
 \alias{makePopulation}
 \title{Classes for populations of individuals represented as functions...}
 \usage{makePopulation(size, funcset, inset, conset, maxfuncdepth=8, funcfactory=function()
-    randfunc(funcset, inset, conset, maxfuncdepth))
+    randfuncRampedHalfAndHalf(funcset, inset, conset, maxfuncdepth))
 makeTypedPopulation(size, type, funcset, inset, conset, maxfuncdepth=8,
-    funcfactory=function() randfuncTyped(type, funcset, inset, conset,
-    maxfuncdepth))
+    funcfactory=function() randfuncTypedRampedHalfAndHalf(type,
+    funcset, inset, conset, maxfuncdepth))
 print.population(x, ...)
 summary.population(object, ...)
 }
@@ -25,7 +25,8 @@ summary.population(object, ...)
 \item{inset}{The set of input variables.}
 \item{conset}{The set of constant factories.}
 \item{maxfuncdepth}{The maximum depth of the functions of the new population.}
-\item{funcfactory}{A factory for creating the functions of the new population.}
+\item{funcfactory}{A factory for creating the functions of the new population.
+Defaults to Koza's "ramped half-and-half" initialization strategy.}
 \item{x}{The population to print.}
 \item{object}{The population to summarize.}
 \item{...}{Additional parameters to the \code{\link{print}} or \code{\link{summary}}

@@ -21,6 +21,7 @@
 ##' @param conset The set of constant factories.
 ##' @param maxfuncdepth The maximum depth of the functions of the new population.
 ##' @param funcfactory A factory for creating the functions of the new population.
+##'   Defaults to Koza's "ramped half-and-half" initialization strategy.
 ##' @param x The population to print.
 ##' @param object The population to summarize.
 ##' @param ... Additional parameters to the \code{\link{print}} or \code{\link{summary}}
@@ -31,7 +32,7 @@
 ##' @export
 makePopulation <- function(size, funcset, inset, conset,
                            maxfuncdepth = 8,
-                           funcfactory = function() randfunc(funcset, inset, conset, maxfuncdepth)) {
+                           funcfactory = function() randfuncRampedHalfAndHalf(funcset, inset, conset, maxfuncdepth)) {
   pop <- lapply(1:size, function(i) funcfactory())
   class(pop) <- c("untypedPopulation", "population", "list")
   pop
@@ -41,7 +42,7 @@ makePopulation <- function(size, funcset, inset, conset,
 ##' @export
 makeTypedPopulation <- function(size, type, funcset, inset, conset,
                                 maxfuncdepth = 8,
-                                funcfactory = function() randfuncTyped(type, funcset, inset, conset, maxfuncdepth)) {
+                                funcfactory = function() randfuncTypedRampedHalfAndHalf(type, funcset, inset, conset, maxfuncdepth)) {
   pop <- makePopulation(size, funcset, inset, conset, maxfuncdepth, funcfactory)
   class(pop) <- c("typedPopulation", "population", "list")
   pop
@@ -82,7 +83,7 @@ plotPopulationFitnessComplexity <- function(pop, fitnessFunction,
                                             showIndices = TRUE,
                                             showParetoFront = TRUE,
                                             hideOutliers = 0, ...) {
-  popFit <- as.vector(lapply(pop, fitnessFunction), mode = "numeric")
+  popFit <- as.vector(lapply(pop, fitnessFunction), mode = "numeric")[1] # only the first fitness component
   popCpx <- as.vector(lapply(pop, complexityFunction), mode = "numeric")
   popFitLim <-
     if (hideOutliers)

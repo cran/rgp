@@ -1,7 +1,9 @@
 #include <R.h>
 #include <Rinternals.h>
 #include <float.h>
+#include "list_utils.h"
 #include "sexp_utils.h"
+#include "unification.h"
 
 #define CHECK_ARG_IS_FUNCTION(A) \
   if (!isFunction(A)) \
@@ -12,12 +14,18 @@
 #define CHECK_ARG_IS_NEW_LIST(A) \
   if (!isNewList(A)) \
     error("Argument '" #A "' is not a 'new list'.");
+#define CHECK_ARG_IS_ENVIRONMENT(A) \
+  if (!isEnvironment(A)) \
+    error("Argument '" #A "' is not an environment.");
 #define CHECK_ARG_IS_NUMERIC(A) \
   if (!isNumeric(A)) \
     error("Argument '" #A "' is not numeric.");
 #define CHECK_ARG_IS_INTEGER(A)                 \
   if (!isInteger(A))                                \
     error("Argument '" #A "' is not an integer.");
+#define CHECK_ARG_IS_LOGICAL(A)                 \
+  if (!isLogical(A))                                \
+    error("Argument '" #A "' is not a logical.");
 
 
 SEXP test_hello_world(const SEXP arg) {
@@ -39,11 +47,21 @@ SEXP test_call_function(const SEXP f, const SEXP reps) {
       REPROTECT(last_result = coerceVector(last_result, REALSXP), ip);
       /* Use s_fval ... */
 
-      /* And unprotext it. */
+      /* And unprotect it. */
       UNPROTECT(1); /* last_result */
   }
   UNPROTECT(1); /* f_call */
   return last_result;
+}
+
+Rboolean test_is_variable(const SEXP s) {
+  // here, variables as symbols not bound in the global environment
+  return isSymbol(s) && findVar(s, R_GlobalEnv) == R_UnboundValue;
+}
+
+SEXP test_unify_match(const SEXP a, const SEXP b, const SEXP contains_check) {
+  CHECK_ARG_IS_LOGICAL(contains_check);
+  return unify_match(a, b, make_alist(), test_is_variable, asLogical(contains_check));
 }
 
 SEXP make_formals(const SEXP formal_names) {
@@ -70,33 +88,33 @@ SEXP make_function(const SEXP formals, const SEXP body, const SEXP environment) 
 }
 
 SEXP make_real_vector(const double real_data[]) {
-    /* FIXME: This does not work because sizeof(real_data) ==
-     *   sizeof(double *) By pure luck (you are running on a 64bit
-     *   system right?)  sizeof(double *) == sizeof(double) and len is
-     *   always 1. You need to explicitly pass the size of real_data
-     *   as a size_t.
-     */
-    const int len = sizeof(real_data) / sizeof(double);
-
-    const SEXP s_real = PROTECT(allocVector(REALSXP, len));
-    double *real = REAL(s_real);
+  /* FIXME: This does not work because sizeof(real_data) ==
+   *   sizeof(double *) By pure luck (you are running on a 64bit
+   *   system right?)  sizeof(double *) == sizeof(double) and len is
+   *   always 1. You need to explicitly pass the size of real_data
+   *   as a size_t.
+   */
+  const int len = sizeof(real_data) / sizeof(double);
+  
+  const SEXP s_real = PROTECT(allocVector(REALSXP, len));
+  double *real = REAL(s_real);
 #if defined(GO_SLOW)
-    /* REAL() usually does a type check on the SEXP. No need to do the
-     * same check len times. 
-     */
-    for (int i = 0; i < len; i++) 
-	REAL(s_real)[i] = real_data[i]; 
+  /* REAL() usually does a type check on the SEXP. No need to do the
+   * same check len times. 
+   */
+  for (int i = 0; i < len; i++) 
+    REAL(s_real)[i] = real_data[i]; 
 #elif defined(GO_FASTER)
-    for (int i = 0; i < len; i++) 
-	real[i] = real_data[i]; 
+  for (int i = 0; i < len; i++) 
+    real[i] = real_data[i]; 
 #else
-    /* memcpy() is usually hand optimized assembler. Most likely faster
-     * than any for loop for small len and not slower for large len.
-     */
-    memcpy(real, real_data, len);
+  /* memcpy() is usually hand optimized assembler. Most likely faster
+   * than any for loop for small len and not slower for large len.
+   */
+  memcpy(real, real_data, len);
 #endif
-    UNPROTECT(1);
-    return real;
+  UNPROTECT(1);
+  return (SEXP) real;
 }
 
 /* test_make_function_sexp
@@ -177,7 +195,7 @@ SEXP mutate_constant_sexps(const SEXP f) {
   CHECK_ARG_IS_FUNCTION(f);
 
   GetRNGstate();
-  const SEXP mutant_body = PROTECT(map_sexp_leafs(BODY(f), mutate_constant_sexp));
+  const SEXP mutant_body = PROTECT(map_sexp_leafs(mutate_constant_sexp, BODY(f)));
   PutRNGstate();
 
   UNPROTECT(1);
@@ -253,7 +271,7 @@ SEXP test_function_manipulation(SEXP f) {
   const SEXP f_formals = FORMALS(f);
   const SEXP f_body = BODY(f);
 
-  return map_sexp(f_body, print_sexp);
+  return map_sexp(print_sexp, f_body);
 }
 
 /*Test-function - Remove*/
