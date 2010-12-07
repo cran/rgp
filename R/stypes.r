@@ -82,7 +82,7 @@ print.sType <- function(x, ...) {
 ##' @seealso sTypeConstructors, attr
 ##' @rdname sTypeTags
 ##' @export
-sType <- function(x) attr(x, "sType")
+sType <- function(x) attr(x, "sType", exact = TRUE)
 
 ##' @rdname sTypeTags
 ##' @export `sType<-`

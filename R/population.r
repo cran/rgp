@@ -20,6 +20,9 @@
 ##' @param inset The set of input variables.
 ##' @param conset The set of constant factories.
 ##' @param maxfuncdepth The maximum depth of the functions of the new population.
+##' @param constprob The probability of generating a constant in a step of growth, if no subtree
+##'   is generated. If neither a subtree nor a constant is generated, a randomly chosen input variable
+##'   will be generated. Defaults to \code{0.2}.
 ##' @param funcfactory A factory for creating the functions of the new population.
 ##'   Defaults to Koza's "ramped half-and-half" initialization strategy.
 ##' @param x The population to print.
@@ -31,8 +34,9 @@
 ##' @rdname populationCreation
 ##' @export
 makePopulation <- function(size, funcset, inset, conset,
-                           maxfuncdepth = 8,
-                           funcfactory = function() randfuncRampedHalfAndHalf(funcset, inset, conset, maxfuncdepth)) {
+                           maxfuncdepth = 8, constprob = 0.2,
+                           funcfactory = function() randfuncRampedHalfAndHalf(funcset, inset, conset,
+                             maxfuncdepth, constprob = constprob)) {
   pop <- lapply(1:size, function(i) funcfactory())
   class(pop) <- c("untypedPopulation", "population", "list")
   pop
@@ -41,9 +45,10 @@ makePopulation <- function(size, funcset, inset, conset,
 ##' @rdname populationCreation
 ##' @export
 makeTypedPopulation <- function(size, type, funcset, inset, conset,
-                                maxfuncdepth = 8,
-                                funcfactory = function() randfuncTypedRampedHalfAndHalf(type, funcset, inset, conset, maxfuncdepth)) {
-  pop <- makePopulation(size, funcset, inset, conset, maxfuncdepth, funcfactory)
+                                maxfuncdepth = 8, constprob = 0.2,
+                                funcfactory = function() randfuncTypedRampedHalfAndHalf(type, funcset, inset, conset,
+                                  maxfuncdepth, constprob = constprob)) {
+  pop <- makePopulation(size, funcset, inset, conset, maxfuncdepth, funcfactory, constprob = constprob)
   class(pop) <- c("typedPopulation", "population", "list")
   pop
 }

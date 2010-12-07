@@ -56,7 +56,7 @@ functionSet <- function(..., list = NULL) {
   ll <- if (missing(list)) list(...) else c(list, ...)
   funcset <- list()
   class(funcset) <- c("functionSet", "list")
-  funcset$all <- lapply(ll, function(o) as.name(o) %::% sType(o)) # convert to names, keeping sTypes
+  funcset$all <- lapply(ll, function(o) as.name(o) %::% sType(o))  # convert to names
   funcset$byType <- sortByType(funcset$all)
   funcset$byRange <- sortByRange(funcset$all)
   funcset
@@ -68,7 +68,7 @@ inputVariableSet <- function(..., list = NULL) {
   ll <- if (missing(list)) list(...) else c(list, ...)
   inset <- list()
   class(inset) <- c("inputVariableSet", "list")
-  inset$all <- lapply(ll, function(o) as.name(o) %::% sType(o)) # convert to names, keeping sTypes
+  inset$all <- lapply(ll, function(o) as.name(o) %::% sType(o))  # convert to names
   inset$byType <- sortByType(inset$all)
   inset$byRange <- sortByRange(inset$all) # TODO remove this field
   inset

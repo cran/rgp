@@ -1,5 +1,5 @@
 Package: rgp
-Version: 0.2-2
+Version: 0.2-3
 Title: R genetic programming framework
 Description: RGP is a simple modular Genetic Programming (GP) system
         build in pure R. In addition to general GP tasks, the system
@@ -24,6 +24,6 @@ Collate: 'complexity.r' 'stypes.r' 'creation.r' 'data_utils.r'
         'plot_utils.r' 'population.r' 'recombination.r' 'rgp.r'
         'selection.r' 'similarity.r' 'test_utils.r'
 Date:
-Packaged: 2010-10-14 08:00:18 UTC; oflasch
+Packaged: 2010-12-07 10:58:11 UTC; oflasch
 Repository: CRAN
-Date/Publication: 2010-10-15 10:06:41
+Date/Publication: 2010-12-07 13:23:21

@@ -1,9 +1,9 @@
 \name{randomExpressionCreationTyped}
 \alias{randexprTypedGrow}
 \title{Creates an R expression by random growth respecting type constraints...}
-\usage{randexprTypedGrow(type, funcset, inset, conset, maxdepth=16, constprob=0.5,
+\usage{randexprTypedGrow(type, funcset, inset, conset, maxdepth=8, constprob=0.2,
     subtreeprob=0.5, curdepth=1)
-randexprTypedFull(type, funcset, inset, conset, maxdepth=16, constprob=0.5)
+randexprTypedFull(type, funcset, inset, conset, maxdepth=8, constprob=0.2)
 }
 \description{Creates an R expression by random growth respecting type constraints}
 \details{\code{randexprTypedGrow}: Creates a random R expression by randomly growing its tree. In each step of growth,
@@ -29,7 +29,7 @@ All nodes in the created expressions will be tagged with their sTypes.
 \item{maxdepth}{The maximum expression tree depth.}
 \item{constprob}{The probability of generating a constant in a step of growth, if no subtree
 is generated. If neither a subtree nor a constant is generated, a randomly chosen input variable
-will be generated.}
+will be generated. Defaults to \code{0.2}.}
 \item{subtreeprob}{The probability of generating a subtree in a step of growth.}
 \item{curdepth}{(internal) The depth of the random expression currently generated, used internally
 in recursive calls.}

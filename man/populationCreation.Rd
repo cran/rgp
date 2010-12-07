@@ -1,11 +1,12 @@
 \name{populationCreation}
 \alias{makePopulation}
 \title{Classes for populations of individuals represented as functions...}
-\usage{makePopulation(size, funcset, inset, conset, maxfuncdepth=8, funcfactory=function()
-    randfuncRampedHalfAndHalf(funcset, inset, conset, maxfuncdepth))
-makeTypedPopulation(size, type, funcset, inset, conset, maxfuncdepth=8,
+\usage{makePopulation(size, funcset, inset, conset, maxfuncdepth=8, constprob=0.2,
+    funcfactory=function() randfuncRampedHalfAndHalf(funcset, inset,
+    conset, maxfuncdepth, constprob = constprob))
+makeTypedPopulation(size, type, funcset, inset, conset, maxfuncdepth=8, constprob=0.2,
     funcfactory=function() randfuncTypedRampedHalfAndHalf(type,
-    funcset, inset, conset, maxfuncdepth))
+    funcset, inset, conset, maxfuncdepth, constprob = constprob))
 print.population(x, ...)
 summary.population(object, ...)
 }
@@ -25,6 +26,9 @@ summary.population(object, ...)
 \item{inset}{The set of input variables.}
 \item{conset}{The set of constant factories.}
 \item{maxfuncdepth}{The maximum depth of the functions of the new population.}
+\item{constprob}{The probability of generating a constant in a step of growth, if no subtree
+is generated. If neither a subtree nor a constant is generated, a randomly chosen input variable
+will be generated. Defaults to \code{0.2}.}
 \item{funcfactory}{A factory for creating the functions of the new population.
 Defaults to Koza's "ramped half-and-half" initialization strategy.}
 \item{x}{The population to print.}

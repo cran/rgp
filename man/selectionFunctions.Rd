@@ -2,12 +2,12 @@
 \alias{makeTournamentSelection}
 \title{GP selection functions...}
 \usage{makeTournamentSelection(tournamentSize=10, selectionSize=ceiling(tournamentSize/2),
-    tournamentDeterminism=1)
+    tournamentDeterminism=1, vectorizedFitness=FALSE)
 makeMultiObjectiveTournamentSelection(tournamentSize=30, selectionSize=ceiling(tournamentSize/2),
-    tournamentDeterminism=1,
+    tournamentDeterminism=1, vectorizedFitness=FALSE,
     rankingStrategy=orderByParetoCrowdingDistance)
 makeComplexityTournamentSelection(tournamentSize=30, selectionSize=ceiling(tournamentSize/2),
-    tournamentDeterminism=1,
+    tournamentDeterminism=1, vectorizedFitness=FALSE,
     rankingStrategy=orderByParetoCrowdingDistance,
     complexityMeasure=funcVisitationLength)
 }
@@ -16,7 +16,7 @@ makeComplexityTournamentSelection(tournamentSize=30, selectionSize=ceiling(tourn
 survive, i.e. are selected for variation or cloning, and which individuals
 of a population should be replaced. Single-objective selection functions base
 their selection decision on scalar fitness function, whereas multi-objective
-selection functions support multiple vector-valued fitness functions.
+selection functions support vector-valued fitness functions.
 Every selection function takes a population and a (possibly vector-valued) fitness
 function as required arguments. It returns a list of two tables \code{selected}
 and \code{discarded}, with columns \code{index} and \code{fitness} each. The
@@ -52,6 +52,9 @@ with propability \emph{p}, the second best individual is selected with propabili
 \emph{p * (1 - p)}, the third best individual ist selected with propability
 \emph{p * (1 - p)^2}, and so on. Note that setting \code{tournamentDeterminism}
 to \code{1.0} (the default) yields determistic behavior.}
+\item{vectorizedFitness}{If \code{TRUE}, the fitness function is expected to take
+a list of individuals as input and return a list of (possible vector-valued) fitnesses
+as output.}
 \item{rankingStrategy}{The strategy used to rank individuals based on multiple objectives.
 This function must turn a fitness vector (one point per column) into an ordering
 permutation (similar to the one returned by \code{order}). Defaults to

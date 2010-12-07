@@ -1,8 +1,8 @@
 \name{randomCall}
 \alias{randomCall}
 \title{Creates a random R call object of a given type...}
-\usage{randomCall(type, funcset, conset, inset=inputVariableSet(), maxdepth=16,
-    constprob=0.5, subtreeprob=0.5, curdepth=1, formalidx=1)
+\usage{randomCall(type, funcset, conset, inset=inputVariableSet(), maxdepth=8,
+    constprob=0.2, subtreeprob=0.5, curdepth=1, formalidx=1)
 }
 \description{Creates a random R call object of a given type}
 \details{Creates a R call object of a given type by randomly growing an expression tree. The call
@@ -23,7 +23,7 @@ tagged with their sTypes.}
 \item{maxdepth}{The maximum expression tree depth.}
 \item{constprob}{The probability of generating a constant in a step of growth, if no subtree
 is generated. If neither a subtree nor a constant is generated, a randomly chosen input variable
-will be generated.}
+will be generated. Defaults to \code{0.2}.}
 \item{subtreeprob}{The probability of generating a subtree in a step of growth.}
 \item{curdepth}{(internal) The depth of the random expression currently generated, used internally
 in recursive calls.}

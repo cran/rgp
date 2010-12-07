@@ -6,7 +6,15 @@
 
 
 SEXP map_list(SEXP (*const f)(SEXP), const SEXP list) {
-  return R_NilValue; // TODO
+  switch (TYPEOF(list)) { // switch for speed
+  case NILSXP:
+    return list; // do nothing with nils
+  case LISTSXP:
+    return LCONS(f(CAR(list)),
+                 map_list(f, CDR(list))); // map CAR, recurse on CDR
+  default: // not a proper R list
+    error("map_list: list must be of class list");
+  }
 }
 
 SEXP make_alist() {

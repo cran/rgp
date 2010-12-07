@@ -1,9 +1,9 @@
 \name{randomExpressionCreation}
 \alias{randexprGrow}
 \title{Creates an R expression by random growth...}
-\usage{randexprGrow(funcset, inset, conset, maxdepth=16, constprob=0.5, subtreeprob=0.5,
+\usage{randexprGrow(funcset, inset, conset, maxdepth=8, constprob=0.2, subtreeprob=0.5,
     curdepth=1)
-randexprFull(funcset, inset, conset, maxdepth=16, constprob=0.5)
+randexprFull(funcset, inset, conset, maxdepth=8, constprob=0.2)
 }
 \description{Creates an R expression by random growth}
 \details{\code{randexprGrow}: Creates a random R expression by randomly growing its tree. In each step of growth,
@@ -26,7 +26,7 @@ a subtree is fixed to 1  until the desired tree depth \code{maxdepth} is reached
 \item{maxdepth}{The maximum expression tree depth.}
 \item{constprob}{The probability of generating a constant in a step of growth, if no subtree
 is generated. If neither a subtree nor a constant is generated, a randomly chosen input variable
-will be generated.}
+will be generated. Defaults to \code{0.2}.}
 \item{subtreeprob}{The probability of generating a subtree in a step of growth.}
 \item{curdepth}{(internal) The depth of the random expression currently generated, used internally
 in recursive calls.}

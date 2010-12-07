@@ -13,7 +13,7 @@
 ##' survive, i.e. are selected for variation or cloning, and which individuals
 ##' of a population should be replaced. Single-objective selection functions base
 ##' their selection decision on scalar fitness function, whereas multi-objective
-##' selection functions support multiple vector-valued fitness functions.
+##' selection functions support vector-valued fitness functions.
 ##' Every selection function takes a population and a (possibly vector-valued) fitness
 ##' function as required arguments. It returns a list of two tables \code{selected}
 ##' and \code{discarded}, with columns \code{index} and \code{fitness} each. The
@@ -45,6 +45,9 @@
 ##'   \emph{p * (1 - p)}, the third best individual ist selected with propability
 ##'   \emph{p * (1 - p)^2}, and so on. Note that setting \code{tournamentDeterminism}
 ##'   to \code{1.0} (the default) yields determistic behavior.
+##' @param vectorizedFitness If \code{TRUE}, the fitness function is expected to take
+##'   a list of individuals as input and return a list of (possible vector-valued) fitnesses
+##'   as output.
 ##' @param rankingStrategy The strategy used to rank individuals based on multiple objectives.
 ##'   This function must turn a fitness vector (one point per column) into an ordering
 ##'   permutation (similar to the one returned by \code{order}). Defaults to
@@ -55,10 +58,16 @@
 ##' @export
 makeTournamentSelection <- function(tournamentSize = 10,
                                     selectionSize = ceiling(tournamentSize / 2),
-                                    tournamentDeterminism = 1.0)
+                                    tournamentDeterminism = 1.0,
+                                    vectorizedFitness = FALSE)
   function(population, fitnessFunction) {
     poolIdxs <- sample(length(population), tournamentSize)
-    poolFitness <- sapply(population[poolIdxs], fitnessFunction)
+    poolFitness <-
+      if (vectorizedFitness) {
+        fitnessFunction(population[poolIdxs])
+      } else {
+        sapply(population[poolIdxs], fitnessFunction)
+      }
     poolFitness <- sapply(poolFitness, function(fitness) fitness[1]) # only use the first fitness component
     idxFitTable <- cbind(poolIdxs, poolFitness)
     colnames(idxFitTable) <- c("index", "fitness")
@@ -78,10 +87,16 @@ makeTournamentSelection <- function(tournamentSize = 10,
 makeMultiObjectiveTournamentSelection <- function(tournamentSize = 30,
                                                   selectionSize = ceiling(tournamentSize / 2),
                                                   tournamentDeterminism = 1.0,
+                                                  vectorizedFitness = FALSE,
                                                   rankingStrategy = orderByParetoCrowdingDistance)
   function(population, fitnessFunction) {
     poolIdxs <- sample(length(population), tournamentSize)
-    poolFitness <- sapply(population[poolIdxs], fitnessFunction) # all fitness components
+    poolFitness <-
+      if (vectorizedFitness) {
+        fitnessFunction(population[poolIdxs])
+      } else {
+        sapply(population[poolIdxs], fitnessFunction) # all fitness components
+      }
     if (!is.matrix(poolFitness)) poolFitness <- matrix(poolFitness, ncol = length(poolFitness))
     idxFitTable <- cbind(poolIdxs, t(poolFitness))
     # Sort by (multi-objective) fitness...
@@ -100,10 +115,13 @@ makeMultiObjectiveTournamentSelection <- function(tournamentSize = 30,
 makeComplexityTournamentSelection <- function(tournamentSize = 30,
                                               selectionSize = ceiling(tournamentSize / 2),
                                               tournamentDeterminism = 1.0,
+                                              vectorizedFitness = FALSE,
                                               rankingStrategy = orderByParetoCrowdingDistance,
                                               complexityMeasure = funcVisitationLength) {
   selectionFunction <- makeMultiObjectiveTournamentSelection(tournamentSize, selectionSize,
                                                              tournamentDeterminism, rankingStrategy)
+  # TODO add support for vectorizedFitness
+  if (vectorizedFitness) stop("makeComplexityTournamentSelection: vectorizedFitness not implemented")
   function(population, fitnessFunction) {
     complexityAugmentedFintessFunction <- function(individual)
       c(fitnessFunction(individual), complexityMeasure(individual))

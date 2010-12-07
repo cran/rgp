@@ -30,7 +30,7 @@ NA
 ##' @param maxdepth The maximum expression tree depth.
 ##' @param constprob The probability of generating a constant in a step of growth, if no subtree
 ##'   is generated. If neither a subtree nor a constant is generated, a randomly chosen input variable
-##'   will be generated.
+##'   will be generated. Defaults to \code{0.2}.
 ##' @param subtreeprob The probability of generating a subtree in a step of growth.
 ##' @param curdepth (internal) The depth of the random expression currently generated, used internally
 ##'   in recursive calls.
@@ -38,13 +38,13 @@ NA
 ##'   internally in recursive calls.
 ##' @return A randomly generated well-typed R call object.
 ##' @export
-randomCall <- function(type, funcset, conset, inset = inputVariableSet(), maxdepth = 16,
-                       constprob = 0.5, subtreeprob = 0.5,
+randomCall <- function(type, funcset, conset, inset = inputVariableSet(), maxdepth = 8,
+                       constprob = 0.2, subtreeprob = 0.5,
                        curdepth = 1, formalidx = 1) {
   if (inherits(type, "sFunctionType")) { # create a random function expression...
     if (runif(1) > subtreeprob || curdepth >= maxdepth) { # select an existing function...
       funcname <- randelt(funcset$byType[[type$string]])
-      if (is.null(funcname)) stop("Could not find a function of type ", type$string, ".")
+      if (is.null(funcname)) stop("randomCall: Could not find a function of type ", type$string, ".")
       funcname
     } else { # create a random function expression...
       newinset <- inputVariableSet(list=Map(function(pIdx, pType) paste("x", pIdx, sep="") %::% pType,
@@ -62,14 +62,14 @@ randomCall <- function(type, funcset, conset, inset = inputVariableSet(), maxdep
     if (runif(1) > subtreeprob || curdepth >= maxdepth) { # create a terminal expression...
       if (runif(1) <= constprob || is.empty(inset$byType[[type$string]])) { # create a constant...
         constfactory <- randelt(conset$byType[[type$string]])
-        if (is.null(constfactory)) stop("Could not find a constant factory for type ", type$string, ".")
+        if (is.null(constfactory)) stop("randomCall: Could not find a constant factory for type ", type$string, ".")
         constfactory() %::% type
       } else { # select an existing formal parameter...
         randelt(inset$byType[[type$string]])
       }
     } else { # create a nested expression...
       funcname <- randelt(funcset$byRange[[type$string]])
-      if (is.null(funcname)) stop("Could not find a function of range type ", type$string, ".")
+      if (is.null(funcname)) stop("randomCall: Could not find a function of range type ", type$string, ".")
       functype <- sType(funcname)
       funcdomaintypes <- functype$domain
       newvexpr <-
@@ -79,7 +79,7 @@ randomCall <- function(type, funcset, conset, inset = inputVariableSet(), maxdep
                            funcdomaintypes)))
       newvexpr %::% type
     }
-  } else stop("Invalid type requested: ", type, ".")
+  } else stop("randomCall: Invalid type requested: ", type, ".")
 }
 
 ##' Creates an R expression by random growth
@@ -100,7 +100,7 @@ randomCall <- function(type, funcset, conset, inset = inputVariableSet(), maxdep
 ##' @param maxdepth The maximum expression tree depth.
 ##' @param constprob The probability of generating a constant in a step of growth, if no subtree
 ##'   is generated. If neither a subtree nor a constant is generated, a randomly chosen input variable
-##'   will be generated.
+##'   will be generated. Defaults to \code{0.2}.
 ##' @param subtreeprob The probability of generating a subtree in a step of growth.
 ##' @param curdepth (internal) The depth of the random expression currently generated, used internally
 ##'   in recursive calls.
@@ -108,8 +108,8 @@ randomCall <- function(type, funcset, conset, inset = inputVariableSet(), maxdep
 ##' @rdname randomExpressionCreation
 ##' @export
 randexprGrow <- function(funcset, inset, conset,
-                         maxdepth = 16,
-                         constprob = 0.5, subtreeprob = 0.5,
+                         maxdepth = 8,
+                         constprob = 0.2, subtreeprob = 0.5,
                          curdepth = 1) {
   constprob <- if (is.empty(conset$all)) 0.0 else constprob
   if (curdepth >= maxdepth) { # maximum depth reached, create terminal
@@ -140,8 +140,8 @@ randexprGrow <- function(funcset, inset, conset,
 ##' @rdname randomExpressionCreation
 ##' @export
 randexprFull <- function(funcset, inset, conset,
-                         maxdepth = 16,
-                         constprob = 0.5) {
+                         maxdepth = 8,
+                         constprob = 0.2) {
   randexprGrow(funcset, inset, conset, maxdepth, constprob, 1.0)
 }
 
@@ -152,23 +152,27 @@ randexprFull <- function(funcset, inset, conset,
 ##' @param conset The set of constant factories.
 ##' @param maxdepth The maximum expression tree depth.
 ##' @param exprfactory The function to use for randomly creating the function's body.
+##' @param constprob The probability of generating a constant in a step of growth, if no subtree
+##'   is generated. If neither a subtree nor a constant is generated, a randomly chosen input variable
+##'   will be generated. Defaults to \code{0.2}.
 ##' @return A randomly generated R function.
 ##' @rdname randomFunctionCreation
 ##' @export
-randfunc <- function(funcset, inset, conset, maxdepth = 16, exprfactory = randexprGrow) {
+randfunc <- function(funcset, inset, conset, maxdepth = 8,
+                     constprob = 0.2, exprfactory = randexprGrow) {
   newf <- new.function()
   formals(newf) <- new.alist(inset$all)
-  body(newf) <- exprfactory(funcset, inset, conset, maxdepth)
+  body(newf) <- exprfactory(funcset, inset, conset, maxdepth, constprob = constprob)
   newf
 }
 
 ##' @rdname randomFunctionCreation
 ##' @export
-randfuncRampedHalfAndHalf <- function(funcset, inset, conset, maxdepth = 16) {
+randfuncRampedHalfAndHalf <- function(funcset, inset, conset, maxdepth = 8, constprob = 0.2) {
   if (runif(1) > 0.5)
-    randfunc(funcset, inset, conset, maxdepth, exprfactory = randexprFull)
+    randfunc(funcset, inset, conset, maxdepth, exprfactory = randexprFull, constprob = constprob)
   else
-    randfunc(funcset, inset, conset, maxdepth, exprfactory = randexprGrow)
+    randfunc(funcset, inset, conset, maxdepth, exprfactory = randexprGrow, constprob = constprob)
 }
 
 ##' Creates an R expression by random growth respecting type constraints
@@ -192,7 +196,7 @@ randfuncRampedHalfAndHalf <- function(funcset, inset, conset, maxdepth = 16) {
 ##' @param maxdepth The maximum expression tree depth.
 ##' @param constprob The probability of generating a constant in a step of growth, if no subtree
 ##'   is generated. If neither a subtree nor a constant is generated, a randomly chosen input variable
-##'   will be generated.
+##'   will be generated. Defaults to \code{0.2}.
 ##' @param subtreeprob The probability of generating a subtree in a step of growth.
 ##' @param curdepth (internal) The depth of the random expression currently generated, used internally
 ##'   in recursive calls.
@@ -200,9 +204,10 @@ randfuncRampedHalfAndHalf <- function(funcset, inset, conset, maxdepth = 16) {
 ##' @rdname randomExpressionCreationTyped
 ##' @export
 randexprTypedGrow <- function(type, funcset, inset, conset,
-                              maxdepth = 16,
-                              constprob = 0.5, subtreeprob = 0.5,
+                              maxdepth = 8,
+                              constprob = 0.2, subtreeprob = 0.5,
                               curdepth = 1) {
+  if (is.null(type)) stop("randexprTypedGrow: Type must not be NULL.")
   constprob <- if (is.empty(conset$all)) 0.0 else constprob
   typeString <- type$string
   insetTypes <- Map(sType, inset$all)
@@ -211,7 +216,7 @@ randexprTypedGrow <- function(type, funcset, inset, conset,
   } else { # maximum depth not reached, create subtree or terminal
   	if (runif(1) <= subtreeprob) { # create subtree of correct type
       funcname <- randelt(funcset$byRange[[typeString]])
-      if (is.null(funcname)) stop("Could not find a function of range type ", typeString, ".")
+      if (is.null(funcname)) stop("randexprTypedGrow: Could not find a function of range type ", typeString, ".")
       functype <- sType(funcname)
       funcdomaintypes <- functype$domain
       newSubtree <-
@@ -231,8 +236,8 @@ randexprTypedGrow <- function(type, funcset, inset, conset,
 ##' @rdname randomExpressionCreationTyped
 ##' @export
 randexprTypedFull <- function(type, funcset, inset, conset,
-                              maxdepth = 16,
-                              constprob = 0.5) {
+                              maxdepth = 8,
+                              constprob = 0.2) {
   randexprTypedGrow(type, funcset, inset, conset, maxdepth, constprob, 1.0)
 }
 
@@ -243,24 +248,28 @@ randexprTypedFull <- function(type, funcset, inset, conset,
 ##' @param inset The set of input variables.
 ##' @param conset The set of constant factories.
 ##' @param maxdepth The maximum expression tree depth.
+##' @param constprob The probability of generating a constant in a step of growth, if no subtree
+##'   is generated. If neither a subtree nor a constant is generated, a randomly chosen input variable
+##'   will be generated. Defaults to \code{0.2}.
 ##' @param exprfactory The function to use for randomly creating the function's body.
 ##' @return A randomly generated well-typed R function.
 ##' @rdname randomFunctionCreationTyped
 ##' @export
-randfuncTyped <- function(type, funcset, inset, conset, maxdepth = 16, exprfactory = randexprTypedGrow) {
+randfuncTyped <- function(type, funcset, inset, conset, maxdepth = 8,
+                          constprob = 0.2, exprfactory = randexprTypedGrow) {
   newf <- new.function()
   formals(newf) <- new.alist(inset$all)
-  body(newf) <- exprfactory(type, funcset, inset, conset, maxdepth)
+  body(newf) <- exprfactory(type, funcset, inset, conset, maxdepth, constprob = constprob)
   newf
 }
 
 ##' @rdname randomFunctionCreationTyped
 ##' @export
-randfuncTypedRampedHalfAndHalf <- function(type, funcset, inset, conset, maxdepth = 16) {
+randfuncTypedRampedHalfAndHalf <- function(type, funcset, inset, conset, maxdepth = 8, constprob = 0.2) {
   if (runif(1) > 0.5)
-    randfuncTyped(type, funcset, inset, conset, maxdepth, exprfactory = randexprTypedFull)
+    randfuncTyped(type, funcset, inset, conset, maxdepth, exprfactory = randexprTypedFull, constprob = constprob)
   else
-    randfuncTyped(type, funcset, inset, conset, maxdepth, exprfactory = randexprTypedGrow)
+    randfuncTyped(type, funcset, inset, conset, maxdepth, exprfactory = randexprTypedGrow, constprob = constprob)
 }
 
 ##' Create a random terminal node
@@ -273,13 +282,13 @@ randfuncTypedRampedHalfAndHalf <- function(type, funcset, inset, conset, maxdept
 randterminalTyped <- function(typeString, inset, conset, constprob) {
   if (runif(1) <= constprob) { # create constant of correct type
     constfactory <- randelt(conset$byRange[[typeString]])
-    if (is.null(constfactory)) stop("Could not find a constant factory for type ", typeString, ".")
+    if (is.null(constfactory)) stop("randterminalTyped: Could not find a constant factory for type ", typeString, ".")
     constfactory()
   } else { # create input variable of correct type
     invar <- randelt(inset$byRange[[typeString]])
     if (is.null(invar)) { # there are no input variables of the requested type, try to create a contant instead
       constfactory <- randelt(conset$byRange[[typeString]])
-      if (is.null(constfactory)) stop("Could not find a constant factory for type ", typeString, ".")
+      if (is.null(constfactory)) stop("randterminalTyped: Could not find a constant factory for type ", typeString, ".")
       constfactory()
     } else {
       invar
