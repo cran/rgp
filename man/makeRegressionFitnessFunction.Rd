@@ -1,7 +1,7 @@
 \name{makeRegressionFitnessFunction}
 \alias{makeRegressionFitnessFunction}
 \title{Create a fitness function for symbolic regression...}
-\usage{makeRegressionFitnessFunction(formula, data, errormeasure=rmse, indsizelimit=NA,
+\usage{makeRegressionFitnessFunction(formula, data, errorMeasure=rmse, indsizelimit=NA,
     penalizeGenotypeConstantIndividuals=FALSE)
 }
 \description{Create a fitness function for symbolic regression}
@@ -14,7 +14,7 @@ will receive a fitness of \code{Inf}.}
 \arguments{\item{formula}{A formula object describing the regression task.}
 \item{data}{An optional data frame containing the variables in the
 model.}
-\item{errormeasure}{A function to use as an error measure.}
+\item{errorMeasure}{A function to use as an error measure, defaults to RMSE.}
 \item{indsizelimit}{Individuals exceeding this size limit will get
 a fitness of \code{Inf}.}
 \item{penalizeGenotypeConstantIndividuals}{Individuals that do not

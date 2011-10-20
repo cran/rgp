@@ -9,8 +9,10 @@
     selectionFunction=makeTournamentSelection(),
     crossoverFunction=crossover, mutationFunction,
     restartCondition=makeEmptyRestartCondition(),
-    restartStrategy=makeLocalRestartStrategy(), progressMonitor,
-    verbose=TRUE)
+    restartStrategy=makeLocalRestartStrategy(),
+    breedingFitness=function(individual) TRUE, breedingTries=50,
+    extinctionPrevention=FALSE, archive=FALSE, genealogy=FALSE,
+    progressMonitor, verbose=TRUE)
 typedGeneticProgramming(fitnessFunction, type, stopCondition=makeTimeStopCondition(5),
     population, populationSize=100, eliteSize=ceiling(0.1 *
     populationSize), elite=list(), functionSet, inputVariables,
@@ -18,6 +20,8 @@ typedGeneticProgramming(fitnessFunction, type, stopCondition=makeTimeStopConditi
     crossoverFunction=crossoverTyped, mutationFunction,
     restartCondition=makeEmptyRestartCondition(),
     restartStrategy=makeLocalRestartStrategy(populationType = type),
+    breedingFitness=function(individual) TRUE, breedingTries=50,
+    extinctionPrevention=FALSE, archive=FALSE, genealogy=FALSE,
     progressMonitor, verbose=TRUE)
 }
 \description{Standard typed and untyped genetic programming}
@@ -74,6 +78,30 @@ tournament selection. See \link{makeTournamentSelection} for details.}
 \link{makeEmptyRestartCondition} for details.}
 \item{restartStrategy}{The strategy for doing restarts. See
 \link{makeLocalRestartStrategy} for details.}
+\item{breedingFitness}{A "breeding" function. This function is applied after
+every stochastic operation \emph{Op} that creates or modifies an individal
+(typically, \emph{Op} is a initialization, mutation, or crossover operation). If
+the breeding function returns \code{TRUE} on the given individual, \emph{Op} is
+considered a success. If the breeding function returns \code{FALSE}, \emph{Op}
+is retried a maximum of \code{breedingTries} times. If this maximum number of
+retries is exceeded, the result of the last try is considered as the result of
+\emph{Op}. In the case the breeding function returns a numeric value, the breeding
+is repeated \code{breedingTries} times and the individual with the lowest breeding
+fitness is considered the result of \emph{Op}.}
+\item{breedingTries}{In case of a boolean \code{breedingFitness} function, the
+maximum number of retries. In case of a numerical \code{breedingFitness} function,
+the number of breeding steps. Also see the documentation for the \code{breedingFitness}
+parameter. Defaults to \code{50}.}
+\item{extinctionPrevention}{When set to \code{TRUE}, the initialization and
+selection steps will try to prevent duplicate individuals
+from occurring in the population. Defaults to \code{FALSE}, as this
+operation might be expensive with larger population sizes.}
+\item{archive}{If set to \code{TRUE}, all GP individuals evaluated are stored in an
+archive list \code{archiveList} that is returned as part of the result of this function.}
+\item{genealogy}{If set to \code{TRUE}, the parent(s) of each indiviudal is stored in
+an archive \code{genealogyList} as part of the result of this function, enabling
+the reconstruction of the complete genealogy of the result population. This
+parameter implies \code{archive = TRUE}.}
 \item{progressMonitor}{A function of signature
 \code{function(population, fitnessfunction, stepNumber, evaluationNumber,
 bestFitness, timeElapsed)} to be called with each evolution step.}

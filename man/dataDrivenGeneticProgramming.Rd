@@ -1,33 +1,42 @@
-\name{symbolicRegression}
-\alias{symbolicRegression}
-\title{Symbolic regression via untyped standard genetic programming...}
-\usage{symbolicRegression(formula, data, stopCondition=makeTimeStopCondition(5), population,
+\name{dataDrivenGeneticProgramming}
+\alias{dataDrivenGeneticProgramming}
+\title{Data-driven untyped standard genetic programming...}
+\usage{dataDrivenGeneticProgramming(formula, data, fitnessFunctionFactory,
+    fitnessFunctionFactoryParameters=list(),
+    stopCondition=makeTimeStopCondition(5), population,
     populationSize=100, eliteSize=ceiling(0.1 * populationSize),
     elite=list(), extinctionPrevention=FALSE, archive=FALSE,
-    genealogy=FALSE, individualSizeLimit=64,
-    penalizeGenotypeConstantIndividuals=FALSE,
-    functionSet=mathFunctionSet, constantSet=numericConstantSet,
+    genealogy=FALSE, functionSet=mathFunctionSet,
+    constantSet=numericConstantSet,
     selectionFunction=makeTournamentSelection(),
     crossoverFunction=crossover, mutationFunction,
     restartCondition=makeEmptyRestartCondition(),
     restartStrategy=makeLocalRestartStrategy(),
     breedingFitness=function(individual) TRUE, breedingTries=50,
-    errorMeasure=rmse, progressMonitor, verbose=TRUE)
+    progressMonitor, verbose=TRUE)
 }
-\description{Symbolic regression via untyped standard genetic programming}
-\details{Perform symbolic regression via untyped genetic programming. The regression
-task is specified as a \code{\link{formula}}. Only simple formulas without
-interactions are supported. The result of the symbolic regression run is a
-symbolic regression model containing an untyped GP population of model
-functions.}
-\value{An symbolic regression model that contains an untyped GP population.}
-\seealso{\code{\link{predict.symbolicRegressionModel}}, \code{\link{geneticProgramming}}}
-\arguments{\item{formula}{A \code{\link{formula}} describing the regression task. Only
-simple formulas of the form \code{response ~ variable1 + ... + variableN}
+\description{Data-driven untyped standard genetic programming}
+\details{Perform an untyped genetic programming using a fitness function that depends
+on a R data frame. Typical applications are data mining tasks such as symbolic
+regression or classification. The task is specified as a \code{\link{formula}}
+and a fitness function factory. Only simple formulas without interactions are
+supported. The result of the data-driven GP run is a model structure containing
+the formulas and an untyped GP population.
+This function is primarily an intermediate for extensions. End-users will
+probably use more specialized GP tools such as \code{\link{symbolicRegression}}.}
+\value{A model structure that contains the formula and an untyped GP population.}
+\seealso{\code{\link{geneticProgramming}}}
+\arguments{\item{formula}{A \code{\link{formula}} describing the task. Only simple
+formulas of the form \code{response ~ variable1 + ... + variableN}
 are supported at this point in time.}
 \item{data}{A \code{\link{data.frame}} containing training data for the
-symbolic regression run. The variables in \code{formula} must match
-column names in this data frame.}
+GP run. The variables in \code{formula} must match column names in this
+data frame.}
+\item{fitnessFunctionFactory}{A function that accepts two parameters, a
+code{\link{formula}}, data (given as a model frame) and the additional parameters
+given in \code{fitnessFunctionFactoryParameters} and returns a fitness function.}
+\item{fitnessFunctionFactoryParameters}{Additional parameters to pass to the
+\code{fitnessFunctionFactory}.}
 \item{stopCondition}{The stop condition for the evolution main loop. See
 \link{makeStepsStopCondition} for details.}
 \item{population}{The GP population to start the run with. If this parameter
@@ -49,14 +58,10 @@ archive list \code{archiveList} that is returned as part of the result of this f
 an archive \code{genealogyList} as part of the result of this function, enabling
 the reconstruction of the complete genealogy of the result population. This
 parameter implies \code{archive = TRUE}.}
-\item{individualSizeLimit}{Individuals with a number of tree nodes that
-exceeds this size limit will get a fitness of \code{Inf}.}
-\item{penalizeGenotypeConstantIndividuals}{Individuals that do not contain
-any input variables will get a fitness of \code{Inf}.}
 \item{functionSet}{The function set.}
 \item{constantSet}{The set of constant factory functions.}
 \item{selectionFunction}{The selection function to use. Defaults to
-tournament selection. See \code{\link{makeTournamentSelection}} for details.}
+tournament selection. See \link{makeTournamentSelection} for details.}
 \item{crossoverFunction}{The crossover function.}
 \item{mutationFunction}{The mutation function.}
 \item{restartCondition}{The restart condition for the evolution main loop. See
@@ -77,7 +82,6 @@ fitness is considered the result of \emph{Op}.}
 maximum number of retries. In case of a numerical \code{breedingFitness} function,
 the number of breeding steps. Also see the documentation for the \code{breedingFitness}
 parameter. Defaults to \code{50}.}
-\item{errorMeasure}{A function to use as an error measure, defaults to RMSE.}
 \item{progressMonitor}{A function of signature
 \code{function(population, fitnessfunction, stepNumber, evaluationNumber,
 bestFitness, timeElapsed)} to be called with each evolution step.}

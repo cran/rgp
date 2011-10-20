@@ -4,6 +4,8 @@
 \usage{splitList(l, groupAssignment)
 groupListConsecutive(l, numberOfGroups)
 groupListDistributed(l, numberOfGroups)
+flatten(l, recursive=FALSE)
+intersperse(xs, ys, pairConstructor=list)
 }
 \description{Splitting and grouping of lists}
 \details{\code{splitList}: Functions for splitting and grouping lists into sublists.
@@ -14,15 +16,28 @@ element of \code{l} goes.
 sublists (or groups).
 \code{groupListDistributed} distributes \code{l} into \code{numberOfGroups}
 sublists (or groups).
+\code{flatten} flattens a list \code{l} of lists into a flat list by concatenation. If
+\code{recursive} is \code{TRUE} (defaults to \code{FALSE}), flatten will be recursively
+called on each argument first.
+\code{intersperse} joins two lists \code{xs} and \code{ys} into a list of pairs containig
+every possible pair, i.e. \code{intersperse(xs, ys)} equals the product list of \code{xs}
+and \code{ys}. The \code{pairConstructor} parameter can be used to change the type of pairs
+returned.
 
 }
 \value{\code{splitList}: A list of lists, where each member represents a group.
 
 }
 \arguments{\item{l}{A list.}
+\item{xs}{A list.}
+\item{ys}{A list.}
+\item{pairConstructor}{The function to use for constructing pairs, defaults to \code{list}.}
 \item{groupAssignment}{A vector of group assignment indices.}
 \item{numberOfGroups}{The number of groups to create, must be <= length(l)}
+\item{recursive}{Whether to operate recursively on sublists or vectors.}
 }
 \alias{groupListConsecutive}
 \alias{groupListDistributed}
+\alias{flatten}
+\alias{intersperse}
 

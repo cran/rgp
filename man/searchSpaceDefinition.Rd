@@ -4,6 +4,9 @@
 \usage{functionSet(..., list)
 inputVariableSet(..., list)
 constantFactorySet(..., list)
+pw(x, pw)
+hasPw(x)
+getPw(x, default=1)
 c.functionSet(..., recursive=FALSE)
 c.inputVariableSet(..., recursive=FALSE)
 c.constantFactorySet(..., recursive=FALSE)
@@ -36,6 +39,14 @@ multiple constant factory sets can be combined using the
 set. \code{inputVariableSet} creates an input variable set.
 \code{constantFactorySet} creates a constant factory set.
 
+Probability weight for functions, input variables, and constants
+can be given by tagging constant names, input variables, and
+constant factory functions via the \code{pw} function (see
+the examples). The predicate \code{hasPw} can be used to check
+if an object \code{x} has an associated probability weight.
+The function \code{getPw} returns the probability weight
+associated with an object \code{x}, if available.
+
 }
 \value{\code{functionSet}: A function set or input variable set.
 
@@ -43,13 +54,23 @@ set. \code{inputVariableSet} creates an input variable set.
 \arguments{\item{...}{Names of functions or input variables given as strings.}
 \item{list}{Names of functions or input variables given as a list of strings.}
 \item{recursive}{Ignored when concatenating function- or input variable sets.}
+\item{x}{An object (function name, input variable name, or constant
+factory) to tag with a probability \code{pw}.}
+\item{pw}{A probability weight.}
+\item{default}{A default probability weight to return iff no probability
+weight is associated with an object.}
 }
 \examples{# creating an untyped search space description...
-functionSet("+", "-", "*", "/", "expt", "log", "sin", "cos", "tan")
+functionSet("+", "-", "*", "/", "exp", "log", "sin", "cos", "tan")
 inputVariableSet("x", "y")
-constantFactorySet(function() runif(1, -1, 1))}
+constantFactorySet(function() runif(1, -1, 1))
+# creating an untyped function set with probability weights...
+functionSet(pw("+", 1.2), pw("-", 0.8), pw("*", 1.0), pw("/", 1.0))}
 \alias{inputVariableSet}
 \alias{constantFactorySet}
+\alias{pw}
+\alias{hasPw}
+\alias{getPw}
 \alias{c.functionSet}
 \alias{c.inputVariableSet}
 \alias{c.constantFactorySet}

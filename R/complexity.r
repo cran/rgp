@@ -12,7 +12,11 @@
 ##' \code{exprDepth} returns the depth of the tree representation ("exression tree") of an R expression.
 ##' \code{funcDepth} returns the tree depth of the body expression of an R function.
 ##' \code{exprSize} returns the number of nodes in the tree of an R expression.
+##' \code{exprLeaves} returns the number of leave nodes in the tree of an R expression.
+##' \code{exprCount} returns the number of tree nodes in an R expression matching a given predicate.
 ##' \code{funcSize} returns the number of nodes in the body expression tree of an R function.
+##' \code{funcLeaves} returns the number of leave nodes in the body expression tree of an R function.
+##' \code{funcCount} returns the number of nodes in an R function body expression matching a given predicate.
 ##' \code{exprVisitationLength} returns the visitation length of the tree of an R expression.
 ##' The visitation length is the total number of nodes in all possible subtrees of a tree.
 ##' \code{funcVisitationLength} returns the visitation length of the body expression tree of an R function.
@@ -22,6 +26,7 @@
 ##'
 ##' @param expr An R expression.
 ##' @param func An R function.
+##' @param predicate An R predicate (function with range type \code{logical}).
 ##'
 ##' @rdname expressionComplexityMeasures
 ##' @export
@@ -43,7 +48,34 @@ exprSize <- function(expr)
 
 ##' @rdname expressionComplexityMeasures
 ##' @export
+exprLeaves <- function(expr)
+  if (is.call(expr)) {
+    sum(as.vector(Map(exprLeaves, rest(as.list(expr))), mode = "integer"))
+  } else 1
+
+##' @rdname expressionComplexityMeasures
+##' @export
+exprCount <- function(expr, predicate = function(node) TRUE) {
+  isCall <- is.call(expr)
+  matchesPredicate <- predicate(expr)
+  if (isCall && matchesPredicate) {
+    sum(as.vector(Map(function(e) exprCount(e, predicate = predicate), rest(as.list(expr))), mode = "integer")) + 1
+  } else if (isCall) {
+    sum(as.vector(Map(function(e) exprCount(e, predicate = predicate), rest(as.list(expr))), mode = "integer"))
+  } else if (matchesPredicate) 1 else 0
+}
+
+##' @rdname expressionComplexityMeasures
+##' @export
 funcSize <- function(func) exprSize(body(func))
+
+##' @rdname expressionComplexityMeasures
+##' @export
+funcLeaves <- function(func) exprLeaves(body(func))
+
+##' @rdname expressionComplexityMeasures
+##' @export
+funcCount <- function(func, predicate = function(node) TRUE) exprCount(body(func), predicate = predicate)
 
 ##' @rdname expressionComplexityMeasures
 ##' @export

@@ -19,9 +19,9 @@ new.function <- function() {
   # environment, which would cause a hard to find memory leak:
   fun <- function() NULL
   # If you use the last line outside of this function, by shure to initialize the
-  # environment of the generated function object to the global environment, like so:
-  # environment(fun) <- globalenv() 
-  fun  
+  # environment of the generated function object to the global environment, like done here:
+  environment(fun) <- globalenv() 
+  fun 
 }
 
 ##' Create a new function argument list from a list or vector of strings
@@ -37,6 +37,44 @@ new.alist <- function(fargs) {
   if (alistargslen != 0)
     alistargs <- substr(alistargs, 1, alistargslen-1)
   eval(parse(text = paste("alist(", alistargs, ")", sep="")), baseenv())
+}
+
+##' A variant of do.call that ignores unused arguments
+##'
+##' @param what What to call (either a function or a character vector naming a function in
+##'   \code{envir}.
+##' @param args The args for the call, these may include arguments not used by \code{what}.
+##' @param quote Whether to quote the arguments.
+##' @param envir The environment within which to evaluate the call.
+##' @return The result of the call.
+do.call.ignore.unused.arguments <- function(what, args, quote = FALSE, envir = parent.frame()) {
+  fcn <- if (is.function(what)) {
+    what
+  } else if (is.character(what) && exists(what, mode = "function", envir = envir)) {
+    get(what, mode = "function", envir = envir)
+  } else stop("do.call.ignore.unused.arguments: The parameter 'what' must be a function or a character string naming a function.")
+  fcnFormalNames <- names(formals(fcn))
+  okFcnFormalNames <- intersect(names(args), fcnFormalNames)
+  okFcnFormals <- args[okFcnFormalNames]
+  do.call(fcn, okFcnFormals, quote = quote, envir = envir)
+}
+
+##' Repeatedly apply a function
+##'
+##' Repeatedly apply a function \code{f} to an argument \code{arg}, additional arguments \code{...}
+##' are supplied unchanged in each call. E.g. \code{iterate(3, foo, 42.14, "bar")} is equivalent to
+##' \code{foo(foo(foo(42.14, "bar"), "bar"), "bar")}.
+##'
+##' @param n The number of times to apply \code{f}, must be >= 0. If 0, \code{arg} is returned.
+##' @param f The function to apply.
+##' @param arg The argument to repeatedly apply \code{f} to.
+##' @param ... Additional argument to pass to \code{f} at each application.
+##' @return The result of repeatedly applying \code{f}.
+iterate <- function(n, f, arg, ...) {
+  stopifnot(n >= 0)
+  result <- arg
+  if (n > 0) for (i in 1:n) result <- f(result, ...) # TODO is this the most efficient way to iterate ?
+  result
 }
 
 ##' Determine the number of arguments of a function
@@ -106,4 +144,23 @@ arity.primitive <- function(f) {
     1
   else
     stop("could not determine arity of primitive")
+}
+
+##' Tabulate a function
+##'
+##' Creates a data frame of values for the function \code{f} at the domain points
+##' given in \code{...}. This function works like \code{\link{mapply}}, but returns
+##' a data frame that also contains the domain points instead of a simple vector that
+##' only contains (range) values of \code{f}. When using element names in \code{...},
+##' these names must match the formal parameter names of \code{f}.
+##'
+##' @param f The function to tabulate.
+##' @param ... The points to tabulate \code{f} at.
+##' @return A data frame of function values of \code{f}.
+##' @seealso \code{\link{mapply}}
+##' @export
+tabulateFunction <- function(f, ...) {
+  xs <- list(...)
+  y <- mapply(f, ...)
+  data.frame(xs, y)
 }

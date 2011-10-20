@@ -23,6 +23,12 @@
 ##' @param constprob The probability of generating a constant in a step of growth, if no subtree
 ##'   is generated. If neither a subtree nor a constant is generated, a randomly chosen input variable
 ##'   will be generated. Defaults to \code{0.2}.
+##' @param breedingFitness A breeding function. See the documentation for
+##'   \code{\link{geneticProgramming}} for details.
+##' @param breedingTries The number of breeding steps.
+##' @param extinctionPrevention When set to \code{TRUE}, initialization will try 
+##'   to prevent duplicate individuals from occurring in the population. Defaults to \code{FALSE}, as
+##'   this operation might be expensive with larger population sizes.
 ##' @param funcfactory A factory for creating the functions of the new population.
 ##'   Defaults to Koza's "ramped half-and-half" initialization strategy.
 ##' @param x The population to print.
@@ -35,9 +41,27 @@
 ##' @export
 makePopulation <- function(size, funcset, inset, conset,
                            maxfuncdepth = 8, constprob = 0.2,
+                           breedingFitness = function(individual) TRUE,
+                           breedingTries = 50,
+                           extinctionPrevention = FALSE,
                            funcfactory = function() randfuncRampedHalfAndHalf(funcset, inset, conset,
-                             maxfuncdepth, constprob = constprob)) {
-  pop <- lapply(1:size, function(i) funcfactory())
+                             maxfuncdepth, constprob = constprob,
+                             breedingFitness = breedingFitness, breedingTries = breedingTries)) {
+  pop <- if (extinctionPrevention) {
+    resultPop <- list()
+    l <- 0
+    repeat {
+      candidate <- funcfactory()
+      if (!contains(resultPop, candidate)) {
+        resultPop <- c(resultPop, candidate)
+        l <- l + 1
+      }
+      if (l == size) break()
+    }
+    resultPop
+  } else {
+    lapply(1:size, function(i) funcfactory())
+  }
   class(pop) <- c("untypedPopulation", "population", "list")
   pop
 }
@@ -46,9 +70,15 @@ makePopulation <- function(size, funcset, inset, conset,
 ##' @export
 makeTypedPopulation <- function(size, type, funcset, inset, conset,
                                 maxfuncdepth = 8, constprob = 0.2,
+                                breedingFitness = function(individual) TRUE,
+                                breedingTries = 50,
+                                extinctionPrevention = FALSE,
                                 funcfactory = function() randfuncTypedRampedHalfAndHalf(type, funcset, inset, conset,
-                                  maxfuncdepth, constprob = constprob)) {
-  pop <- makePopulation(size, funcset, inset, conset, maxfuncdepth, funcfactory, constprob = constprob)
+                                  maxfuncdepth, constprob = constprob,
+                                  breedingFitness = breedingFitness, breedingTries = breedingTries)) {
+  pop <- makePopulation(size, funcset, inset, conset, maxfuncdepth, funcfactory = funcfactory, constprob = constprob,
+                        breedingFitness = breedingFitness, breedingTries = breedingTries,
+                        extinctionPrevention = extinctionPrevention)
   class(pop) <- c("typedPopulation", "population", "list")
   pop
 }

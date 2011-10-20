@@ -9,6 +9,7 @@
 ##
 
 ##' @include search_space.r
+NA
 ##' @include time_utils.r
 NA
 
@@ -61,6 +62,30 @@ NA
 ##'   \link{makeEmptyRestartCondition} for details.
 ##' @param restartStrategy The strategy for doing restarts. See
 ##'   \link{makeLocalRestartStrategy} for details.
+##' @param breedingFitness A "breeding" function. This function is applied after
+##'   every stochastic operation \emph{Op} that creates or modifies an individal
+##'   (typically, \emph{Op} is a initialization, mutation, or crossover operation). If
+##'   the breeding function returns \code{TRUE} on the given individual, \emph{Op} is
+##'   considered a success. If the breeding function returns \code{FALSE}, \emph{Op}
+##'   is retried a maximum of \code{breedingTries} times. If this maximum number of
+##'   retries is exceeded, the result of the last try is considered as the result of
+##'   \emph{Op}. In the case the breeding function returns a numeric value, the breeding
+##'   is repeated \code{breedingTries} times and the individual with the lowest breeding
+##'   fitness is considered the result of \emph{Op}.
+##' @param breedingTries In case of a boolean \code{breedingFitness} function, the
+##'   maximum number of retries. In case of a numerical \code{breedingFitness} function,
+##'   the number of breeding steps. Also see the documentation for the \code{breedingFitness}
+##'   parameter. Defaults to \code{50}.
+##' @param extinctionPrevention When set to \code{TRUE}, the initialization and
+##'   selection steps will try to prevent duplicate individuals
+##'   from occurring in the population. Defaults to \code{FALSE}, as this
+##'   operation might be expensive with larger population sizes.
+##' @param archive If set to \code{TRUE}, all GP individuals evaluated are stored in an
+##'   archive list \code{archiveList} that is returned as part of the result of this function. 
+##' @param genealogy If set to \code{TRUE}, the parent(s) of each indiviudal is stored in
+##'   an archive \code{genealogyList} as part of the result of this function, enabling
+##'   the reconstruction of the complete genealogy of the result population. This
+##'   parameter implies \code{archive = TRUE}.
 ##' @param progressMonitor A function of signature
 ##'   \code{function(population, fitnessfunction, stepNumber, evaluationNumber,
 ##'   bestFitness, timeElapsed)} to be called with each evolution step.
@@ -85,8 +110,16 @@ geneticProgramming <- function(fitnessFunction,
                                mutationFunction = NULL,
                                restartCondition = makeEmptyRestartCondition(),
                                restartStrategy = makeLocalRestartStrategy(),
+                               breedingFitness = function(individual) TRUE,
+                               breedingTries = 50,
+                               extinctionPrevention = FALSE,
+                               archive = FALSE,
+                               genealogy = FALSE,
                                progressMonitor = NULL,
                                verbose = TRUE) {
+  ## Check parameters...
+  if (genealogy && !archive) stop("geneticProgramming: genealogy == TRUE implies archive == TRUE")
+  if (genealogy) stop("geneticProgramming: genealogy tracking not implemented.") # TODO
   ## Provide default parameters and initialize GP run...
   logmsg <- function(msg, ...) {
     if (verbose)
@@ -108,18 +141,25 @@ geneticProgramming <- function(fitnessFunction,
   mutatefunc <-
     if (is.null(mutationFunction)) {
       function(ind) mutateSubtree(mutateNumericConst(ind),
-                                  functionSet, inputVariables, constantSet, mutatesubtreeprob = 0.01)
+                                  functionSet, inputVariables, constantSet, mutatesubtreeprob = 0.1,
+                                  breedingFitness = breedingFitness, breedingTries = breedingTries)
     } else
       mutationFunction
   pop <-
     if (is.null(population))
-      makePopulation(populationSize, functionSet, inputVariables, constantSet)
+      makePopulation(populationSize, functionSet, inputVariables, constantSet,
+                     extinctionPrevention = extinctionPrevention,
+                     breedingFitness = breedingFitness, breedingTries = breedingTries)
     else
       population
   stepNumber <- 1
   evaluationNumber <- 0
   startTime <- proc.time()["elapsed"]
   timeElapsed <- 0
+  archiveList <- list() # the archive of all individuals selected in this run, only used if archive == TRUE
+  archiveIndexOf <- function(archive, individual)
+    Position(function(a) identical(body(a$individual), body(individual)), archive)
+  genealogyList <- list() # an adjacency list of representing the genealogy of all individuals in the archive
   bestFitness <- Inf # best fitness value seen in this run, if multi-criterial, only the first component counts
 
   ## Execute GP run...
@@ -128,17 +168,45 @@ geneticProgramming <- function(fitnessFunction,
                         evaluationNumber = evaluationNumber, bestFitness = bestFitness, timeElapsed = timeElapsed)) {
     # Select two sets of individuals and divide each into winners and losers...
     selA <- selectionFunction(pop, fitnessFunction); selB <- selectionFunction(pop, fitnessFunction)
+    if (archive) { # add the evaluated individuals to the archive...
+      evaluatedIndices <- c(selA$selected[, 1], selB$selected[, 1], selA$discarded[, 1], selB$discarded[, 1])
+      evaluatedFitnesses <- c(selA$selected[, 2], selB$selected[, 2], selA$discarded[, 2], selB$discarded[, 2])
+      for (i in 1:length(evaluatedIndices))
+        archiveList[[length(archiveList) + 1]] <- list(individual = pop[[evaluatedIndices[i]]],
+                                                       fitness = evaluatedFitnesses[i])
+    }
     winnersA <- selA$selected[, 1]; winnersB <- selB$selected[, 1]
     bestFitness <- min(c(bestFitness, selA$selected[, 2], selB$selected[, 2]))
     losersA <- selA$discarded[, 1]; losersB <- selB$discarded[, 1]
     losers <- c(losersA, losersB)
-    # Create winner children...
-    winnerChildren <- Map(function(winnerA, winnerB)
-                            mutatefunc(crossoverFunction(pop[[winnerA]], pop[[winnerB]])),
-                          winnersA, winnersB)
-    # Replace losers by winner children (cycling the list of winner children if too short)...
-    suppressWarnings(pop[losers] <- winnerChildren)
-    # Apply restart strategy
+    # Create winner children through crossover and mutation...
+    makeWinnerChildren <- function(winnersA, winnersB)
+                            Map(function(winnerA, winnerB)
+                                  mutatefunc(crossoverFunction(pop[[winnerA]], pop[[winnerB]],
+                                                               breedingFitness = breedingFitness,
+                                                               breedingTries = breedingTries)),
+                                winnersA, winnersB)
+    winnerChildrenA <- makeWinnerChildren(winnersA, winnersB) 
+    winnerChildrenB <- makeWinnerChildren(winnersA, winnersB) 
+    winnerChildren <- c(winnerChildrenA, winnerChildrenB)
+    # Replace losers with winner children...
+    if (extinctionPrevention) {
+      numberOfLosers <- length(losers)
+      winnerChildrenAndLosers <- c(winnerChildren, pop[losers])
+      uniqueWinnerChildrenAndLosers <- unique(winnerChildrenAndLosers) # unique() does not change the order of it's argument
+      numberOfUniqueWinnerChildrenAndLosers <- length(uniqueWinnerChildrenAndLosers)
+      if (numberOfUniqueWinnerChildrenAndLosers < numberOfLosers) { # not enough unique individuals...
+        numberMissing <- numberOfLosers - numberOfUniqueWinnerChildrenAndLosers
+        warning(sprintf("geneticProgramming: not enough unique individuals for extinction prevention (%d individuals missing)", numberMissing))
+        # we have to fill up with duplicates...
+        uniqueWinnerChildrenAndLosers <- c(uniqueWinnerChildrenAndLosers, winnerChildrenAndLosers[1:numberMissing])
+      }
+      uniqueChildren <- uniqueWinnerChildrenAndLosers[1:numberOfLosers] # fill up duplicated winner children with losers
+      pop[losers] <- uniqueChildren
+    } else {
+      pop[losers] <- winnerChildren
+    }
+    # Apply restart strategy...
     if (restartCondition(pop = pop, fitnessFunction = fitnessFunction, stepNumber = stepNumber,
                          evaluationNumber = evaluationNumber, bestFitness = bestFitness, timeElapsed = timeElapsed)) {
       restartResult <- restartStrategy(fitnessFunction, pop, populationSize, functionSet, inputVariables, constantSet)
@@ -171,6 +239,13 @@ geneticProgramming <- function(fitnessFunction,
                  crossoverFunction = crossoverFunction,
                  mutationFunction = mutatefunc,
                  restartCondition = restartCondition,
+                 breedingFitness = breedingFitness,
+                 breedingTries = breedingTries,
+                 extinctionPrevention = extinctionPrevention,
+                 archive = archive,
+                 genealogy = genealogy,
+                 archiveList = archiveList,
+                 genealogyList = genealogyList,
                  restartStrategy = restartStrategy), class = "geneticProgrammingResult")
 }
 
@@ -191,12 +266,19 @@ typedGeneticProgramming <- function(fitnessFunction,
                                     mutationFunction = NULL,
                                     restartCondition = makeEmptyRestartCondition(),
                                     restartStrategy = makeLocalRestartStrategy(populationType = type),
+                                    breedingFitness = function(individual) TRUE,
+                                    breedingTries = 50,
+                                    extinctionPrevention = FALSE,
+                                    archive = FALSE,
+                                    genealogy = FALSE,
                                     progressMonitor = NULL,
                                     verbose = TRUE) {
   if (is.null(type)) stop("typedGeneticProgramming: Type must not be NULL.")
   pop <-
     if (is.null(population))
-      makeTypedPopulation(populationSize, type, functionSet, inputVariables, constantSet)
+      makeTypedPopulation(populationSize, type, functionSet, inputVariables, constantSet,
+                          extinctionPrevention = extinctionPrevention,
+                          breedingFitness = breedingFitness, breedingTries = breedingTries)
     else
       population
   mutatefunc <-
@@ -204,7 +286,8 @@ typedGeneticProgramming <- function(fitnessFunction,
       function(ind) mutateSubtreeTyped(mutateFuncTyped(mutateNumericConstTyped(ind),
                                                        functionSet, mutatefuncprob = 0.01),
                                        functionSet, inputVariables, constantSet,
-                                       mutatesubtreeprob = 0.01)
+                                       mutatesubtreeprob = 0.01,
+                                       breedingFitness = breedingFitness, breedingTries = breedingTries)
     } else mutationFunction
   geneticProgramming(fitnessFunction, stopCondition = stopCondition, population = pop,
                      populationSize = populationSize, eliteSize = eliteSize, elite = elite,
@@ -213,6 +296,9 @@ typedGeneticProgramming <- function(fitnessFunction,
                      constantSet = constantSet, selectionFunction = selectionFunction,
                      crossoverFunction = crossoverFunction, mutationFunction = mutatefunc,
                      restartCondition = restartCondition, restartStrategy = restartStrategy,
+                     breedingFitness = breedingFitness, breedingTries = breedingTries,
+                     extinctionPrevention = extinctionPrevention,
+                     archive = archive, genealogy = genealogy,
                      progressMonitor = progressMonitor, verbose = verbose)
 }
 
@@ -236,6 +322,7 @@ joinElites <- function(individuals, elite, eliteSize, fitnessFunction) {
     allIndividualsSorted[1:eliteSize]
   else
     allIndividualsSorted
+  newElite
 }
 
 ##' Summary reports of genetic programming run result objects
@@ -278,140 +365,6 @@ summary.geneticProgrammingResult <- function(object, reportFitness = TRUE, order
     report
   }
   list(population = reportPopulation(object$population), elite = reportPopulation(object$elite))
-}
-
-##' Symbolic regression via untyped standard genetic programming
-##'
-##' Perform symbolic regression via untyped genetic programming. The regression
-##' task is specified as a \code{\link{formula}}. Only simple formulas without
-##' interactions are supported. The result of the symbolic regression run is a
-##' symbolic regression model containing an untyped GP population of model
-##' functions.
-##'
-##' @param formula A \code{\link{formula}} describing the regression task. Only
-##'   simple formulas of the form \code{response ~ variable1 + ... + variableN}
-##'   are supported at this point in time.
-##' @param data A \code{\link{data.frame}} containing training data for the
-##'   symbolic regression run. The variables in \code{formula} must match
-##'   column names in this data frame.
-##' @param stopCondition The stop condition for the evolution main loop. See
-##'   \link{makeStepsStopCondition} for details.
-##' @param population The GP population to start the run with. If this parameter
-##'   is missing, a new GP population of size \code{populationSize} is created
-##'   through random growth.
-##' @param populationSize The number of individuals if a population is to be
-##'   created.
-##' @param eliteSize The number of elite individuals to keep. Defaults to
-##'  \code{ceiling(0.1 * populationSize)}.
-##' @param elite The elite list, must be alist of individuals sorted in ascending
-##'   order by their first fitness component.
-##' @param individualSizeLimit Individuals with a number of tree nodes that
-##'   exceeds this size limit will get a fitness of \code{Inf}.
-##' @param penalizeGenotypeConstantIndividuals Individuals that do not contain
-##'   any input variables will get a fitness of \code{Inf}.
-##' @param functionSet The function set.
-##' @param constantSet The set of constant factory functions.
-##' @param selectionFunction The selection function to use. Defaults to
-##'   tournament selection. See \link{makeTournamentSelection} for details.
-##' @param crossoverFunction The crossover function.
-##' @param mutationFunction The mutation function.
-##' @param restartCondition The restart condition for the evolution main loop. See
-##'   \link{makeEmptyRestartCondition} for details.
-##' @param restartStrategy The strategy for doing restarts. See
-##'   \link{makeLocalRestartStrategy} for details.
-##' @param progressMonitor A function of signature
-##'   \code{function(population, fitnessfunction, stepNumber, evaluationNumber,
-##'   bestFitness, timeElapsed)} to be called with each evolution step.
-##' @param verbose Whether to print progress messages.
-##' @return An symbolic regression model that contains an untyped GP population.
-##'
-##' @seealso \code{\link{predict.symbolicRegressionModel}}, \code{\link{geneticProgramming}}
-##' @export
-symbolicRegression <- function(formula, data,
-                               stopCondition = makeTimeStopCondition(5),
-                               population = NULL,
-                               populationSize = 100,
-                               eliteSize = ceiling(0.1 * populationSize),
-                               elite = list(),
-                               individualSizeLimit = 64,
-                               penalizeGenotypeConstantIndividuals = FALSE,
-                               functionSet = mathFunctionSet,
-                               constantSet = numericConstantSet,
-                               selectionFunction = makeTournamentSelection(),
-                               crossoverFunction = crossover,
-                               mutationFunction = NULL,
-                               restartCondition = makeEmptyRestartCondition(),
-                               restartStrategy = makeLocalRestartStrategy(),
-                               progressMonitor = NULL,
-                               verbose = TRUE) {
-  ## Match variables in formula to those in data or parent.frame() and
-  ## return them in a new data frame. This also expands any '.'
-  ## arguments in the formula.  
-  mf <- model.frame(formula, data)
-  ## Extract list of terms (rhs of ~) in expanded formula
-  variableNames <- attr(terms(formula(mf)), "term.labels")
-  ## Create inputVariableSet
-  inVarSet <- inputVariableSet(list=as.list(variableNames))
-  fitFunc <- makeRegressionFitnessFunction(formula(mf), mf, errormeasure = rmse,
-                                           penalizeGenotypeConstantIndividuals = penalizeGenotypeConstantIndividuals,
-                                           indsizelimit = individualSizeLimit)
-  gpModel <- geneticProgramming(fitFunc, stopCondition, population, populationSize, eliteSize, elite,
-                                functionSet, inVarSet, constantSet, selectionFunction,
-                                crossoverFunction, mutationFunction,
-                                restartCondition, restartStrategy,
-                                progressMonitor, verbose)
-  
-  structure(append(gpModel, list(formula = formula(mf))),
-                   class = c("symbolicRegressionModel", "geneticProgrammingResult"))
-}
-
-##' Predict method for symbolic regression models
-##'
-##' Predict values via a model function from a population of model functions
-##' generated by symbolic regression.
-##'
-##' @param object A model created by \code{\link{symbolicRegression}}.
-##' @param newdata A \code{\link{data.frame}} containing input data for the
-##'   symbolic regression model. The variables in \code{object$formula} must match
-##'   column names in this data frame.
-##' @param model The numeric index of the model function in \code{object$population}
-##'   to use for prediction or \code{"BEST"} to use the model function with the best
-##'   training fitness.
-##' @param detailed Whether to add metadata to the prediction object returned.
-##' @param ... Ignored in this \code{predict} method.
-##' @return A vector of predicted values or, if \code{detailed} is \code{TRUE}, a
-##'   list of the following elements:
-##'   \code{model} the model used in this prediction
-##'   \code{response} a matrix of predicted versus respone values
-##'   \code{RMSE} the RMSE between the real and predicted response
-##'
-##' @export
-predict.symbolicRegressionModel <- function(object, newdata, model = "BEST", detailed = FALSE, ...) {
-  ind <- if (model == "BEST") {
-    trainingFitnessSortedPopulation <- sortBy(object$population, object$fitnessFunction)
-    trainingFitnessSortedPopulation[[1]]
-  } else object$population[[model]]
-  data <- if (any(is.na(newdata))) {
-    dataWithoutNAs <- na.omit(newdata)
-    warning(sprintf("removed %i data rows containing NA values", length(attr(dataWithoutNAs, "na.action"))))
-    dataWithoutNAs
-  } else newdata
-  
-  formulaVars <- as.list(attr(terms(object$formula), "variables")[-1])
-  responseVariable <- formulaVars[[1]]
-  explanatoryVariables <- formulaVars[-1]
-  attach(data)
-  trueResponse <- eval(responseVariable)
-  explanatories <- lapply(explanatoryVariables, eval)
-  detach(data)
-  ysind <- do.call(ind, explanatories) # vectorized evaluation
-  errorind <- rmse(trueResponse, ysind)
-  
-  if (detailed) {
-    predictedVersusReal <- cbind(ysind, trueResponse)
-    colnames(predictedVersusReal) <- c("predicted", "real")
-    list(model = ind, response = predictedVersusReal, RMSE = errorind)
-  } else ysind
 }
 
 ##' Evolution restart conditions
@@ -493,18 +446,30 @@ makeFitnessDistributionRestartCondition <- function(testFrequency = 100,
 ##'
 ##' @param populationType The sType of the replacement individuals, defaults to \code{NULL} for
 ##'   creating untyped populations.
+##' @param extinctionPrevention Whether to surpress duplicate individuals in newly initialized
+##'   populations. See \code{\link{geneticProgramming}} for details.
+##' @param breedingFitness A breeding function. See the documentation for
+##'   \code{\link{geneticProgramming}} for details.
+##' @param breedingTries The number of breeding steps.
 ##'
 ##' @rdname evolutionRestartStrategies
 ##' @export
-makeLocalRestartStrategy <- function(populationType = NULL) {
+makeLocalRestartStrategy <- function(populationType = NULL,
+                                     extinctionPrevention = FALSE,
+                                     breedingFitness = function(individual) TRUE,
+                                     breedingTries = 50) {
   restartStrategy <- function(fitnessFunction, population, populationSize, functionSet, inputVariables, constantSet) {
     fitnessValues <- as.numeric(Map(function(ind) fitnessFunction(ind)[1], population))
     bestInd <- population[[which.min(fitnessValues)]]
     restartedPopulation <-
       if (is.null(populationType))
-        makePopulation(populationSize, functionSet, inputVariables, constantSet)
+        makePopulation(populationSize, functionSet, inputVariables, constantSet,
+                       extinctionPrevention = extinctionPrevention,
+                       breedingFitness = breedingFitness, breedingTries = breedingTries)
       else
-        makeTypedPopulation(populationSize, populationType, functionSet, inputVariables, constantSet)
+        makeTypedPopulation(populationSize, populationType, functionSet, inputVariables, constantSet,
+                            extinctionPrevention = extinctionPrevention,
+                            breedingFitness = breedingFitness, breedingTries = breedingTries)
     list(population = restartedPopulation, elite = list(bestInd))
   }
   class(restartStrategy) <- c("restartStrategy", "function")
@@ -518,7 +483,7 @@ makeLocalRestartStrategy <- function(populationType = NULL) {
 ##' timeElapsed)}.
 ##' They are used to decide when to finish a GP evolution run. Stop conditions must be members
 ##' of the S3 class \code{c("stopCondition", "function")}. They can be combined using the
-##' generic \emph{and} (\code{|}), \emph{or} (\code{|}) and \emph{not} (\code{!}) functions.
+##' generic \emph{and} (\code{&}), \emph{or} (\code{|}) and \emph{not} (\code{!}) functions.
 ##'
 ##' \code{makeStepsStopCondition} creates a stop condition that is fulfilled if the number
 ##' of evolution steps exceeds a given limit.
@@ -624,7 +589,7 @@ safeSqroot <- function(a) sqrt(ifelse(a < 0, 0, a))
 
 ##' @rdname safeGPfunctions
 ##' @export
-safeLn <- function(a) log(ifelse(a < 0, 0, a))
+safeLn <- function(a) ifelse(a < 0, 0, log(a))
 
 ##' @rdname safeGPfunctions
 ##' @export

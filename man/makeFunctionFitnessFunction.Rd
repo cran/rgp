@@ -1,7 +1,7 @@
 \name{makeFunctionFitnessFunction}
 \alias{makeFunctionFitnessFunction}
 \title{Create a fitness function from a function of one variable...}
-\usage{makeFunctionFitnessFunction(func, from=-1, to=1, steps=128, errormeasure=rmse, indsizelimit=NA)
+\usage{makeFunctionFitnessFunction(func, from=-1, to=1, steps=128, errorMeasure=rmse, indsizelimit=NA)
 }
 \description{Create a fitness function from a function of one variable}
 \details{Creates a fitness function that calculates an error measure with
@@ -14,7 +14,7 @@ limit will receive a fitness of \code{Inf}.}
 \item{from}{The start of the sequence of fitness cases.}
 \item{to}{The end of the sequence of fitness cases.}
 \item{steps}{The number of steps in the sequence of fitness cases.}
-\item{errormeasure}{A function to use as an error measure.}
+\item{errorMeasure}{A function to use as an error measure, defaults to RMSE.}
 \item{indsizelimit}{Individuals exceeding this size limit will get
 a fitness of \code{Inf}.}
 }

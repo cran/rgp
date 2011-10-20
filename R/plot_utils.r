@@ -1,5 +1,5 @@
 ## plot_utils.r
-##   - Simple plot utilities
+##   - Utilities for plotting several types of RGP objects
 ##
 ## RGP - a GP system for R
 ## 2010 Oliver Flasch (oliver.flasch@fh-koeln.de)
@@ -34,6 +34,7 @@
 ##'
 ##' @examples
 ##' plotFunctions(list(function(x) sin(x), function(x) cos(x), function(x) 0.5*sin(2*x)+1), -pi, pi, 256)
+##'
 ##' @export
 plotFunctions <- function(funcs, from = 0, to = 1, steps = 1024,
                           type = "l", lty = 1:5, lwd = 1, lend = par("lend"),
@@ -68,6 +69,8 @@ plotFunctions <- function(funcs, from = 0, to = 1, steps = 1024,
 ##'
 ##' @param func The function to convert.
 ##' @return An expression plottable by \code{\link{plotmath}}.
+##'
+##' @seealso \code{\link{funcToIgraph}}
 ##' @export
 funcToPlotmathExpr <- function(func)
   bquote(f(.(names(formals(func)))) == .(exprToPlotmathExpr(body(func))))
@@ -80,6 +83,7 @@ funcToPlotmathExpr <- function(func)
 ##'
 ##' @param expr The GP-generated expression to convert.
 ##' @return An expression plottable by \code{\link{plotmath}}.
+##'
 ##' @export
 exprToPlotmathExpr <- function(expr)
   if (is.call(expr)) {
@@ -97,3 +101,59 @@ exprToPlotmathExpr <- function(expr)
       as.call(c(func, Map(exprToPlotmathExpr, rest(expl))))
   } else expr
 
+##' Visualization of functions and expressions as trees
+##'
+##' The following functions plot R expressions and functions as trees. The igraph package
+##' is required for most of these functions.
+##' \code{exprToGraph} transforms an R expression into a graph given as a character vector
+##' of vertices V and a even-sized numeric vector of edges E. Two elements i and i+1 in E
+##' encode a directed edge from V[i] to V[i+1]. 
+##' \code{funcToIgraph} and \code{exprToIgraph} return an igraph graph object for an R
+##' function or an R expression.
+##' 
+##' @param func An R function.
+##' @param expr An R expression.
+##' @return The result (see the details section).
+##'
+##' @seealso \code{\link{funcToPlotmathExpr}}
+##' @rdname gpIndividualVisualization
+##' @export
+funcToIgraph <- function(func) exprToIgraph(body(func))
+
+##' @rdname gpIndividualVisualization
+##' @export
+exprToIgraph <- function(expr) {
+  if (!require("igraph")) stop("exprToIgraph: Package 'igraph' not installed.")
+  exprGraph <- exprToGraph(expr)
+  exprIgraph <- graph(exprGraph$edges - 1, n = length(exprGraph$vertices)) # igraph vertexes are counted from zero
+  V(exprIgraph)$label <- exprGraph$vertices
+  exprIgraph
+}
+
+##' @rdname gpIndividualVisualization
+##' @export
+exprToGraph <- function(expr) {
+  vertices <- character()
+  edges <- numeric()
+  exprToGraphRecursive <- function(expr, cv = 1, c = 1)
+  if (is.call(expr)) {
+    f <- expr[[1]]
+    vertices <<- c(vertices, as.character(f))
+    edges <<- c(edges, cv, c)
+    args <- as.list(expr)[-1]
+    exprToGraphRecursive(args, cv = c, c = c + 1)
+  } else if (is.list(expr) && !identical(expr, list())) {
+    rc <- exprToGraphRecursive(expr[[1]], cv = cv, c = c) # first
+    exprToGraphRecursive(expr[-1], cv = cv, c = rc) # rest
+  } else if (is.list(expr)) {
+    # empty argument list, do nothing
+    c
+  } else {
+    vertices <<- c(vertices, as.character(expr))
+    edges <<- c(edges, cv, c)
+    c + 1
+  }
+  exprToGraphRecursive(expr)
+  list(vertices = vertices,
+       edges = edges[-2:-1]) # the first edge is the reflexive root edge
+}

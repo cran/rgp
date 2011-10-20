@@ -2,11 +2,17 @@
 \alias{makePopulation}
 \title{Classes for populations of individuals represented as functions...}
 \usage{makePopulation(size, funcset, inset, conset, maxfuncdepth=8, constprob=0.2,
-    funcfactory=function() randfuncRampedHalfAndHalf(funcset, inset,
-    conset, maxfuncdepth, constprob = constprob))
+    breedingFitness=function(individual) TRUE, breedingTries=50,
+    extinctionPrevention=FALSE, funcfactory=function()
+    randfuncRampedHalfAndHalf(funcset, inset, conset, maxfuncdepth,
+    constprob = constprob, breedingFitness = breedingFitness,
+    breedingTries = breedingTries))
 makeTypedPopulation(size, type, funcset, inset, conset, maxfuncdepth=8, constprob=0.2,
-    funcfactory=function() randfuncTypedRampedHalfAndHalf(type,
-    funcset, inset, conset, maxfuncdepth, constprob = constprob))
+    breedingFitness=function(individual) TRUE, breedingTries=50,
+    extinctionPrevention=FALSE, funcfactory=function()
+    randfuncTypedRampedHalfAndHalf(type, funcset, inset, conset,
+    maxfuncdepth, constprob = constprob, breedingFitness =
+    breedingFitness, breedingTries = breedingTries))
 print.population(x, ...)
 summary.population(object, ...)
 }
@@ -29,6 +35,12 @@ summary.population(object, ...)
 \item{constprob}{The probability of generating a constant in a step of growth, if no subtree
 is generated. If neither a subtree nor a constant is generated, a randomly chosen input variable
 will be generated. Defaults to \code{0.2}.}
+\item{breedingFitness}{A breeding function. See the documentation for
+\code{\link{geneticProgramming}} for details.}
+\item{breedingTries}{The number of breeding steps.}
+\item{extinctionPrevention}{When set to \code{TRUE}, initialization will try 
+to prevent duplicate individuals from occurring in the population. Defaults to \code{FALSE}, as
+this operation might be expensive with larger population sizes.}
 \item{funcfactory}{A factory for creating the functions of the new population.
 Defaults to Koza's "ramped half-and-half" initialization strategy.}
 \item{x}{The population to print.}

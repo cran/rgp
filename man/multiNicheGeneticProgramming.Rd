@@ -80,6 +80,6 @@ bestFitness, timeElapsed)} to be called with each evolution step.}
 \item{clusterApply}{The cluster apply function that is used to distribute the
 parallel passes to CPUs in a compute cluster.}
 \item{clusterExport}{A function that is used to export R variables to the nodes of
-a CPU cluster, defaults to \code{\link{sfExport}}.}
+a CPU cluster, defaults to \code{sfExport}.}
 }
 

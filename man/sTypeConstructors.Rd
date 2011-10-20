@@ -16,6 +16,7 @@ and \code{range} containing its argument and result types.
 Every sType has a \code{string} field containing a unambiguous string representation
 that can serve as a hash table key.
 STypes can be checked for equality via \code{\link{identical}}.
+\code{sObject} is the root of the sType hierarchy, i.e. the most general type.
 
 }
 \value{\code{st}: The created sType.
@@ -25,6 +26,8 @@ STypes can be checked for equality via \code{\link{identical}}.
 \arguments{\item{baseTypeName}{The name of the base sType to create.}
 }
 \examples{st("numeric")
-list(st("numeric"), st("numeric")) \%->\% st("logical")}
+list(st("numeric"), st("numeric")) \%->\% st("logical")
+is.sType(st("logical"))}
 \alias{\%->\%}
+\alias{sObject}
 

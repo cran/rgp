@@ -76,7 +76,7 @@ NA
 ##' @param clusterApply The cluster apply function that is used to distribute the
 ##'   parallel passes to CPUs in a compute cluster.
 ##' @param clusterExport A function that is used to export R variables to the nodes of
-##'   a CPU cluster, defaults to \code{\link{sfExport}}.
+##'   a CPU cluster, defaults to \code{sfExport}.
 ##' @return A genetic programming result object that contains a GP population in the
 ##'   field \code{population}, as well as metadata describing the run parameters.
 ##'
@@ -262,7 +262,7 @@ multiNicheGeneticProgramming <- function(fitnessFunction,
 ##' @param clusterApply The cluster apply function that is used to distribute the
 ##'   parallel passes to CPUs in a compute cluster.
 ##' @param clusterExport A function that is used to export R variables to the nodes of
-##'   a CPU cluster, defaults to \code{\link{sfExport}}.
+##'   a CPU cluster, defaults to snowfall's \code{sfExport}.
 ##' @return An symbolic regression model that contains an untyped GP population.
 ##'
 ##' @seealso \code{\link{predict.symbolicRegressionModel}}, \code{\link{geneticProgramming}}
@@ -298,7 +298,7 @@ multiNicheSymbolicRegression <- function(formula, data,
   variableNames <- attr(terms(formula(mf)), "term.labels")
   ## Create inputVariableSet
   inVarSet <- inputVariableSet(list=as.list(variableNames))
-  fitFunc <- makeRegressionFitnessFunction(formula(mf), mf, errormeasure = rmse,
+  fitFunc <- makeRegressionFitnessFunction(formula(mf), mf, errorMeasure = rmse,
                                            penalizeGenotypeConstantIndividuals = penalizeGenotypeConstantIndividuals,
                                            indsizelimit = individualSizeLimit)
   gpModel <- multiNicheGeneticProgramming(fitFunc, stopCondition, passStopCondition,

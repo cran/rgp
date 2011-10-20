@@ -15,7 +15,7 @@ of the signature \code{function(population, stepNumber, evaluationNumber, bestFi
 timeElapsed)}.
 They are used to decide when to finish a GP evolution run. Stop conditions must be members
 of the S3 class \code{c("stopCondition", "function")}. They can be combined using the
-generic \emph{and} (\code{|}), \emph{or} (\code{|}) and \emph{not} (\code{!}) functions.
+generic \emph{and} (\code{&}), \emph{or} (\code{|}) and \emph{not} (\code{!}) functions.
 
 \code{makeStepsStopCondition} creates a stop condition that is fulfilled if the number
 of evolution steps exceeds a given limit.

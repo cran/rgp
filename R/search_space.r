@@ -9,6 +9,8 @@
 
 ##' @include stypes.r
 NA
+##' @include function_utils.r
+NA
 
 ##' Functions for defining the search space for Genetic Programming
 ##'
@@ -39,16 +41,31 @@ NA
 ##' set. \code{inputVariableSet} creates an input variable set.
 ##' \code{constantFactorySet} creates a constant factory set.
 ##'
+##' Probability weight for functions, input variables, and constants
+##' can be given by tagging constant names, input variables, and
+##' constant factory functions via the \code{pw} function (see
+##' the examples). The predicate \code{hasPw} can be used to check
+##' if an object \code{x} has an associated probability weight.
+##' The function \code{getPw} returns the probability weight
+##' associated with an object \code{x}, if available.
+##'
 ##' @param ... Names of functions or input variables given as strings.
 ##' @param list Names of functions or input variables given as a list of strings.
 ##' @param recursive Ignored when concatenating function- or input variable sets.
+##' @param x An object (function name, input variable name, or constant
+##'   factory) to tag with a probability \code{pw}.
+##' @param pw A probability weight.
+##' @param default A default probability weight to return iff no probability
+##'   weight is associated with an object.
 ##' @return A function set or input variable set.
 ##'
 ##' @examples
 ##' # creating an untyped search space description...
-##' functionSet("+", "-", "*", "/", "expt", "log", "sin", "cos", "tan")
+##' functionSet("+", "-", "*", "/", "exp", "log", "sin", "cos", "tan")
 ##' inputVariableSet("x", "y")
 ##' constantFactorySet(function() runif(1, -1, 1))
+##' # creating an untyped function set with probability weights...
+##' functionSet(pw("+", 1.2), pw("-", 0.8), pw("*", 1.0), pw("/", 1.0))
 ##' 
 ##' @rdname searchSpaceDefinition
 ##' @export
@@ -56,9 +73,16 @@ functionSet <- function(..., list = NULL) {
   ll <- if (missing(list)) list(...) else c(list, ...)
   funcset <- list()
   class(funcset) <- c("functionSet", "list")
-  funcset$all <- lapply(ll, function(o) as.name(o) %::% sType(o))  # convert to names
-  funcset$byType <- sortByType(funcset$all)
-  funcset$byRange <- sortByRange(funcset$all)
+  funcset.all <- ll
+  funcset.byType <- sortByType(funcset.all)
+  funcset.byRange <- sortByRange(funcset.all)
+  funcset$all <- extractAttributes(funcset.all, "probabilityWeight", default = 1.0)
+  funcset$byType <- Map(function(set) extractAttributes(set, "probabilityWeight", default = 1.0),
+                        funcset.byType)
+  funcset$byRange <- Map(function(set) extractAttributes(set, "probabilityWeight", default = 1.0),
+                         funcset.byRange)
+  funcset$nameStrings <- as.character(funcset$all)
+  funcset$arities <- as.numeric(Map(function(nameString) arity(as.name(nameString)), funcset$nameStrings))
   funcset
 }
 
@@ -68,9 +92,23 @@ inputVariableSet <- function(..., list = NULL) {
   ll <- if (missing(list)) list(...) else c(list, ...)
   inset <- list()
   class(inset) <- c("inputVariableSet", "list")
-  inset$all <- lapply(ll, function(o) as.name(o) %::% sType(o))  # convert to names
-  inset$byType <- sortByType(inset$all)
-  inset$byRange <- sortByRange(inset$all) # TODO remove this field
+  inset.all <- ll
+  inset.byType <- sortByType(inset.all)
+  inset.byRange <- sortByRange(inset.all) # TODO remove this field
+  inset$all <- extractAttributes(inset.all, "probabilityWeight", default = 1.0)
+  collectFormals <- function(inputVariable) {
+    if (is.character(inputVariable)) {
+      list(as.symbol(inputVariable)) 
+    } else {
+      extractLeafSymbols(inputVariable)
+    }
+  }
+  inset$allFormals <- unique(flatten(Map(collectFormals, inset$all)))
+  inset$byType <- Map(function(set) extractAttributes(set, "probabilityWeight", default = 1.0),
+                      inset.byType)
+  inset$byRange <- Map(function(set) extractAttributes(set, "probabilityWeight", default = 1.0),
+                       inset.byRange)
+  inset$nameStrings <- as.character(inset$all)
   inset
 }
 
@@ -80,11 +118,34 @@ constantFactorySet <- function(..., list = NULL) {
   ll <- if (missing(list)) list(...) else c(list, ...)
   constfacset <- list()
   class(constfacset) <- c("constantFactorySet", "list")
-  constfacset$all <- ll
-  constfacset$byType <- sortByType(constfacset$all)
-  constfacset$byRange <- sortByRange(constfacset$all) # TODO remove this field
+  constfacset.all <- ll
+  constfacset.byType <- sortByType(constfacset.all)
+  constfacset.byRange <- sortByRange(constfacset.all) # TODO remove this field
+  constfacset$all <- extractAttributes(constfacset.all, "probabilityWeight", default = 1.0)
+  constfacset$byType <- Map(function(set) extractAttributes(set, "probabilityWeight", default = 1.0),
+                            constfacset.byType)
+  constfacset$byRange <- Map(function(set) extractAttributes(set, "probabilityWeight", default = 1.0),
+                             constfacset.byRange)
   constfacset
 }
+
+##' @rdname searchSpaceDefinition
+##' @export
+pw <- function(x, pw) {
+  if (hasPw(x))
+    stop("pw: Object ", x, " already has an probability weight (of ", pw, ").")
+  attr(x, "probabilityWeight") <- pw
+  x
+}
+
+##' @rdname searchSpaceDefinition
+##' @export
+hasPw <- function(x) !is.null(attr(x, "probabilityWeight"))
+
+##' @rdname searchSpaceDefinition
+##' @export
+getPw <- function(x, default = 1.0)
+  if (hasPw(x)) attr(x, "probabilityWeight") else default
 
 ##' @rdname searchSpaceDefinition
 ##' @export
@@ -144,4 +205,21 @@ sortByRange <- function(x) {
     }
   }
   byRangeTable
+}
+
+##' Extract a given attribute of all objects in a list and tag that list with the
+##' list of extracted attributes
+##'
+##' @param x A list with objects containing the attribute \code{attribute}.
+##' @param extractAttribute The attribute to extract from all objects in the list \code{x}.
+##' @param tagAttribute The name of the attribute for \code{x} holding the list of
+##'   extracted attributes.
+##' @param default A default value to return if an object in \code{x} has no attribute
+##'   \code{attribute}.
+##' @return The list \code{x}, tagged with a new attribute \code{tagAttribute}.
+extractAttributes <- function(x, extractAttribute, tagAttribute = extractAttribute, default = NULL) {
+  extractedAttributes <- Map(function(o) if (!is.null(attr(o, extractAttribute)))
+                             attr(o, extractAttribute) else default, x)
+  attr(x, tagAttribute) <- extractedAttributes
+  x
 }
