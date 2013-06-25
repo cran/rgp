@@ -12,7 +12,8 @@
 /* unify_match
  *
  */
-SEXP unify_match(const SEXP a, const SEXP b, const SEXP sigma,
-                 Rboolean (*const is_variable)(SEXP), const Rboolean contains_check);
+SEXP unify_match(SEXP a, SEXP b, SEXP sigma,
+                 Rboolean (*const is_variable)(SEXP), Rboolean contains_check);
 
 #endif
+

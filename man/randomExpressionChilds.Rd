@@ -1,18 +1,24 @@
-\name{randomExpressionChilds}
+\name{randchild}
 \alias{randchild}
-\title{Select random childs or subtrees of an expression...}
-\usage{randchild(expr)
-randsubtree(expr, subtreeprob=0.1)
-}
-\description{Select random childs or subtrees of an expression}
-\details{\code{randchild}: \code{randchild} returns a uniformly random direct child of an expression.
-\code{randsubtree} returns a uniformly random subtree of an expression. Note that this subtree
-must not be a direct child.
-
-}
-\arguments{\item{expr}{The expression to select random childs or subtrees from.}
-\item{subtreeprob}{The probability for \code{randsubtree} to select a certain subtree instead
-of searching further via an recursive call.}
-}
 \alias{randsubtree}
+\title{Select random childs or subtrees of an expression}
+\usage{
+  randchild(expr)
+
+  randsubtree(expr, subtreeprob = 0.1)
+}
+\arguments{
+  \item{expr}{The expression to select random childs or
+  subtrees from.}
+
+  \item{subtreeprob}{The probability for \code{randsubtree}
+  to select a certain subtree instead of searching further
+  via an recursive call.}
+}
+\description{
+  \code{randchild} returns a uniformly random direct child
+  of an expression. \code{randsubtree} returns a uniformly
+  random subtree of an expression. Note that this subtree
+  must not be a direct child.
+}
 

@@ -1,4 +1,4 @@
-## symbolic_regression.r
+## symbolic_regression.R
 ##   - Tools for symbolic regression using the R formula interface
 ##
 ## RGP - a GP system for R
@@ -6,11 +6,6 @@
 ## with contributions of Thomas Bartz-Beielstein, Olaf Mersmann and Joerg Stork
 ## released under the GPL v2
 ##
-
-##' @include evolution.r
-NA
-##' @include data_driven_gp.r
-NA
 
 ##' Symbolic regression via untyped standard genetic programming
 ##'
@@ -43,24 +38,24 @@ NA
 ##'   operation might be expensive with larger population sizes.
 ##' @param archive If set to \code{TRUE}, all GP individuals evaluated are stored in an
 ##'   archive list \code{archiveList} that is returned as part of the result of this function. 
-##' @param genealogy If set to \code{TRUE}, the parent(s) of each indiviudal is stored in
-##'   an archive \code{genealogyList} as part of the result of this function, enabling
-##'   the reconstruction of the complete genealogy of the result population. This
-##'   parameter implies \code{archive = TRUE}.
 ##' @param individualSizeLimit Individuals with a number of tree nodes that
 ##'   exceeds this size limit will get a fitness of \code{Inf}.
 ##' @param penalizeGenotypeConstantIndividuals Individuals that do not contain
 ##'   any input variables will get a fitness of \code{Inf}.
+##' @param subSamplingShare The share of fitness cases \deqn{s} sampled for
+##'   evaluation with each function evaluation. \deqn{0 < s \leq 1} must
+##'   hold, defaults to \code{1.0}.
 ##' @param functionSet The function set.
 ##' @param constantSet The set of constant factory functions.
-##' @param selectionFunction The selection function to use. Defaults to
-##'   tournament selection. See \code{\link{makeTournamentSelection}} for details.
 ##' @param crossoverFunction The crossover function.
 ##' @param mutationFunction The mutation function.
 ##' @param restartCondition The restart condition for the evolution main loop. See
 ##'   \link{makeEmptyRestartCondition} for details.
 ##' @param restartStrategy The strategy for doing restarts. See
 ##'   \link{makeLocalRestartStrategy} for details.
+##' @param searchHeuristic The search-heuristic (i.e. optimization algorithm) to use
+##'   in the search of solutions. See the documentation for \code{searchHeuristics} for
+##'   available algorithms.
 ##' @param breedingFitness A "breeding" function. This function is applied after
 ##'   every stochastic operation \emph{Op} that creates or modifies an individal
 ##'   (typically, \emph{Op} is a initialization, mutation, or crossover operation). If
@@ -77,8 +72,10 @@ NA
 ##'   parameter. Defaults to \code{50}.
 ##' @param errorMeasure A function to use as an error measure, defaults to RMSE.
 ##' @param progressMonitor A function of signature
-##'   \code{function(population, fitnessfunction, stepNumber, evaluationNumber,
+##'   \code{function(population, fitnessValues, fitnessFunction, stepNumber, evaluationNumber,
 ##'   bestFitness, timeElapsed)} to be called with each evolution step.
+##' @param envir The R environment to evaluate individuals in, defaults to
+##'   \code{parent.frame()}.
 ##' @param verbose Whether to print progress messages.
 ##' @return An symbolic regression model that contains an untyped GP population.
 ##'
@@ -92,24 +89,27 @@ symbolicRegression <- function(formula, data,
                                elite = list(),
                                extinctionPrevention = FALSE,
                                archive = FALSE,
-                               genealogy = FALSE,
                                individualSizeLimit = 64,
                                penalizeGenotypeConstantIndividuals = FALSE,
+                               subSamplingShare = 1.0,
                                functionSet = mathFunctionSet,
                                constantSet = numericConstantSet,
-                               selectionFunction = makeTournamentSelection(),
                                crossoverFunction = crossover,
                                mutationFunction = NULL,
                                restartCondition = makeEmptyRestartCondition(),
                                restartStrategy = makeLocalRestartStrategy(),
+                               searchHeuristic = makeAgeFitnessComplexityParetoGpSearchHeuristic(),
                                breedingFitness = function(individual) TRUE,
                                breedingTries = 50,
                                errorMeasure = rmse,
                                progressMonitor = NULL,
+                               envir = parent.frame(),
                                verbose = TRUE) {
   symbolicRegressionModel <- dataDrivenGeneticProgramming(formula, data, makeRegressionFitnessFunction,
-                                                          list(errorMeasure = errorMeasure,
+                                                          list(envir = envir,
+                                                               errorMeasure = errorMeasure,
                                                                penalizeGenotypeConstantIndividuals = penalizeGenotypeConstantIndividuals,
+                                                               subSamplingShare = subSamplingShare,
                                                                indsizelimit = individualSizeLimit),
                                                           stopCondition = stopCondition,
                                                           population = population,
@@ -118,14 +118,13 @@ symbolicRegression <- function(formula, data,
                                                           elite = elite,
                                                           extinctionPrevention = extinctionPrevention,
                                                           archive = archive,
-                                                          genealogy = genealogy,
                                                           functionSet = functionSet,
                                                           constantSet = constantSet,
-                                                          selectionFunction = selectionFunction,
                                                           crossoverFunction = crossoverFunction,
                                                           mutationFunction = mutationFunction,
                                                           restartCondition = restartCondition,
                                                           restartStrategy = restartStrategy,
+                                                          searchHeuristic = searchHeuristic,
                                                           breedingFitness = breedingFitness,
                                                           breedingTries = breedingTries,
                                                           progressMonitor = progressMonitor,
@@ -155,6 +154,8 @@ symbolicRegression <- function(formula, data,
 ##'   \code{response} a matrix of predicted versus respone values
 ##'   \code{RMSE} the RMSE between the real and predicted response
 ##'
+##' @method predict symbolicRegressionModel
+##' @S3method predict symbolicRegressionModel
 ##' @export
 predict.symbolicRegressionModel <- function(object, newdata, model = "BEST", detailed = FALSE, ...) {
   ind <- if (model == "BEST") {
@@ -170,10 +171,8 @@ predict.symbolicRegressionModel <- function(object, newdata, model = "BEST", det
   formulaVars <- as.list(attr(terms(object$formula), "variables")[-1])
   responseVariable <- formulaVars[[1]]
   explanatoryVariables <- formulaVars[-1]
-  attach(data)
-  trueResponse <- eval(responseVariable)
-  explanatories <- lapply(explanatoryVariables, eval)
-  detach(data)
+  trueResponse <- with(data, eval(responseVariable))
+  explanatories <- with(data, lapply(explanatoryVariables, eval))
   ysind <- do.call(ind, explanatories) # vectorized evaluation
   errorind <- rmse(trueResponse, ysind)
   
@@ -195,16 +194,22 @@ predict.symbolicRegressionModel <- function(object, newdata, model = "BEST", det
 ##' @param formula A formula object describing the regression task.
 ##' @param data An optional data frame containing the variables in the
 ##'   model.
+##' @param envir The R environment to evaluate individuals in.
 ##' @param errorMeasure A function to use as an error measure, defaults to RMSE.
 ##' @param indsizelimit Individuals exceeding this size limit will get
 ##'   a fitness of \code{Inf}.
 ##' @param penalizeGenotypeConstantIndividuals Individuals that do not
 ##'   contain any input variables will get a fitness of \code{Inf}.
+##' @param subSamplingShare The share of fitness cases \deqn{s} sampled for
+##'   evaluation with each function evaluation. \deqn{0 < s \leq 1} must
+##'   hold, defaults to \code{1.0}.
 ##' @return A fitness function to be used in symbolic regression.
 ##' @export
-makeRegressionFitnessFunction <- function(formula, data, errorMeasure = rmse,
+makeRegressionFitnessFunction <- function(formula, data, envir,
+                                          errorMeasure = rmse,
                                           indsizelimit = NA,
-                                          penalizeGenotypeConstantIndividuals = FALSE) {
+                                          penalizeGenotypeConstantIndividuals = FALSE,
+                                          subSamplingShare = 1.0) {
   data <- if (any(is.na(data))) {
     dataWithoutNAs <- na.omit(data)
     warning(sprintf("removed %i data rows containing NA values",
@@ -214,18 +219,70 @@ makeRegressionFitnessFunction <- function(formula, data, errorMeasure = rmse,
   formulaVars <- as.list(attr(terms(formula), "variables")[-1])
   responseVariable <- formulaVars[[1]]
   explanatoryVariables <- formulaVars[-1]
-  trueResponse <- eval(responseVariable, envir=data)
-  explanatories <- lapply(explanatoryVariables, eval, envir=data)
-  function(ind) {
-    ysind <- do.call(ind, explanatories) # vectorized fitness-case evaluation
-    errorind <- errorMeasure(trueResponse, ysind)    
-    if (!is.na(indsizelimit) && funcSize(ind) > indsizelimit)
-      Inf # individual size limit exceeded
-    else if (is.na(errorind) || is.nan(errorind))
-      Inf # error value is NA or NaN
-    else if (penalizeGenotypeConstantIndividuals
-             && is.empty(inputVariablesOfIndividual(ind, explanatoryVariables)))
-      Inf # individual does not contain any input variables
-    else errorind
+  trueResponse <- eval(responseVariable, envir = data)
+  explanatories <- lapply(explanatoryVariables, eval, envir = data)
+  if (subSamplingShare < 1.0) { # do sub sampling of fitness cases
+    function(ind) {
+      numberOfFitnessCases <- length(trueResponse)
+      sampleIndices <- sample(1:numberOfFitnessCases, subSamplingShare * numberOfFitnessCases, replace = FALSE)
+      ysind <- do.call(ind, Map(function(explanatory) explanatory[sampleIndices], explanatories), envir = envir) # vectorized fitness-case evaluation
+      errorind <- errorMeasure(trueResponse[sampleIndices], ysind)
+      if (!is.na(indsizelimit) && funcSize(ind) > indsizelimit)
+        Inf # individual size limit exceeded
+      else if (is.na(errorind) || is.nan(errorind))
+        Inf # error value is NA or NaN
+      else if (penalizeGenotypeConstantIndividuals
+               && is.empty(inputVariablesOfIndividual(ind, explanatoryVariables)))
+        Inf # individual does not contain any input variables
+      else errorind
+    }
+  } else { # no subsampling of fitness cases
+    function(ind) {
+      ysind <- do.call(ind, explanatories, envir = envir) # vectorized fitness-case evaluation
+      errorind <- errorMeasure(trueResponse, ysind)
+      if (!is.na(indsizelimit) && funcSize(ind) > indsizelimit)
+        Inf # individual size limit exceeded
+      else if (is.na(errorind) || is.nan(errorind))
+        Inf # error value is NA or NaN
+      else if (penalizeGenotypeConstantIndividuals
+               && is.empty(inputVariablesOfIndividual(ind, explanatoryVariables)))
+        Inf # individual does not contain any input variables
+      else errorind
+    }
   }
 }
+
+##' Variable Presence Maps
+##'
+##' Counts the number of input variables (formal arguments) present in the
+##' body of a individual function. Applied to a population of individuals,
+##' this information is useful to identify driving variables in a modelling
+##' task.
+##' \code{functionVariablePresenceMap} returns a (one row) variable
+##' presence map for a function, \code{populationVariablePresenceMap}
+##' returns a variable presence map for a population of RGP individuals
+##' (a list of R functions).
+##'
+##' @param f A R function to return a variable presence map for.
+##' @param pop A RGP population to return a variable presence map for.
+##' @return A data frame with variables (formal parameters) in the columns,
+##'   individuals (function) in the rows and variable counts in the cells.
+##'
+##' @rdname variablePresenceMaps 
+##' @export
+functionVariablePresenceMap <- function(f) {
+  variablePresence <- as.list(formals(f))
+  variablePresence <- Map(function(x) 0, variablePresence) # set each element to 0
+
+  MapExpressionLeafs(function(leaf) if (is.name(leaf)) {
+    variablePresence[[as.character(leaf)]] <<- variablePresence[[as.character(leaf)]] + 1
+  }, body(f))
+
+  as.data.frame(variablePresence)
+}
+
+##' @rdname variablePresenceMaps 
+##' @export
+populationVariablePresenceMap <- function(pop)
+  Reduce(rbind, Map(functionVariablePresenceMap, pop))
+

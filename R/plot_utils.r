@@ -1,4 +1,4 @@
-## plot_utils.r
+## plot_utils.R
 ##   - Utilities for plotting several types of RGP objects
 ##
 ## RGP - a GP system for R
@@ -29,11 +29,14 @@
 ##'   \code{\link{legend}}. 
 ##' @param bty The box type parameter of the legend, passed as the \code{bty} parameter to
 ##'   \code{\link{legend}}.
-##' @param ... Grapical parameters for \code{\link{par}} and further arguments to \code{plot}.
+##' @param ... Graphic parameters for \code{\link{par}} and further arguments to \code{plot}.
 ##'   For example, use the \code{main} parameter to set a title.
 ##'
 ##' @examples
-##' plotFunctions(list(function(x) sin(x), function(x) cos(x), function(x) 0.5*sin(2*x)+1), -pi, pi, 256)
+##' plotFunctions(list(function(x) sin(x),
+##'                    function(x) cos(x),
+##'                    function(x) 0.5*sin(2*x)+1),
+##'               -pi, pi, 256)
 ##'
 ##' @export
 plotFunctions <- function(funcs, from = 0, to = 1, steps = 1024,
@@ -61,6 +64,42 @@ plotFunctions <- function(funcs, from = 0, to = 1, steps = 1024,
          col = col, bg = bg, lty = lty, lwd = lwd, pch = pch)
   invisible()
 }
+
+##' Plot a 2D function as a 3D surface
+##'
+##' Creates and shows and perspective plot of a 2D function of either the form
+##' \eqn{z = f(x, y)} or \eqn{z = f(xv)}, where \eqn{xv} is a numeric of length 2.
+##'
+##' @param func A 2D function to plot.
+##' @param lo A vector of lower limits of the plot (one entry for each dimension). 
+##' @param up A vector of upper limits of the plot (one entry for each dimension). 
+##' @param samples The number of samples in each dimension.
+##' @param palette The color palette, use \code{NULL} to disable.
+##' @param ... Graphic parameters for \code{\link{persp}}.
+##' 
+##' @export
+plotFunction3d <- function (func = function(x) sum(x^2),
+                            lo = c(0, 0), up = c(1, 1), samples = 10,
+                            palette = gray.colors(256), ...) {
+  x <- seq(lo[1], up[1], length = samples)
+  y <- seq(lo[2], up[2], length = samples)
+  z <- if (length(formals(func)) == 1) {
+    fn <- function(a, b) apply(cbind(a, b), 1, func)
+    outer(x, y, fn)
+  } else if (length(formals(func)) == 2) {
+    outer(x, y, func)
+  } else {
+    stop("plotFunction3d: function arity must be either 1 or 2")
+  }
+
+  if (is.null(palette)) {
+    persp(x, y, z, ...)
+  } else {
+    colInd <- cut(z, length(palette))
+    persp(x, y, z, col = palette[colInd], ...)
+  }
+}
+
 
 ##' Convert a function to an expression plottable by plotmath
 ##'

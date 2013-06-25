@@ -1,4 +1,4 @@
-## similarity.r
+## similarity.R
 ##   - Similarity and distance measures for R functions and expressions
 ##
 ## RGP - a GP system for R

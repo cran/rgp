@@ -1,4 +1,4 @@
-## test_utils.r
+## test_utils.R
 ##   - Utility functions for testing and benchmarking RGP
 ##
 ## RGP - a GP system for R

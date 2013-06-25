@@ -1,4 +1,4 @@
-## time_utils.r
+## time_utils.R
 ##   - Utility functions for dates and times
 ##
 ## RGP - a GP system for R

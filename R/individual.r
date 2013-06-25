@@ -1,4 +1,4 @@
-## individual.r
+## individual.R
 ##   - Functions for analysing GP individuals
 ##
 ## RGP - a GP system for R

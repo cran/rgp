@@ -1,4 +1,4 @@
-## complexity.r
+## complexity.R
 ##   - Complexity measures for GP individuals and estimators of GP search space size
 ##
 ## RGP - a GP system for R
@@ -129,7 +129,7 @@ exprShapesOfDepth <- function(funcset, n)
     1 # there is only one expression shape of depth 1
   } else {
     exprShapesOfDepthNminusOne <- exprShapesOfDepth(funcset, n - 1)
-    uniqueArities <- unique(as.vector(Map(arity, funcset$all), mode = "integer"))
+    uniqueArities <- unique(funcset$arities)
     exprsWithFixedRootArity <- exprShapesOfDepthNminusOne ^ uniqueArities
     sum(exprsWithFixedRootArity)
   }
@@ -143,7 +143,7 @@ exprShapesOfMaxDepth <- function(funcset, n)
     1 # there is only one expression shape of max depth 1
   } else {
     exprShapesOfDepthNminusOne <- exprShapesOfMaxDepth(funcset, n - 1)
-    uniqueArities <- unique(as.vector(Map(arity, funcset$all), mode = "integer"))
+    uniqueArities <- unique(funcset$arities)
     exprsWithFixedRootArity <- exprShapesOfDepthNminusOne ^ uniqueArities
     sum(exprsWithFixedRootArity) + 1
   }
@@ -157,7 +157,7 @@ exprsOfDepth <- function(funcset, inset, n)
     1 + length(inset) # an expression of depth 1 is either a constant or an input variable
   } else {
     exprsOfDepthNminusOne <- exprsOfDepth(funcset, inset, n - 1)
-    arities <- as.vector(Map(arity, funcset$all), mode = "integer")
+    arities <- funcset$arities
     exprsWithFixedRoot <- exprsOfDepthNminusOne ^ arities
     sum(exprsWithFixedRoot)
   }
@@ -171,7 +171,7 @@ exprsOfMaxDepth <- function(funcset, inset, n)
     1 + length(inset) # an expression of depth 1 is either a constant or an input variable
   } else {
     exprsOfMaxDepthNminusOne <- exprsOfMaxDepth(funcset, inset, n - 1)
-    arities <- as.vector(Map(arity, funcset$all), mode = "integer")
+    arities <- funcset$arities
     exprsWithFixedRoot <- exprsOfMaxDepthNminusOne ^ arities
     sum(exprsWithFixedRoot) + 1 + length(inset)
   }

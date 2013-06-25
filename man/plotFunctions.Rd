@@ -1,32 +1,72 @@
 \name{plotFunctions}
 \alias{plotFunctions}
-\title{Show an overlayed plot of multiple functions...}
-\usage{plotFunctions(funcs, from=0, to=1, steps=1024, type="l", lty=1:5, lwd=1,
-    lend=par("lend"), pch, col=1:6, cex, bg=NA, xlab="x", ylab="y",
-    legendpos="bottomright", bty="n", ...)
+\title{Show an overlayed plot of multiple functions}
+\usage{
+  plotFunctions(funcs, from = 0, to = 1, steps = 1024,
+    type = "l", lty = 1:5, lwd = 1, lend = par("lend"),
+    pch = NULL, col = 1:6, cex = NULL, bg = NA, xlab = "x",
+    ylab = "y", legendpos = "bottomright", bty = "n", ...)
 }
-\description{Show an overlayed plot of multiple functions}
-\details{Creates and shows and overlayed plot of one or more functions of one variable \eqn{y = f(x)}.}
-\arguments{\item{funcs}{A list of functions of one variable to plot.}
-\item{from}{The left bound of the plot, i.e. the minimum \eqn{x} value to plot.}
-\item{to}{The right bound of the plot, i.e. the maximum \eqn{x} value to plot.}
-\item{steps}{The number of steps, or samples, to plot.}
-\item{type}{The plot type (e.g. l = line) as passed on to \code{\link{matplot}}.}
-\item{lty}{The line types as passed on to \code{\link{matplot}}.}
-\item{lwd}{The line widths as passed on to \code{\link{matplot}}.}
-\item{lend}{The line end cap types as passed on to \code{\link{matplot}}.}
-\item{pch}{The plot chars as passed on to \code{\link{matplot}}.}
-\item{col}{The plot colors as passed on to \code{\link{matplot}}.}
-\item{cex}{The character expansion sizes as passed on to \code{\link{matplot}}.}
-\item{bg}{The background (fill) colors as passed on to \code{\link{matplot}}.}
-\item{xlab}{The x axis label as passed on to \code{\link{matplot}}.}
-\item{ylab}{The y axis label as passed on to \code{\link{matplot}}.}
-\item{legendpos}{The position of the legend, passed as the \code{x} parameter to
-\code{\link{legend}}.}
-\item{bty}{The box type parameter of the legend, passed as the \code{bty} parameter to
-\code{\link{legend}}.}
-\item{...}{Grapical parameters for \code{\link{par}} and further arguments to \code{plot}.
-For example, use the \code{main} parameter to set a title.}
+\arguments{
+  \item{funcs}{A list of functions of one variable to
+  plot.}
+
+  \item{from}{The left bound of the plot, i.e. the minimum
+  \eqn{x} value to plot.}
+
+  \item{to}{The right bound of the plot, i.e. the maximum
+  \eqn{x} value to plot.}
+
+  \item{steps}{The number of steps, or samples, to plot.}
+
+  \item{type}{The plot type (e.g. l = line) as passed on to
+  \code{\link{matplot}}.}
+
+  \item{lty}{The line types as passed on to
+  \code{\link{matplot}}.}
+
+  \item{lwd}{The line widths as passed on to
+  \code{\link{matplot}}.}
+
+  \item{lend}{The line end cap types as passed on to
+  \code{\link{matplot}}.}
+
+  \item{pch}{The plot chars as passed on to
+  \code{\link{matplot}}.}
+
+  \item{col}{The plot colors as passed on to
+  \code{\link{matplot}}.}
+
+  \item{cex}{The character expansion sizes as passed on to
+  \code{\link{matplot}}.}
+
+  \item{bg}{The background (fill) colors as passed on to
+  \code{\link{matplot}}.}
+
+  \item{xlab}{The x axis label as passed on to
+  \code{\link{matplot}}.}
+
+  \item{ylab}{The y axis label as passed on to
+  \code{\link{matplot}}.}
+
+  \item{legendpos}{The position of the legend, passed as
+  the \code{x} parameter to \code{\link{legend}}.}
+
+  \item{bty}{The box type parameter of the legend, passed
+  as the \code{bty} parameter to \code{\link{legend}}.}
+
+  \item{...}{Graphic parameters for \code{\link{par}} and
+  further arguments to \code{plot}.  For example, use the
+  \code{main} parameter to set a title.}
 }
-\examples{plotFunctions(list(function(x) sin(x), function(x) cos(x), function(x) 0.5*sin(2*x)+1), -pi, pi, 256)}
+\description{
+  Creates and shows and overlayed plot of one or more
+  functions of one variable \eqn{y = f(x)}.
+}
+\examples{
+plotFunctions(list(function(x) sin(x),
+                   function(x) cos(x),
+                   function(x) 0.5*sin(2*x)+1),
+              -pi, pi, 256)
+}
 

@@ -1,4 +1,4 @@
-## search_space.r
+## search_space.R
 ##   - Functions for defining the search space for Genetic Programming
 ##
 ## RGP - a GP system for R
@@ -6,11 +6,6 @@
 ## with contributions of Thomas Bartz-Beielstein, Olaf Mersmann and Joerg Stork
 ## released under the GPL v2
 ##
-
-##' @include stypes.r
-NA
-##' @include function_utils.r
-NA
 
 ##' Functions for defining the search space for Genetic Programming
 ##'
@@ -51,6 +46,8 @@ NA
 ##'
 ##' @param ... Names of functions or input variables given as strings.
 ##' @param list Names of functions or input variables given as a list of strings.
+##' @param parentEnvironmentLevel Level of the parent environment used to resolve
+##'   function names.
 ##' @param recursive Ignored when concatenating function- or input variable sets.
 ##' @param x An object (function name, input variable name, or constant
 ##'   factory) to tag with a probability \code{pw}.
@@ -69,7 +66,7 @@ NA
 ##' 
 ##' @rdname searchSpaceDefinition
 ##' @export
-functionSet <- function(..., list = NULL) {
+functionSet <- function(..., list = NULL, parentEnvironmentLevel = 1) {
   ll <- if (missing(list)) list(...) else c(list, ...)
   funcset <- list()
   class(funcset) <- c("functionSet", "list")
@@ -82,7 +79,11 @@ functionSet <- function(..., list = NULL) {
   funcset$byRange <- Map(function(set) extractAttributes(set, "probabilityWeight", default = 1.0),
                          funcset.byRange)
   funcset$nameStrings <- as.character(funcset$all)
-  funcset$arities <- as.numeric(Map(function(nameString) arity(as.name(nameString)), funcset$nameStrings))
+  funcset$arities <- numeric()
+  funcset$envir <- parent.frame(n = parentEnvironmentLevel)
+  for (nameString in funcset$nameStrings) {
+    funcset$arities <- c(funcset$arities, arity(get(nameString, envir = funcset$envir)))
+  }
   funcset
 }
 
@@ -148,15 +149,19 @@ getPw <- function(x, default = 1.0)
   if (hasPw(x)) attr(x, "probabilityWeight") else default
 
 ##' @rdname searchSpaceDefinition
+##' @method c functionSet 
+##' @S3method c functionSet 
 ##' @export
 c.functionSet <- function(..., recursive = FALSE) {
   fSets <- list(...)
   combinedFsets <- list()
   for (fSet in fSets) combinedFsets <- append(fSet$all, combinedFsets)
-  functionSet(list = combinedFsets)
+  functionSet(list = combinedFsets, parentEnvironmentLevel = 2)
 }
 
 ##' @rdname searchSpaceDefinition
+##' @method c inputVariableSet
+##' @S3method c inputVariableSet
 ##' @export
 c.inputVariableSet <- function(..., recursive = FALSE) {
   iSets <- list(...)
@@ -166,6 +171,8 @@ c.inputVariableSet <- function(..., recursive = FALSE) {
 }
 
 ##' @rdname searchSpaceDefinition
+##' @method c constantFactorySet
+##' @S3method c constantFactorySet
 ##' @export
 c.constantFactorySet <- function(..., recursive = FALSE) {
   cSets <- list(...)
@@ -181,6 +188,7 @@ c.constantFactorySet <- function(..., recursive = FALSE) {
 sortByType <- function(x) {
   byTypeTable <- list()
   for (o in x) {
+    o <- if (is.character(o)) as.name(o) else o
     if (hasStype(o)) {
       oStype <- sType(o)
       if (is.null(byTypeTable[[oStype$string]])) byTypeTable[[oStype$string]] <- list()
@@ -197,6 +205,7 @@ sortByType <- function(x) {
 sortByRange <- function(x) {
   byRangeTable <- list()
   for (o in x) {
+    o <- if (is.character(o)) as.name(o) else o
     if (hasStype(o)) {
       oStype <- sType(o)
       oStypeRange <- if (inherits(oStype, "sFunctionType")) oStype$range else oStype

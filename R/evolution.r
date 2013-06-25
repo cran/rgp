@@ -1,4 +1,4 @@
-## evolution.r
+## evolution.R
 ##   - Functions defining typical evolution main loops,
 ##     some typical GP function- and constant sets
 ##
@@ -7,11 +7,6 @@
 ## with contributions of Thomas Bartz-Beielstein, Olaf Mersmann and Joerg Stork
 ## released under the GPL v2
 ##
-
-##' @include search_space.r
-NA
-##' @include time_utils.r
-NA
 
 ##' Standard typed and untyped genetic programming
 ##'
@@ -41,7 +36,7 @@ NA
 ##' @param type The range type of the individual functions. This parameter
 ##'   only applies to \code{typedGeneticProgramming}.
 ##' @param stopCondition The stop condition for the evolution main loop. See
-##'   \link{makeStepsStopCondition} For details.
+##'   code \code{makeStepsStopCondition} for details.
 ##' @param population The GP population to start the run with. If this parameter
 ##'   is missing, a new GP population of size \code{populationSize} is created
 ##'   through random growth.
@@ -54,14 +49,15 @@ NA
 ##' @param functionSet The function set.
 ##' @param inputVariables The input variable set.
 ##' @param constantSet The set of constant factory functions.
-##' @param selectionFunction The selection function to use. Defaults to
-##'   tournament selection. See \link{makeTournamentSelection} for details.
 ##' @param crossoverFunction The crossover function.
 ##' @param mutationFunction The mutation function.
 ##' @param restartCondition The restart condition for the evolution main loop. See
 ##'   \link{makeEmptyRestartCondition} for details.
 ##' @param restartStrategy The strategy for doing restarts. See
 ##'   \link{makeLocalRestartStrategy} for details.
+##' @param searchHeuristic The search-heuristic (i.e. optimization algorithm) to use
+##'   in the search of solutions. See the documentation for \code{searchHeuristics} for
+##'   available algorithms.
 ##' @param breedingFitness A "breeding" function. This function is applied after
 ##'   every stochastic operation \emph{Op} that creates or modifies an individal
 ##'   (typically, \emph{Op} is a initialization, mutation, or crossover operation). If
@@ -82,12 +78,8 @@ NA
 ##'   operation might be expensive with larger population sizes.
 ##' @param archive If set to \code{TRUE}, all GP individuals evaluated are stored in an
 ##'   archive list \code{archiveList} that is returned as part of the result of this function. 
-##' @param genealogy If set to \code{TRUE}, the parent(s) of each indiviudal is stored in
-##'   an archive \code{genealogyList} as part of the result of this function, enabling
-##'   the reconstruction of the complete genealogy of the result population. This
-##'   parameter implies \code{archive = TRUE}.
 ##' @param progressMonitor A function of signature
-##'   \code{function(population, fitnessfunction, stepNumber, evaluationNumber,
+##'   \code{function(population, fintessValues, fitnessfunction, stepNumber, evaluationNumber,
 ##'   bestFitness, timeElapsed)} to be called with each evolution step.
 ##' @param verbose Whether to print progress messages.
 ##' @return A genetic programming result object that contains a GP population in the
@@ -105,39 +97,38 @@ geneticProgramming <- function(fitnessFunction,
                                functionSet = mathFunctionSet,
                                inputVariables = inputVariableSet("x"),
                                constantSet = numericConstantSet,
-                               selectionFunction = makeTournamentSelection(),
                                crossoverFunction = crossover,
                                mutationFunction = NULL,
                                restartCondition = makeEmptyRestartCondition(),
                                restartStrategy = makeLocalRestartStrategy(),
+                               searchHeuristic = makeAgeFitnessComplexityParetoGpSearchHeuristic(),
                                breedingFitness = function(individual) TRUE,
                                breedingTries = 50,
                                extinctionPrevention = FALSE,
                                archive = FALSE,
-                               genealogy = FALSE,
                                progressMonitor = NULL,
                                verbose = TRUE) {
-  ## Check parameters...
-  if (genealogy && !archive) stop("geneticProgramming: genealogy == TRUE implies archive == TRUE")
-  if (genealogy) stop("geneticProgramming: genealogy tracking not implemented.") # TODO
   ## Provide default parameters and initialize GP run...
   logmsg <- function(msg, ...) {
     if (verbose)
       message(sprintf(msg, ...))
   }
-  progmon <-
-    if (verbose) {
-      function(pop, fitnessFunction, stepNumber, evaluationNumber, bestFitness, timeElapsed) {
-        if (!is.null(progressMonitor))
-          progressMonitor(pop, fitnessFunction, stepNumber, evaluationNumber, bestFitness, timeElapsed)
-        if (stepNumber %% 100 == 0)
-          logmsg("evolution step %i, fitness evaluations: %i, best fitness: %f, time elapsed: %s",
-                 stepNumber, evaluationNumber, bestFitness, formatSeconds(timeElapsed))
+  nonVerboseProgmon <- if (is.null(progressMonitor)) {
+    function(pop, fitnessValues, fitnessFunction, stepNumber, evaluationNumber, bestFitness, timeElapsed) NULL
+  } else {
+    progressMonitor
+  }
+  progmon <- if (verbose) {
+    function(pop, fitnessValues, fitnessFunction, stepNumber, evaluationNumber, bestFitness, timeElapsed) {
+      nonVerboseProgmon(pop, fitnessValues, fitnessFunction, stepNumber, evaluationNumber, bestFitness, timeElapsed)
+      if (stepNumber %% 100 == 0) {
+        logmsg("evolution step %i, fitness evaluations: %i, best fitness: %f, time elapsed: %s",
+               stepNumber, evaluationNumber, bestFitness, formatSeconds(timeElapsed))
       }
-    } else if (is.null(progressMonitor)) {
-      function(pop, fitnessFunction, stepNumber, evaluationNumber, bestFitness, timeElapsed) NULL # verbose == FALSE, do not show progress
-    } else
-      progressMonitor
+    }
+  } else {
+    nonVerboseProgmon
+  }
   mutatefunc <-
     if (is.null(mutationFunction)) {
       function(ind) mutateSubtree(mutateNumericConst(ind),
@@ -152,88 +143,28 @@ geneticProgramming <- function(fitnessFunction,
                      breedingFitness = breedingFitness, breedingTries = breedingTries)
     else
       population
-  stepNumber <- 1
-  evaluationNumber <- 0
-  startTime <- proc.time()["elapsed"]
-  timeElapsed <- 0
-  archiveList <- list() # the archive of all individuals selected in this run, only used if archive == TRUE
-  archiveIndexOf <- function(archive, individual)
-    Position(function(a) identical(body(a$individual), body(individual)), archive)
-  genealogyList <- list() # an adjacency list of representing the genealogy of all individuals in the archive
-  bestFitness <- Inf # best fitness value seen in this run, if multi-criterial, only the first component counts
 
-  ## Execute GP run...
-  logmsg("STARTING standard genetic programming evolution run...")
-  while (!stopCondition(pop = pop, fitnessFunction = fitnessFunction, stepNumber = stepNumber,
-                        evaluationNumber = evaluationNumber, bestFitness = bestFitness, timeElapsed = timeElapsed)) {
-    # Select two sets of individuals and divide each into winners and losers...
-    selA <- selectionFunction(pop, fitnessFunction); selB <- selectionFunction(pop, fitnessFunction)
-    if (archive) { # add the evaluated individuals to the archive...
-      evaluatedIndices <- c(selA$selected[, 1], selB$selected[, 1], selA$discarded[, 1], selB$discarded[, 1])
-      evaluatedFitnesses <- c(selA$selected[, 2], selB$selected[, 2], selA$discarded[, 2], selB$discarded[, 2])
-      for (i in 1:length(evaluatedIndices))
-        archiveList[[length(archiveList) + 1]] <- list(individual = pop[[evaluatedIndices[i]]],
-                                                       fitness = evaluatedFitnesses[i])
-    }
-    winnersA <- selA$selected[, 1]; winnersB <- selB$selected[, 1]
-    bestFitness <- min(c(bestFitness, selA$selected[, 2], selB$selected[, 2]))
-    losersA <- selA$discarded[, 1]; losersB <- selB$discarded[, 1]
-    losers <- c(losersA, losersB)
-    # Create winner children through crossover and mutation...
-    makeWinnerChildren <- function(winnersA, winnersB)
-                            Map(function(winnerA, winnerB)
-                                  mutatefunc(crossoverFunction(pop[[winnerA]], pop[[winnerB]],
-                                                               breedingFitness = breedingFitness,
-                                                               breedingTries = breedingTries)),
-                                winnersA, winnersB)
-    winnerChildrenA <- makeWinnerChildren(winnersA, winnersB) 
-    winnerChildrenB <- makeWinnerChildren(winnersA, winnersB) 
-    winnerChildren <- c(winnerChildrenA, winnerChildrenB)
-    # Replace losers with winner children...
-    if (extinctionPrevention) {
-      numberOfLosers <- length(losers)
-      winnerChildrenAndLosers <- c(winnerChildren, pop[losers])
-      uniqueWinnerChildrenAndLosers <- unique(winnerChildrenAndLosers) # unique() does not change the order of it's argument
-      numberOfUniqueWinnerChildrenAndLosers <- length(uniqueWinnerChildrenAndLosers)
-      if (numberOfUniqueWinnerChildrenAndLosers < numberOfLosers) { # not enough unique individuals...
-        numberMissing <- numberOfLosers - numberOfUniqueWinnerChildrenAndLosers
-        warning(sprintf("geneticProgramming: not enough unique individuals for extinction prevention (%d individuals missing)", numberMissing))
-        # we have to fill up with duplicates...
-        uniqueWinnerChildrenAndLosers <- c(uniqueWinnerChildrenAndLosers, winnerChildrenAndLosers[1:numberMissing])
-      }
-      uniqueChildren <- uniqueWinnerChildrenAndLosers[1:numberOfLosers] # fill up duplicated winner children with losers
-      pop[losers] <- uniqueChildren
-    } else {
-      pop[losers] <- winnerChildren
-    }
-    # Apply restart strategy...
-    if (restartCondition(pop = pop, fitnessFunction = fitnessFunction, stepNumber = stepNumber,
-                         evaluationNumber = evaluationNumber, bestFitness = bestFitness, timeElapsed = timeElapsed)) {
-      restartResult <- restartStrategy(fitnessFunction, pop, populationSize, functionSet, inputVariables, constantSet)
-      pop <- restartResult[[1]]
-      elite <- joinElites(restartResult[[2]], elite, eliteSize, fitnessFunction)
-      logmsg("restarted run")
-    }
-    
-    timeElapsed <- proc.time()["elapsed"] - startTime
-    stepNumber <- 1 + stepNumber
-    evaluationNumber <- selA$numberOfFitnessEvaluations + selB$numberOfFitnessEvaluations + evaluationNumber
-    progmon(pop = pop, fitnessFunction = fitnessFunction, stepNumber = stepNumber,
-            evaluationNumber = evaluationNumber, bestFitness = bestFitness, timeElapsed = timeElapsed)
-  }
-  elite <- joinElites(pop, elite, eliteSize, fitnessFunction) # insert pop into elite at end of run
-  logmsg("Standard genetic programming evolution run FINISHED after %i evolution steps, %i fitness evaluations and %s.",
-         stepNumber, evaluationNumber, formatSeconds(timeElapsed))
+  ## Execute search-heuristic...
+  result <- searchHeuristic(logFunction = logmsg, stopCondition = stopCondition,
+                            pop = pop, fitnessFunction = fitnessFunction,
+                            mutationFunction = mutatefunc, crossoverFunction = crossoverFunction,
+                            functionSet = functionSet, inputVariables = inputVariables, constantSet = constantSet,
+                            archive = archive, extinctionPrevention = extinctionPrevention,
+                            elite = elite, eliteSize = eliteSize,
+                            restartCondition = restartCondition, restartStrategy = restartStrategy,
+                            breedingFitness = breedingFitness, breedingTries = breedingTries,
+                            progressMonitor = progmon)
 
   ## Return GP run result...
   structure(list(fitnessFunction = fitnessFunction,
                  stopCondition = stopCondition,
-                 timeElapsed = timeElapsed,
-                 stepNumber = stepNumber,
-                 evaluationNumber = evaluationNumber,
-                 bestFitness = bestFitness,
-                 population = pop,
-                 elite = elite,
+                 timeElapsed = result$timeElapsed,
+                 stepNumber = result$stepNumber,
+                 evaluationNumber = result$evaluationNumber,
+                 bestFitness = result$bestFitness,
+                 population = result$population,
+                 fitnessValues = result$fitnessValues,
+                 elite = result$elite,
                  functionSet = functionSet,
                  constantSet = constantSet,
                  crossoverFunction = crossoverFunction,
@@ -243,10 +174,10 @@ geneticProgramming <- function(fitnessFunction,
                  breedingTries = breedingTries,
                  extinctionPrevention = extinctionPrevention,
                  archive = archive,
-                 genealogy = genealogy,
-                 archiveList = archiveList,
-                 genealogyList = genealogyList,
-                 restartStrategy = restartStrategy), class = "geneticProgrammingResult")
+                 archiveList = result$archiveList,
+                 restartStrategy = restartStrategy,
+                 searchHeuristicResults = result$searchHeuristicResults),
+            class = "geneticProgrammingResult")
 }
 
 ##' @rdname geneticProgramming
@@ -261,16 +192,15 @@ typedGeneticProgramming <- function(fitnessFunction,
                                     functionSet,
                                     inputVariables,
                                     constantSet,
-                                    selectionFunction = makeTournamentSelection(),
                                     crossoverFunction = crossoverTyped,
                                     mutationFunction = NULL,
                                     restartCondition = makeEmptyRestartCondition(),
                                     restartStrategy = makeLocalRestartStrategy(populationType = type),
+                                    searchHeuristic = makeAgeFitnessComplexityParetoGpSearchHeuristic(),
                                     breedingFitness = function(individual) TRUE,
                                     breedingTries = 50,
                                     extinctionPrevention = FALSE,
                                     archive = FALSE,
-                                    genealogy = FALSE,
                                     progressMonitor = NULL,
                                     verbose = TRUE) {
   if (is.null(type)) stop("typedGeneticProgramming: Type must not be NULL.")
@@ -293,12 +223,13 @@ typedGeneticProgramming <- function(fitnessFunction,
                      populationSize = populationSize, eliteSize = eliteSize, elite = elite,
                      functionSet = functionSet,
                      inputVariables = inputVariables,
-                     constantSet = constantSet, selectionFunction = selectionFunction,
+                     constantSet = constantSet,
                      crossoverFunction = crossoverFunction, mutationFunction = mutatefunc,
                      restartCondition = restartCondition, restartStrategy = restartStrategy,
+                     searchHeuristic = searchHeuristic,
                      breedingFitness = breedingFitness, breedingTries = breedingTries,
                      extinctionPrevention = extinctionPrevention,
-                     archive = archive, genealogy = genealogy,
+                     archive = archive,
                      progressMonitor = progressMonitor, verbose = verbose)
 }
 
@@ -332,23 +263,26 @@ joinElites <- function(individuals, elite, eliteSize, fitnessFunction) {
 ##' example.
 ##'
 ##' @param object The genetic programming run result object to report on.
-##' @param reportFitness Whether to report the fitness values of each individual
+##' @param reportFitness Whether to report detailed fitness values of each individual
 ##'   in the result population. Note that calculating fitness values may take
-##'   a long time. Defaults to \code{TRUE}.
+##'   a long time. Defaults to \code{FALSE}. Either way, basic fitness
+##'   values for each individual is reported.
 ##' @param orderByFitness Whether the report of the result population should be
 ##'   ordered by fitness. This does not have an effect if \code{reportFitness}
 ##'   is set to \code{FALSE}. Defaults to \code{TRUE}.
 ##' @param ... Ignored in this summary function.
 ##'
 ##' @seealso \code{\link{geneticProgramming}}, \code{\link{symbolicRegression}}
+##' @method summary geneticProgrammingResult
+##' @S3method summary geneticProgrammingResult
 ##' @export
-summary.geneticProgrammingResult <- function(object, reportFitness = TRUE, orderByFitness = TRUE, ...) {
-  reportPopulation <- function(individualFunctions) {
+summary.geneticProgrammingResult <- function(object, reportFitness = FALSE, orderByFitness = TRUE, ...) {
+  reportPopulation <- function(individualFunctions, individualFitnessValues) {
     individualFunctionsAsStrings <- Map(function(f) Reduce(function(a, b) paste(a, b, sep=""),
                                                            deparse(f)),
                                         individualFunctions)
-    report <- cbind(1:length(individualFunctions), individualFunctions, individualFunctionsAsStrings)
-    colnames(report) <- c("Individual Index", "Individual Function", "(as String)")
+    report <- cbind(1:length(individualFunctions), individualFunctions, individualFunctionsAsStrings, individualFitnessValues)
+    colnames(report) <- c("Individual Index", "Individual Function", "(as String)", "Fitness Value")
     if (reportFitness) {
       fitnessList <- lapply(individualFunctions, object$fitnessFunction)
       fitnessesLength <- length(fitnessList)
@@ -364,7 +298,7 @@ summary.geneticProgrammingResult <- function(object, reportFitness = TRUE, order
     }
     report
   }
-  list(population = reportPopulation(object$population), elite = reportPopulation(object$elite))
+  list(population = reportPopulation(object$population, object$fitnessValues), elite = reportPopulation(object$elite))
 }
 
 ##' Evolution restart conditions
@@ -377,6 +311,9 @@ summary.geneticProgrammingResult <- function(object, reportFitness = TRUE, order
 ##'
 ##' \code{makeEmptyRestartCondition} creates a restart condition that is never fulfilled, i.e.
 ##' restarts will never occur.
+##' \code{makeStepLimitRestartCondition} creates a restart condition that holds if the
+##' number if evolution steps is an integer multiple of a given step limit.
+##' restarts will never occur.
 ##' \code{makeFitnessStagnationRestartCondition} creates a restart strategy that holds if the
 ##' standard deviation of a last \code{fitnessHistorySize} best fitness values falls below
 ##' a given \code{fitnessStandardDeviationLimit}.
@@ -384,6 +321,7 @@ summary.geneticProgrammingResult <- function(object, reportFitness = TRUE, order
 ##' if the standard deviation of the fitness values of the individuals in the current
 ##' population falls below a given \code{fitnessStandardDeviationLimit}.
 ##'
+##' @param stepLimit The step limit for \code{makeStepLimitRestartCondition}.
 ##' @param fitnessHistorySize The number of past best fitness values to look at when calculating
 ##'   the best fitness standard deviation for \code{makeFitnessStagnationRestartCondition}.
 ##' @param testFrequency The frequency to test for the restart condition, in evolution
@@ -398,6 +336,14 @@ makeEmptyRestartCondition <- function() {
   stopCondition <- function(pop, fitnessFunction, stepNumber, evaluationNumber, bestFitness, timeElapsed) FALSE
   class(stopCondition) <- c("stopCondition", "function")
   stopCondition
+}
+
+##' @rdname evolutionRestartConditions
+##' @export
+makeStepLimitRestartCondition <- function(stepLimit = 10) {
+  function(pop, fitnessFunction, stepNumber, evaluationNumber, bestFitness, timeElapsed) {
+    stepNumber %% stepLimit == 0
+  }
 }
 
 ##' @rdname evolutionRestartConditions
@@ -483,7 +429,7 @@ makeLocalRestartStrategy <- function(populationType = NULL,
 ##' timeElapsed)}.
 ##' They are used to decide when to finish a GP evolution run. Stop conditions must be members
 ##' of the S3 class \code{c("stopCondition", "function")}. They can be combined using the
-##' generic \emph{and} (\code{&}), \emph{or} (\code{|}) and \emph{not} (\code{!}) functions.
+##' functions \code{andStopCondition}, \code{orStopCondition} and \code{notStopCondition}.
 ##'
 ##' \code{makeStepsStopCondition} creates a stop condition that is fulfilled if the number
 ##' of evolution steps exceeds a given limit.
@@ -535,8 +481,8 @@ makeTimeStopCondition <- function(timeLimit) {
 }
 
 ##' @rdname evolutionStopConditions
-##' @export `&.stopCondition`
-`&.stopCondition` <- function(e1, e2) {
+##' @export
+andStopCondition <- function(e1, e2) {
   stopCondition <- function(pop, fitnessFunction, stepNumber, evaluationNumber, bestFitness, timeElapsed)
     e1(pop, fitnessFunction, stepNumber, evaluationNumber, bestFitness, timeElapsed) && e2(pop, fitnessFunction, stepNumber, evaluationNumber, bestFitness, timeElapsed)
   class(stopCondition) <- c("stopCondition", "function")
@@ -544,8 +490,8 @@ makeTimeStopCondition <- function(timeLimit) {
 }
 
 ##' @rdname evolutionStopConditions
-##' @export `|.stopCondition`
-`|.stopCondition` <- function(e1, e2) {
+##' @export
+orStopCondition <- function(e1, e2) {
   stopCondition <- function(pop, fitnessFunction, stepNumber, evaluationNumber, bestFitness, timeElapsed)
     e1(pop, fitnessFunction, stepNumber, evaluationNumber, bestFitness, timeElapsed) || e2(pop, fitnessFunction, stepNumber, evaluationNumber, bestFitness, timeElapsed)
   class(stopCondition) <- c("stopCondition", "function")
@@ -553,8 +499,8 @@ makeTimeStopCondition <- function(timeLimit) {
 }
 
 ##' @rdname evolutionStopConditions
-##' @export `!.stopCondition`
-`!.stopCondition` <- function(e1) {
+##' @export
+notStopCondition <- function(e1) {
   stopCondition <- function(pop, fitnessFunction, stepNumber, evaluationNumber, bestFitness, timeElapsed)
     !e1(pop, fitnessFunction, stepNumber, evaluationNumber, bestFitness, timeElapsed)
   class(stopCondition) <- c("stopCondition", "function")
@@ -607,6 +553,11 @@ ifPositive <- function(x, thenbranch, elsebranch) ifelse(x > 0, thenbranch, else
 ##' @export
 ifThenElse <- function(x, thenbranch, elsebranch) ifelse(x, thenbranch, elsebranch)
 
+# TODO hack to make roxygen2 work with external function references...
+functionSet <- function(...) NULL
+constantFactorySet <- function(...) NULL
+# ... .
+
 ##' Default function- and constant factory sets for Genetic Programming
 ##'
 ##' \code{arithmeticFunctionSet} is an untyped function set containing the functions
@@ -620,22 +571,24 @@ ifThenElse <- function(x, thenbranch, elsebranch) ifelse(x, thenbranch, elsebran
 ##' \code{numericConstantSet} is an untyped constant factory set containing a single
 ##' constant factory that creates numeric constants via calls to \code{runif(1, -1, 1)}.
 ##'
+##' Note that these objects are initialized in the RGP package's \code{.onAttach} function.
+##'
 ##' @rdname defaultGPFunctionAndConstantSets
 ##' @export
-arithmeticFunctionSet <- functionSet("+", "-", "*", "/")
+arithmeticFunctionSet <- NULL
 
 ##' @rdname defaultGPFunctionAndConstantSets
 ##' @export
-expLogFunctionSet <- functionSet("sqrt", "exp", "ln")
+expLogFunctionSet <- NULL 
 
 ##' @rdname defaultGPFunctionAndConstantSets
 ##' @export
-trigonometricFunctionSet <- functionSet("sin", "cos", "tan")
+#trigonometricFunctionSet <- functionSet("sin", "cos", "tan")
 
 ##' @rdname defaultGPFunctionAndConstantSets
 ##' @export
-mathFunctionSet <- c(arithmeticFunctionSet, expLogFunctionSet, trigonometricFunctionSet)
+#mathFunctionSet <- c(arithmeticFunctionSet, expLogFunctionSet, trigonometricFunctionSet)
 
 ##' @rdname defaultGPFunctionAndConstantSets
 ##' @export
-numericConstantSet <- constantFactorySet(function() runif(1, -1, 1))
+#numericConstantSet <- constantFactorySet(function() runif(1, -1, 1))

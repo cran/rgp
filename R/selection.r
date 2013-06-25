@@ -1,4 +1,4 @@
-## selection.r
+## selection.R
 ##   - GP selection strategies
 ##
 ## RGP - a GP system for R

@@ -1,4 +1,4 @@
-## population.r
+## population.R
 ##   - Functions for handling GP populations
 ##
 ## RGP - a GP system for R
@@ -44,10 +44,16 @@ makePopulation <- function(size, funcset, inset, conset,
                            breedingFitness = function(individual) TRUE,
                            breedingTries = 50,
                            extinctionPrevention = FALSE,
-                           funcfactory = function() randfuncRampedHalfAndHalf(funcset, inset, conset,
-                             maxfuncdepth, constprob = constprob,
-                             breedingFitness = breedingFitness, breedingTries = breedingTries)) {
-  pop <- if (extinctionPrevention) {
+                           funcfactory = NULL) {
+  funcfactory <- if (is.null(funcfactory)) {
+    function() randfuncRampedHalfAndHalf(funcset, inset, conset, maxfuncdepth, constprob = constprob,
+                                         breedingFitness = breedingFitness, breedingTries = breedingTries)
+  } else {
+    funcfactory
+  }
+  pop <- if (size <= 0) {
+    list()
+  } else if (extinctionPrevention) {
     resultPop <- list()
     l <- 0
     repeat {
@@ -73,9 +79,14 @@ makeTypedPopulation <- function(size, type, funcset, inset, conset,
                                 breedingFitness = function(individual) TRUE,
                                 breedingTries = 50,
                                 extinctionPrevention = FALSE,
-                                funcfactory = function() randfuncTypedRampedHalfAndHalf(type, funcset, inset, conset,
-                                  maxfuncdepth, constprob = constprob,
-                                  breedingFitness = breedingFitness, breedingTries = breedingTries)) {
+                                funcfactory = NULL) {
+  if (is.null(funcfactory)) {
+    function() randfuncTypedRampedHalfAndHalf(type, funcset, inset, conset,
+                                              maxfuncdepth, constprob = constprob,
+                                              breedingFitness = breedingFitness, breedingTries = breedingTries)
+  } else {
+    funcfactory
+  }
   pop <- makePopulation(size, funcset, inset, conset, maxfuncdepth, funcfactory = funcfactory, constprob = constprob,
                         breedingFitness = breedingFitness, breedingTries = breedingTries,
                         extinctionPrevention = extinctionPrevention)
@@ -84,12 +95,16 @@ makeTypedPopulation <- function(size, type, funcset, inset, conset,
 }
 
 ##' @rdname populationCreation
+##' @method print population 
+##' @S3method print population 
 ##' @export
 print.population <- function(x, ...) {
   print.default(x, ...) # TODO
 }
 
 ##' @rdname populationCreation
+##' @method summary population 
+##' @S3method summary population 
 ##' @export
 summary.population <- function(object, ...) {
   # TODO

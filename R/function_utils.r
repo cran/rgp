@@ -1,4 +1,4 @@
-## function_utils.r
+## function_utils.R
 ##   - Utility functions for R functions
 ##
 ## RGP - a GP system for R
@@ -13,16 +13,30 @@
 ##'
 ##' @note Always use this function to dynamically generate new functions that are not clojures
 ##' to prevent hard to find memory leaks.
+##' @param envir The new function closure's environment, defaults to \code{globalenv()}.
 ##' @return A new function that does not take any arguments and always returns \code{NULL}.
-new.function <- function() {
+new.function <- function(envir = globalenv()) {
   # The following line has to be inside this function to prevent capturing the lexical
   # environment, which would cause a hard to find memory leak:
   fun <- function() NULL
   # If you use the last line outside of this function, by shure to initialize the
   # environment of the generated function object to the global environment, like done here:
-  environment(fun) <- globalenv() 
+  environment(fun) <- envir
   fun 
 }
+
+##' Create a new R closure given a function body expression and an argument list 
+##'
+##' Creates a R closure (i.e. a function object) from a body expression and an argument
+##' list. The closure's environment will be the default environment.
+##'
+##' @param fbody The function body, given as a R expression.
+##' @param fargs The formal arguments, given as a list or vector of strings.
+##' @param envir The new function closure's environment, defaults to \code{globalenv()}.
+##' @return A formal argument list, ready to be passed via \code{\link{formals}}.
+##' @export
+makeClosure <- function(fbody, fargs, envir = globalenv())
+  .Call("make_closure", fbody, fargs, envir)
 
 ##' Create a new function argument list from a list or vector of strings
 ##'
@@ -84,16 +98,13 @@ iterate <- function(n, f, arg, ...) {
 ##' @param f The function to determine the arity for.
 ##' @return The arity of the function \code{f}.
 arity <- function(f) {
-  if (is.primitive(f))
+  if (is.primitive(f)) {
     arity.primitive(f)
-  else if (is.function(f))
+  } else if (is.function(f)) {
     length(formals(f))
-  else if (is.name(f))
-    arity(eval(f))
-  else if (is.character(f))
-    arity(as.name(f))
-  else
+  } else {
     stop("could not determine arity of object \"", f, "\" (of class ", class(f), ")")
+  }
 }
 
 ##' Determine the number of arguments of a primitive function

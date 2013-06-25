@@ -1,4 +1,4 @@
-## breeding.r
+## breeding.R
 ##   - Functions for "breeding" individuals by repeated application of init-
 ##     ialization or variation operators
 ##

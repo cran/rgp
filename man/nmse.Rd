@@ -1,0 +1,19 @@
+\name{nmse}
+\alias{nmse}
+\title{Normalized mean squared error (NMSE)}
+\usage{
+  nmse(x, y)
+}
+\arguments{
+  \item{x}{A numeric vector or list.}
+
+  \item{y}{A numeric vector or list.}
+}
+\value{
+  The NMSE between \code{x} and \code{y}.
+}
+\description{
+  Calculates the MSE between vectors after normalizing them
+  into the interval [0, 1].
+}
+

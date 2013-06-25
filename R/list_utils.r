@@ -1,4 +1,4 @@
-## list_utils.r
+## list_utils.R
 ##   - Utility functions for lists and vectors
 ##
 ## RGP - a GP system for R

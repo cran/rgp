@@ -1,8 +1,8 @@
-## data_utils.r
-##   - Utility functions for R data frames
+## data_utils.R
+##   - Utility functions for R matrices and data frames
 ##
 ## RGP - a GP system for R
-## 2010 Oliver Flasch (oliver.flasch@fh-koeln.de)
+## 2010-2012 Oliver Flasch (oliver.flasch@fh-koeln.de)
 ## with contributions of Thomas Bartz-Beielstein, Patrick Koch, Olaf Mersmann and Joerg Stork
 ## released under the GPL v2
 ##

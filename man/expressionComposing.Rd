@@ -1,12 +1,17 @@
-\name{expressionComposing}
+\name{subexpressions}
 \alias{subexpressions}
-\title{Functions for decomposing and recombining R expressions...}
-\usage{subexpressions(expr)
+\title{Functions for decomposing and recombining R expressions}
+\usage{
+  subexpressions(expr)
 }
-\description{Functions for decomposing and recombining R expressions}
-\details{\code{subExpressions} returns a list of all subexpressions (subtrees) of an
-expression \code{expr}.}
-\value{The decomposed or recombined expression.}
-\arguments{\item{expr}{An R expression.}
+\arguments{
+  \item{expr}{An R expression.}
+}
+\value{
+  The decomposed or recombined expression.
+}
+\description{
+  \code{subexpressions} returns a list of all
+  subexpressions (subtrees) of an expression \code{expr}.
 }
 

@@ -1,13 +1,23 @@
 \name{smse}
 \alias{smse}
-\title{Scaled mean squared error (SMSE)...}
-\usage{smse(x, y)
+\title{Scaled mean squared error (SMSE)}
+\usage{
+  smse(x, y)
 }
-\description{Scaled mean squared error (SMSE)}
-\details{Calculates the MSE between vectors after normalizing them into the
-interval [0, 1].}
-\value{The SMSE between \code{x} and \code{y}.}
-\arguments{\item{x}{A numeric vector or list.}
-\item{y}{A numeric vector or list.}
+\arguments{
+  \item{x}{A numeric vector or list.}
+
+  \item{y}{A numeric vector or list.}
+}
+\value{
+  The NMSE between \code{x} and \code{y}.
+}
+\description{
+  Calculates the MSE between vectors after scaling them.
+  Beware that this error measure is invariant to scaling
+  with negative constants, i.e. the multiplicative inverse
+  of the true functions also receives an error of 0. See
+  \url{http://www2.cs.uidaho.edu/~cs472_572/f11/scaledsymbolicRegression.pdf}
+  for details.
 }
 

@@ -1,4 +1,4 @@
-## niching.r
+## niching.R
 ##   - Functions defining evolution main loops for cluster-based niching GP
 ##
 ## RGP - a GP system for R
@@ -6,10 +6,6 @@
 ## with contributions of Thomas Bartz-Beielstein, Olaf Mersmann and Joerg Stork
 ## released under the GPL v2
 ##
-
-##' @include evolution.r
-##' @include list_utils.r
-NA
 
 ##' Cluster-based multi-niche genetic programming
 ##'
@@ -38,9 +34,9 @@ NA
 ##'   selection function is used, \code{fitnessFunction} must return a numerical
 ##'   vector of fitness values.
 ##' @param stopCondition The stop condition for the evolution main loop. See
-##'   \link{makeStepsStopCondition} for details.
+##'   \code{makeStepsStopCondition} for details.
 ##' @param passStopCondition The stop condition for each parallel pass. See
-##'   \link{makeStepsStopCondition} for details.
+##'   \code{makeStepsStopCondition} for details.
 ##' @param numberOfNiches The number of niches to cluster the population into.
 ##' @param clusterFunction The function used to cluster the population into
 ##'   niches. The first parameter of this function is a GP population, the
@@ -61,8 +57,9 @@ NA
 ##' @param functionSet The function set.
 ##' @param inputVariables The input variable set.
 ##' @param constantSet The set of constant factory functions.
-##' @param selectionFunction The selection function to use. Defaults to
-##'   tournament selection. See \link{makeTournamentSelection} for details.
+##' @param searchHeuristic The search-heuristic (i.e. optimization algorithm) to use
+##'   in the search of solutions. See the documentation for \code{searchHeuristics} for
+##'   available algorithms.
 ##' @param crossoverFunction The crossover function.
 ##' @param mutationFunction The mutation function.
 ##' @param restartCondition The restart condition for the evolution main loop. See
@@ -70,7 +67,7 @@ NA
 ##' @param restartStrategy The strategy for doing restarts. See
 ##'   \link{makeLocalRestartStrategy} for details.
 ##' @param progressMonitor A function of signature
-##'   \code{function(population, fitnessFunction, stepNumber, evaluationNumber,
+##'   \code{function(population, fitnessValues, fitnessFunction, stepNumber, evaluationNumber,
 ##'   bestFitness, timeElapsed)} to be called with each evolution step.
 ##' @param verbose Whether to print progress messages.
 ##' @param clusterApply The cluster apply function that is used to distribute the
@@ -95,11 +92,11 @@ multiNicheGeneticProgramming <- function(fitnessFunction,
                                          functionSet = mathFunctionSet,
                                          inputVariables = inputVariableSet("x"),
                                          constantSet = numericConstantSet,
-                                         selectionFunction = makeTournamentSelection(),
                                          crossoverFunction = crossover,
                                          mutationFunction = NULL,
                                          restartCondition = makeEmptyRestartCondition(),
                                          restartStrategy = makeLocalRestartStrategy(),
+                                         searchHeuristic = makeAgeFitnessComplexityParetoGpSearchHeuristic(),
                                          progressMonitor = NULL,
                                          verbose = TRUE,
                                          clusterApply = sfClusterApplyLB,
@@ -109,19 +106,19 @@ multiNicheGeneticProgramming <- function(fitnessFunction,
     if (verbose)
       message(sprintf(msg, ...))
   }
-  quietProgmon <- function(pop, fitnessFunction, stepNumber, evaluationNumber, bestFitness, timeElapsed) NULL
+  quietProgmon <- function(pop, fitnessValues, fitnessFunction, stepNumber, evaluationNumber, bestFitness, timeElapsed) NULL
   environment(quietProgmon) <- globalenv() # prevent a possible memory-leak
   progmon <-
     if (verbose) {
-      function(pop, fitnessFunction, evaluationNumber, stepNumber, bestFitness, timeElapsed) {
+      function(pop, fitnessValues, fitnessFunction, evaluationNumber, stepNumber, bestFitness, timeElapsed) {
         if (!is.null(progressMonitor))
-          progressMonitor(pop, fitnessFunction, evaluationNumber, stepNumber, bestFitness, timeElapsed)
+          progressMonitor(pop, fitnessValues, fitnessFunction, evaluationNumber, stepNumber, bestFitness, timeElapsed)
         if (stepNumber %% 100 == 0)
           logmsg("evolution step %i, fitness evaluations: %i, best fitness: %f, time elapsed: %s",
                  stepNumber, evaluationNumber, bestFitness, formatSeconds(timeElapsed))
       }
     } else if (is.null(progressMonitor)) {
-      function(pop, fitnessFunction, stepNumber, evaluationNumber, bestFitness, timeElapsed) NULL # verbose == FALSE, do not show progress
+      function(pop, fitnessValues, fitnessFunction, stepNumber, evaluationNumber, bestFitness, timeElapsed) NULL # verbose == FALSE, do not show progress
     } else
       progressMonitor
   mutatefunc <-
@@ -137,7 +134,7 @@ multiNicheGeneticProgramming <- function(fitnessFunction,
       population
   popClass <- class(pop)
   variablesToExportToClusterNodes <- c("quietProgmon", "mutatefunc", "restartCondition", "restartStrategy", "crossoverFunction",
-                                       "selectionFunction", "constantSet", "inputVariables", "functionSet", "eliteSize",
+                                       "searchHeuristic", "constantSet", "inputVariables", "functionSet", "eliteSize",
                                        "passStopCondition", "fitnessFunction")
   stepNumber <- 1
   evaluationNumber <- 0
@@ -156,11 +153,11 @@ multiNicheGeneticProgramming <- function(fitnessFunction,
                        functionSet = functionSet,
                        inputVariables = inputVariables,
                        constantSet = constantSet,
-                       selectionFunction = selectionFunction,
                        crossoverFunction = crossoverFunction,
                        mutationFunction = mutatefunc,
                        restartCondition = restartCondition,
                        restartStrategy = restartStrategy,
+                       searchHeuristic = searchHeuristic,
                        progressMonitor = quietProgmon,
                        verbose = FALSE)
   environment(passWorker) <- globalenv()
@@ -221,9 +218,9 @@ multiNicheGeneticProgramming <- function(fitnessFunction,
 ##'   symbolic regression run. The variables in \code{formula} must match
 ##'   column names in this data frame.
 ##' @param stopCondition The stop condition for the evolution main loop. See
-##'   \link{makeStepsStopCondition} for details.
+##'   \code{makeStepsStopCondition} for details.
 ##' @param passStopCondition The stop condition for each parallel pass. See
-##'   \link{makeStepsStopCondition} for details.
+##'   \code{makeStepsStopCondition} for details.
 ##' @param numberOfNiches The number of niches to cluster the population into.
 ##' @param clusterFunction The function used to cluster the population into
 ##'   niches. The first parameter of this function is a GP population, the
@@ -329,8 +326,9 @@ multiNicheSymbolicRegression <- function(formula, data,
 ##' @rdname populationClustering
 ##' @seealso \code{\link{multiNicheGeneticProgramming}}, \code{\link{multiNicheSymbolicRegression}}
 ##' @export
-makeHierarchicalClusterFunction <- function(distanceMeasure = normInducedFunctionDistance(exprVisitationLength),
+makeHierarchicalClusterFunction <- function(distanceMeasure = NULL,
                                             minNicheSize = 1) {
+  distanceMeasure <- if (is.null(distanceMeasure)) normInducedFunctionDistance(exprVisitationLength) else distanceMeasure
   function(p, numberOfClusters) {
     dm <- customDist(p, distanceMeasure)
     groups <- cutree(hclust(dm, method = "ward"), numberOfClusters)

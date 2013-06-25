@@ -1,4 +1,4 @@
-## data_driven_gp.r
+## data_driven_gp.R
 ##   - Data-driven Genetic Programming using the R formula interface
 ##
 ## RGP - a GP system for R
@@ -6,9 +6,6 @@
 ## with contributions of Thomas Bartz-Beielstein, Olaf Mersmann and Joerg Stork
 ## released under the GPL v2
 ##
-
-##' @include evolution.r
-NA
 
 ##' Data-driven untyped standard genetic programming
 ##'
@@ -33,7 +30,7 @@ NA
 ##' @param fitnessFunctionFactoryParameters Additional parameters to pass to the
 ##'   \code{fitnessFunctionFactory}.
 ##' @param stopCondition The stop condition for the evolution main loop. See
-##'   \link{makeStepsStopCondition} for details.
+##'   \code{makeStepsStopCondition} for details.
 ##' @param population The GP population to start the run with. If this parameter
 ##'   is missing, a new GP population of size \code{populationSize} is created
 ##'   through random growth.
@@ -49,20 +46,17 @@ NA
 ##'   operation might be expensive with larger population sizes.
 ##' @param archive If set to \code{TRUE}, all GP individuals evaluated are stored in an
 ##'   archive list \code{archiveList} that is returned as part of the result of this function. 
-##' @param genealogy If set to \code{TRUE}, the parent(s) of each indiviudal is stored in
-##'   an archive \code{genealogyList} as part of the result of this function, enabling
-##'   the reconstruction of the complete genealogy of the result population. This
-##'   parameter implies \code{archive = TRUE}.
 ##' @param functionSet The function set.
 ##' @param constantSet The set of constant factory functions.
-##' @param selectionFunction The selection function to use. Defaults to
-##'   tournament selection. See \link{makeTournamentSelection} for details.
 ##' @param crossoverFunction The crossover function.
 ##' @param mutationFunction The mutation function.
 ##' @param restartCondition The restart condition for the evolution main loop. See
 ##'   \link{makeEmptyRestartCondition} for details.
 ##' @param restartStrategy The strategy for doing restarts. See
 ##'   \link{makeLocalRestartStrategy} for details.
+##' @param searchHeuristic The search-heuristic (i.e. optimization algorithm) to use
+##'   in the search of solutions. See the documentation for \code{searchHeuristics} for
+##'   available algorithms.
 ##' @param breedingFitness A "breeding" function. This function is applied after
 ##'   every stochastic operation \emph{Op} that creates or modifies an individal
 ##'   (typically, \emph{Op} is a initialization, mutation, or crossover operation). If
@@ -94,14 +88,13 @@ dataDrivenGeneticProgramming <- function(formula, data, fitnessFunctionFactory,
                                          elite = list(),
                                          extinctionPrevention = FALSE,
                                          archive = FALSE,
-                                         genealogy = FALSE,
                                          functionSet = mathFunctionSet,
                                          constantSet = numericConstantSet,
-                                         selectionFunction = makeTournamentSelection(),
                                          crossoverFunction = crossover,
                                          mutationFunction = NULL,
                                          restartCondition = makeEmptyRestartCondition(),
                                          restartStrategy = makeLocalRestartStrategy(),
+                                         searchHeuristic = makeAgeFitnessComplexityParetoGpSearchHeuristic(),
                                          breedingFitness = function(individual) TRUE,
                                          breedingTries = 50,
                                          progressMonitor = NULL,
@@ -124,16 +117,15 @@ dataDrivenGeneticProgramming <- function(formula, data, fitnessFunctionFactory,
                                 functionSet = functionSet,
                                 inputVariables = inVarSet,
                                 constantSet = constantSet,
-                                selectionFunction = selectionFunction,
                                 crossoverFunction = crossoverFunction,
                                 mutationFunction = mutationFunction,
                                 restartCondition = restartCondition,
                                 restartStrategy = restartStrategy,
+                                searchHeuristic = searchHeuristic,
                                 breedingFitness = breedingFitness,
                                 breedingTries = breedingTries,
                                 extinctionPrevention = extinctionPrevention,
                                 archive = archive,
-                                genealogy = genealogy,
                                 progressMonitor = progressMonitor,
                                 verbose = verbose)
   

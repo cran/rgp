@@ -6,16 +6,16 @@
 #include "list_utils.h"
 
 
-static SEXP extend_if_possible(const SEXP variable, const SEXP value, const SEXP sigma,
-                               Rboolean (*const is_variable)(SEXP), const Rboolean contains_check);
-static Rboolean depends_on(const SEXP expression, const SEXP variable, const SEXP sigma,
+static SEXP extend_if_possible(SEXP variable, SEXP value, SEXP sigma,
+                               Rboolean (*const is_variable)(SEXP), Rboolean contains_check);
+static Rboolean depends_on(SEXP expression, SEXP variable, SEXP sigma,
                            Rboolean (*const is_variable)(SEXP));
-static R_INLINE Rboolean is_equal(const SEXP a, const SEXP b);
-static R_INLINE Rboolean is_na_logical(const SEXP a);
-static R_INLINE Rboolean is_compound_expression(const SEXP a);
+static R_INLINE Rboolean is_equal(SEXP a, SEXP b);
+static R_INLINE Rboolean is_na_logical(SEXP a);
+static R_INLINE Rboolean is_compound_expression(SEXP a);
 
-SEXP unify_match(const SEXP a, const SEXP b, const SEXP sigma,
-                 Rboolean (*const is_variable)(SEXP), const Rboolean contains_check) {
+SEXP unify_match(SEXP a, SEXP b, SEXP sigma,
+                 Rboolean (*const is_variable)(SEXP), Rboolean contains_check) {
   if (is_na_logical(sigma))
     return sigma; // pass the fail on
   else if (is_equal(a, b))
@@ -32,8 +32,8 @@ SEXP unify_match(const SEXP a, const SEXP b, const SEXP sigma,
     return ScalarLogical(NA_LOGICAL); // fail
 }
 
-static SEXP extend_if_possible(const SEXP variable, const SEXP value, const SEXP sigma,
-                               Rboolean (*const is_variable)(SEXP), const Rboolean contains_check) {
+static SEXP extend_if_possible(SEXP variable, SEXP value, SEXP sigma,
+                               Rboolean (*const is_variable)(SEXP), Rboolean contains_check) {
   if (contains_alist(variable, sigma))
     return unify_match(get_alist(variable, sigma), value, sigma, is_variable, contains_check);
   else if (is_variable(value))
@@ -47,7 +47,7 @@ static SEXP extend_if_possible(const SEXP variable, const SEXP value, const SEXP
     return add_alist(variable, value, sigma);
 }
 
-static Rboolean depends_on(const SEXP expression, const SEXP variable, const SEXP sigma,
+static Rboolean depends_on(SEXP expression, SEXP variable, SEXP sigma,
                            Rboolean (*const is_variable)(SEXP)) {
   if (is_variable(expression))
     if (is_equal(variable, expression))
@@ -64,15 +64,16 @@ static Rboolean depends_on(const SEXP expression, const SEXP variable, const SEX
   else return FALSE;
 }
 
-static R_INLINE Rboolean is_equal(const SEXP a, const SEXP b) {
+static R_INLINE Rboolean is_equal(SEXP a, SEXP b) {
   // return R_compute_identical(a, b, TRUE, TRUE, TRUE); // R_compute_identical is missing from Linux-R?
   error("is_equal: Not implemented."); // TODO
 }
 
-static R_INLINE Rboolean is_na_logical(const SEXP a) {
+static R_INLINE Rboolean is_na_logical(SEXP a) {
   return isLogical(a) && LOGICAL(a)[0] == NA_LOGICAL;
 }
 
-static R_INLINE Rboolean is_compound_expression(const SEXP a) {
+static R_INLINE Rboolean is_compound_expression(SEXP a) {
   return isList(a) || (!isSymbol(a) && isLanguage(a));
 }
+

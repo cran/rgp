@@ -1,10 +1,6 @@
 Package: rgp
-Maintainer: Oliver Flasch <oliver.flasch@fh-koeln.de>
-License: GPL-2
+Version: 0.3-4
 Title: R genetic programming framework
-LazyData: yes
-Author: Oliver Flasch, Olaf Mersmann, Thomas Bartz-Beielstein, Joerg
-        Stork
 Description: RGP is a simple modular Genetic Programming (GP) system
         build in pure R. In addition to general GP tasks, the system
         supports Symbolic Regression by GP through the familiar R model
@@ -13,18 +9,25 @@ Description: RGP is a simple modular Genetic Programming (GP) system
         function sets containing functions of diverse domain- and range
         types. A basic set of genetic operators for variation (mutation
         and crossover) and selection is provided.
-Version: 0.2-4
+Author: Oliver Flasch, Olaf Mersmann, Thomas Bartz-Beielstein, Joerg
+        Stork, Martin Zaefferer
+Maintainer: Oliver Flasch <oliver.flasch@fh-koeln.de>
+License: GPL-2
 URL: http://rsymbolic.org/projects/show/rgp
-Depends: R (>= 2.13.0), methods, emoa (>= 0.4-2), rrules (>= 0.1-0)
-Suggests: igraph (>= 0.5.5), snowfall (>= 1.84)
-Collate: 'breeding.r' 'building_blocks.r' 'complexity.r' 'stypes.r'
-        'creation.r' 'time_utils.r' 'function_utils.r' 'search_space.r'
-        'evolution.r' 'data_driven_gp.r' 'data_utils.r'
-        'expression_utils.r' 'fitness.r' 'individual.r' 'list_utils.r'
-        'mutation.r' 'niching.r' 'plot_utils.r' 'population.r'
-        'recombination.r' 'rgp.r' 'selection.r' 'similarity.r'
-        'symbolic_regression.r' 'test_utils.r'
+LazyData: yes
+Depends: R (>= 3.0.0), methods, utils, emoa (>= 0.5-0), rrules (>=
+        0.1-0)
+Suggests: igraph (>= 0.5.5), snowfall (>= 1.84-4), twiddler (>= 0.4-0)
+Collate: 'breeding.R' 'building_blocks.R' 'complexity.R' 'creation.R'
+        'data_driven_gp.R' 'data_utils.R' 'design_of_experiments.R'
+        'evolution.R' 'expression_utils.R' 'fitness.R'
+        'function_utils.R' 'individual.R' 'list_utils.R' 'mutation.R'
+        'niching.R' 'plot_utils.R' 'population.R' 'recombination.R'
+        'rgp.R' 'search_heuristics.R' 'search_space.R' 'selection.R'
+        'similarity.R' 'stypes.R' 'symbolic_regression.R'
+        'test_utils.R' 'time_utils.R'
 Date:
-Packaged: 2011-10-20 13:56:56 UTC; oflasch
+Packaged: 2013-06-25 09:03:15 UTC; oflasch
+NeedsCompilation: yes
 Repository: CRAN
-Date/Publication: 2011-10-20 15:35:16
+Date/Publication: 2013-06-25 11:22:39

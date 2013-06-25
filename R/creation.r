@@ -1,4 +1,4 @@
-## creation.r
+## creation.R
 ##   - Functions for creating new GP individuals (individual initialization)
 ##
 ## RGP - a GP system for R
@@ -6,10 +6,6 @@
 ## with contributions of Thomas Bartz-Beielstein, Olaf Mersmann and Joerg Stork
 ## released under the GPL v2
 ##
-
-##' @include stypes.r
-##' @include breeding.r
-NA
 
 ##' Creates an R expression by random growth
 ##'
@@ -42,14 +38,16 @@ randexprGrow <- function(funcset, inset, conset,
                          curdepth = 1) {
   constprob <- if (is.empty(conset$all)) 0.0 else constprob
   if (runif(1) <= subtreeprob && curdepth < maxdepth) { # maybe create subtree if maximum depth not reached
-    funcname <- toName(randelt(funcset$all, prob = attr(funcset$all, "probabilityWeight")))
-    funcarity <- arity(funcname)
+    randfuncindex <- sample.int(n = length(funcset$all), size = 1, prob = attr(funcset$all, "probabilityWeight"))
+    funcname <- toName(funcset$all[[randfuncindex]])
+    funcarity <- funcset$arities[randfuncindex]
     as.call(append(funcname,
                    lapply(1:funcarity, function(i) randexprGrow(funcset, inset, conset, maxdepth,
                                                                 constprob, subtreeprob, curdepth + 1))))
   } else { # create terminal
     if (runif(1) <= constprob) { # create constant
-      constfactory <- randelt(conset$all, prob = attr(conset$all, "probabilityWeight"))
+      constfactoryName <- randelt(conset$all, prob = attr(conset$all, "probabilityWeight"))
+      constfactory <- eval(constfactoryName)
       constfactory()
     } else { # create input variable
       toName(randelt(inset$all, prob = attr(inset$all, "probabilityWeight")))
@@ -86,7 +84,7 @@ randfunc <- function(funcset, inset, conset, maxdepth = 8,
                      breedingFitness = function(individual) TRUE,
                      breedingTries = 50) {
   funcFactory <- function() {
-    newf <- new.function()
+    newf <- new.function(envir = funcset$envir)
     formals(newf) <- new.alist(inset$allFormals)
     body(newf) <- exprfactory(funcset, inset, conset, maxdepth, constprob = constprob)
     newf
@@ -116,11 +114,10 @@ randfuncRampedHalfAndHalf <- function(funcset, inset, conset, maxdepth = 8, cons
 ##' constant will be generated with probability \code{constprob}. If no constant is generated, an input
 ##' variable will be chosen randomly. The depth of the resulting expression trees can be bounded by the
 ##' \code{maxdepth} parameter.
-##' In contrast to \code{randexprGrow}, this function respects sType tags of functions, input variables,
+##' In contrast to \code{randexprGrow}, this function respects sTypes of functions, input variables,
 ##' and constant factories. Only well-typed expressions are created.
 ##' \code{randexprTypedFull} creates a random full expression tree of depth \code{maxdepth},
 ##' respecting type constraints.
-##' All nodes in the created expressions will be tagged with their sTypes.
 ##'
 ##' @param type The (range) type the created expression should have.
 ##' @param funcset The function set.
@@ -156,12 +153,11 @@ randexprTypedGrow <- function(type, funcset, inset, conset,
                            funcdomaintypes)))
     ## the type of the generated subtree is a function type with the input variable types as domain types...
     newSubtreeType <- insetTypes %->% type
-    newSubtree %::% newSubtreeType
     return(newSubtree)
     }
   }
   # else, create a terminal node of correct type
-  return(randterminalTyped(typeString, inset, conset, constprob) %::% type)
+  return(randterminalTyped(typeString, inset, conset, constprob))
 }
 
 ##' @rdname randomExpressionCreationTyped
@@ -194,7 +190,7 @@ randfuncTyped <- function(type, funcset, inset, conset, maxdepth = 8,
                           breedingFitness = function(individual) TRUE,
                           breedingTries = 50) {
   funcFactory <- function() {
-    newf <- new.function()
+    newf <- new.function(envir = funcset$envir)
     formals(newf) <- new.alist(inset$allFormals)
     body(newf) <- exprfactory(type, funcset, inset, conset, maxdepth, constprob = constprob)
     newf
@@ -224,14 +220,16 @@ randfuncTypedRampedHalfAndHalf <- function(type, funcset, inset, conset, maxdept
 ##' @return A random terminal node, i.e. an input variable or a constant.
 randterminalTyped <- function(typeString, inset, conset, constprob) {
   if (runif(1) <= constprob) { # create constant of correct type
-    constfactory <- randelt(conset$byRange[[typeString]], prob = attr(conset$byRange[[typeString]], "probabilityWeight"))
-    if (is.null(constfactory)) stop("randterminalTyped: Could not find a constant factory for type ", typeString, ".")
+    constfactoryName <- randelt(conset$byRange[[typeString]], prob = attr(conset$byRange[[typeString]], "probabilityWeight"))
+    if (is.null(constfactoryName)) stop("randterminalTyped: Could not find a constant factory for type ", typeString, ".")
+    constfactory <- eval(constfactoryName)
     constfactory()
   } else { # create input variable of correct type
     invar <- toName(randelt(inset$byRange[[typeString]], prob = attr(inset$byRange[[typeString]], "probabilityWeight")))
     if (is.null(invar)) { # there are no input variables of the requested type, try to create a contant instead
-      constfactory <- randelt(conset$byRange[[typeString]], prob = attr(conset$byRange[[typeString]], "probabilityWeight"))
-      if (is.null(constfactory)) stop("randterminalTyped: Could not find a constant factory for type ", typeString, ".")
+      constfactoryName <- randelt(conset$byRange[[typeString]], prob = attr(conset$byRange[[typeString]], "probabilityWeight"))
+      if (is.null(constfactoryName)) stop("randterminalTyped: Could not find an input variable or constant factory for type ", typeString, ".")
+      constfactory <- eval(constfactoryName)
       constfactory()
     } else {
       invar

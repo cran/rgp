@@ -1,4 +1,4 @@
-## mutation.r
+## mutation.R
 ##   - Functions for mutating GP individuals
 ##
 ## RGP - a GP system for R
@@ -6,13 +6,6 @@
 ## with contributions of Thomas Bartz-Beielstein, Olaf Mersmann and Joerg Stork
 ## released under the GPL v2
 ##
-
-##' @include complexity.r
-NA
-##' @include stypes.r
-NA
-##' @include breeding.r
-NA
 
 ##' Random mutation of functions and expressions
 ##'
@@ -23,10 +16,17 @@ NA
 ##' \code{mutateSubtree} mutates a function by recursively replacing inner nodes with
 ##'   newly grown subtrees of maximum depth \code{maxsubtreedepth}.
 ##' \code{mutateNumericConst} mutates a function by perturbing each numeric (double) constant \eqn{c}
-##'   with probability \code{mutateconstprob} by setting \eqn{c := c + rnorm(1)}. Note that constants
-##'   of other typed than \code{double} (e.g \code{integer}s) are not affected.
+##'   with probability \code{mutateconstprob} by setting \eqn{c := c + rnorm(1, mean = mu, sd = sigma)}.
+##'   Note that constants of other typed than \code{double} (e.g \code{integer}s) are not affected.
+##'
 ##' \code{mutateFuncTyped}, \code{mutateSubtreeTyped}, and \code{mutateNumericConstTyped} are
 ##' variants of the above functions that only create well-typed result expressions.
+##'
+##' \code{mutateFuncFast}, \code{mutateSubtreeFast}, \code{mutateNumericConstFast} are variants
+##' of the above untyped mutation function implemented in C. They offer a considerably faster
+##' execution speed for the price of limited flexibility. These variants take function bodies
+##' as arguments (obtain these via R's \code{body} function) and return function bodies as results.
+##' To turn a function body into a function, use RGP's \code{\link{makeClosure}} tool function.
 ##'
 ##' The second set of mutation operators features a more orthogonal design, with each individual
 ##' operator having a only a small effect on the genotype. Mutation strength is controlled by
@@ -37,10 +37,10 @@ NA
 ##'   subtree of the exact depth of \code{subtreeDepth}.
 ##' \code{mutateDeleteSubtree} Selects a subree of the exact depth of \code{subtreeDepth} by uniform random
 ##'   sampling and replaces it with a matching leaf.
-##' \code{mutateChangeDeleteInsert} Either applies \code{mutateChangeLabel}, \code{mutateDeleteSubtree},
+##' \code{mutateChangeDeleteInsert} Either applies \code{mutateChangeLabel}, \code{mutateInsertSubtree},
 ##'   or \code{mutateDeleteSubtree}. The probability weights for selecting an operator can be supplied
 ##'   via the ...Probability arguments (probability weights are normalized to a sum of 1). 
-##' \code{mutateDeleteInsert} Either applies \code{mutateDeleteSubtree} or \code{mutateDeleteSubtree}. The
+##' \code{mutateDeleteInsert} Either applies \code{mutateDeleteSubtree} or \code{mutateInsertSubtree}. The
 ##'  probability weights for selecting an operator can be supplied via the ...Probability arguments
 ##'  (probability weights are normalized to a sum of 1).
 ##' The above functions automatically create well-typed result expressions when used in a strongly
@@ -49,6 +49,7 @@ NA
 ##' All RGP mutation operators have the S3 class \code{c("mutationOperator", "function")}.
 ##'
 ##' @param func The function to mutate randomly.
+##' @param funcbody The function body to mutate randomly, obtain it via \code{body(func)}.
 ##' @param funcset The function set.
 ##' @param inset The set of input variables.
 ##' @param conset The set of constant factories.
@@ -60,8 +61,15 @@ NA
 ##' @param strength The number of individual point mutations (changes, insertions, deletions) to
 ##'   perform.
 ##' @param subtreeDepth The depth of the subtrees to insert or delete.
-##' @param constprob The probability of creating a constant versus an input variable when inserting
-##'   a new subtree.
+##' @param constprob The probability of creating a constant versus an input variable.
+##' @param insertprob The probability to insert a subtree.
+##' @param deleteprob The probability to insert a subtree.
+##' @param constmin The lower limit for numeric constants.
+##' @param constmax The upper limit for numeric onstants.
+##' @param mu The normal distribution mean for random numeric constant mutation.
+##' @param sigma The normal distribution standard deviation for random numeric constant mutation.
+##' @param subtreeprob The probability of creating a subtree instead of a leaf in the random subtree
+##'   generator function.
 ##' @param iterations The number of times to apply a mutation operator to a GP individual. This
 ##'   can be used as a generic way of controling the strength of the genotypic effect of mutation. 
 ##' @param changeProbability The probability for selecting the \code{mutateChangeLabel} operator.
@@ -90,7 +98,7 @@ mutateFunc <- function(func, funcset, mutatefuncprob = 0.1,
     } else expr
   }
   doMutation <- function() {
-    mutant <- new.function()
+    mutant <- new.function(envir = funcset$envir)
     formals(mutant) <- formals(func)
     body(mutant) <- mutatefuncexpr(body(func), funcset, mutatefuncprob)
     mutant
@@ -117,7 +125,7 @@ mutateSubtree <- function(func, funcset, inset, conset, mutatesubtreeprob = 0.1,
     } else expr
   }
   doMutation <- function() {
-    mutant <- new.function()
+    mutant <- new.function(envir = funcset$envir)
     formals(mutant) <- formals(func)
     body(mutant) <- mutatesubtreeexpr(body(func), funcset, inset, conset, mutatesubtreeprob, maxsubtreedepth)
     mutant
@@ -130,19 +138,19 @@ class(mutateSubtree) <- c("mutationOperator", "function")
 ##' @export
 mutateNumericConst <- function(func, mutateconstprob = 0.1,
                                breedingFitness = function(individual) TRUE,
-                               breedingTries = 50) {
+                               breedingTries = 50, mu = 0.0, sigma = 1.0) {
   mutateconstexpr <- function(expr, mutateconstprob) {
     if (is.call(expr)) {
       as.call(append(expr[[1]], Map(function(e) mutateconstexpr(e, mutateconstprob), rest(expr))))
     } else if (runif(1) <= mutateconstprob && is.double(expr)) {
       if (runif(1) > buildingBlockTag(expr)) {
-        mutatedExpr <- expr + rnorm(1)
-        withAttributesOf(mutatedExpr, expr)
+        mutatedExpr <- expr + rnorm(1, mean = mu, sd = sigma)
+        mutatedExpr
       } else expr
     } else expr
   }
   doMutation <- function() {
-    mutant <- new.function()
+    mutant <- new.function(envir = environment(func))
     formals(mutant) <- formals(func)
     body(mutant) <- mutateconstexpr(body(func), mutateconstprob)
     mutant
@@ -172,12 +180,12 @@ mutateFuncTyped <- function(func, funcset, mutatefuncprob = 0.1,
         newfunccandidateType <- sType(newfunccandidate)
         newfunc <- if (identical(newfunccandidateType, oldfuncType)) newfunccandidate else oldfunc
         newcall <- as.call(append(newfunc, Map(function(e) mutatefuncexprTyped(e, funcset, mutatefuncprob), rest(expr))))
-        withAttributesOf(newcall, expr)
+        newcall
       } else expr
     } else expr
   }
   doMutation <- function() {
-    mutant <- new.function()
+    mutant <- new.function(envir = funcset$envir)
     formals(mutant) <- formals(func)
     body(mutant) <- mutatefuncexprTyped(body(func), funcset, mutatefuncprob)
     mutant
@@ -203,11 +211,11 @@ mutateSubtreeTyped <- function(func, funcset, inset, conset, mutatesubtreeprob =
                        Map(function(e) mutatesubtreeexprTyped(e, funcset, inset, conset,
                                                               mutatesubtreeprob, maxsubtreedepth),
                            rest(expr))))
-      withAttributesOf(mutatedExpr, expr)
+      mutatedExpr
     } else expr
   }
   doMutation <- function() {
-    mutant <- new.function()
+    mutant <- new.function(envir = funcset$envir)
     formals(mutant) <- formals(func)
     body(mutant) <- mutatesubtreeexprTyped(body(func), funcset, inset, conset, mutatesubtreeprob, maxsubtreedepth)
     mutant
@@ -224,16 +232,16 @@ mutateNumericConstTyped <- function(func, mutateconstprob = 0.1,
   mutateconstexprTyped <- function(expr, mutateconstprob) {
     if (is.call(expr)) {
       mutatedExpr <- as.call(append(expr[[1]], Map(function(e) mutateconstexprTyped(e, mutateconstprob), rest(expr))))
-      withAttributesOf(mutatedExpr, expr)
+      mutatedExpr
     } else if (runif(1) <= mutateconstprob && is.double(expr)) {
       if (runif(1) > buildingBlockTag(expr)) {
         mutatedExpr <- expr + rnorm(1)
-        withAttributesOf(mutatedExpr, expr)
+        mutatedExpr
       } else expr
     } else expr
   }
   doMutation <- function() {
-    mutant <- new.function()
+    mutant <- new.function(envir = environment(func))
     formals(mutant) <- formals(func)
     body(mutant) <- mutateconstexprTyped(body(func), mutateconstprob)
     mutant
@@ -259,10 +267,10 @@ mutateChangeLabel <- function(func, funcset, inset, conset,
         if (hasStype(expr)) {
           newInputVariable <- toName(randelt(inset$byType[[sType(expr)$string]],
                                              prob = attr(inset$byType[[sType(expr)$string]], "probabilityWeight")))
-          withAttributesOf(newInputVariable, expr)
+          newInputVariable
         } else {
           newInputVariable <- toName(randelt(inset$all, prob = attr(inset$all, "probabilityWeight")))
-          withAttributesOf(newInputVariable, expr)
+          newInputVariable
         }
       } else expr
     } else if (is.call(expr)) {
@@ -272,7 +280,7 @@ mutateChangeLabel <- function(func, funcset, inset, conset,
         ## Just skip parentheses in the expression tree...
         restExpr <- rest(expr)
         mutatedExpr <- as.call(append(expr[[1]], Map(mutateExpressionChangeLabel, restExpr)))
-        withAttributesOf(mutatedExpr, expr)
+        mutatedExpr
       } else {
         mutatedLabel <- if (currentNode %in% sampledMutationPoints && runif(1) > buildingBlockTag(expr)) {
           ## Select a candidate for a new function of matching range type. This can of course result
@@ -293,22 +301,22 @@ mutateChangeLabel <- function(func, funcset, inset, conset,
         } else expr[[1]]
         restExpr <- rest(expr)
         mutatedExpr <- as.call(append(mutatedLabel, Map(mutateExpressionChangeLabel, restExpr)))
-        withAttributesOf(mutatedExpr, expr)
+        mutatedExpr
       }
     } else if (is.numeric(expr)) {
       if (currentNode %in% sampledMutationPoints && runif(1) > buildingBlockTag(expr)) {
         mutatedExpr <- expr + rnorm(1)
-        withAttributesOf(mutatedExpr, expr)
+        mutatedExpr
       } else expr
     } else if (is.logical(expr)) {
       if (currentNode %in% sampledMutationPoints && runif(1) > buildingBlockTag(expr)) {
         mutatedExpr <- as.logical(rbinom(1, 1, 0.5))
-        withAttributesOf(mutatedExpr, expr)
+        mutatedExpr
       } else expr
     } else stop("mutateChangeLabel: Unsupported expression: ", expr, ".")
   }
   doMutation <- function() {
-    mutant <- new.function()
+    mutant <- new.function(envir = funcset$envir)
     formals(mutant) <- formals(func)
     body(mutant) <- mutateExpressionChangeLabel(body(func))
     mutant
@@ -336,7 +344,7 @@ mutateInsertSubtree <- function(func, funcset, inset, conset,
       } else {
         restExpr <- rest(expr)
         mutatedExpr <- as.call(append(expr[[1]], Map(mutateExpressionInsertSubtree, restExpr)))
-        withAttributesOf(mutatedExpr, expr)
+        mutatedExpr
       }
     } else if (is.symbol(expr) || is.numeric(expr) || is.logical(expr)) {
       currentLeaf <<- currentLeaf + 1
@@ -346,17 +354,17 @@ mutateInsertSubtree <- function(func, funcset, inset, conset,
           type <- sType(expr)
           newSubtree <- randexprTypedFull(type, funcset, inset, conset,
                                           maxdepth = subtreeDepth, constprob = 0.2)
-          withAttributesOf(newSubtree, expr)
+          newSubtree
         } else {
           newSubtree <- randexprFull(funcset, inset, conset,
                                      maxdepth = subtreeDepth, constprob = 0.2)
-          withAttributesOf(newSubtree, expr)
+          newSubtree
         }
       } else expr
     } else stop("mutateInsertSubtree: Unsupported expression: ", expr, ".")
   }
   doMutation <- function() {
-    mutant <- new.function()
+    mutant <- new.function(envir = funcset$envir)
     formals(mutant) <- formals(func)
     body(mutant) <- mutateExpressionInsertSubtree(body(func))
     mutant
@@ -386,7 +394,7 @@ mutateDeleteSubtree <- function(func, funcset, inset, conset,
         if (hasStype(expr)) {
           typeString <- rangeTypeOfType(sType(expr))$string
           newLeaf <- randterminalTyped(typeString, inset, conset, constprob)
-          withAttributesOf(newLeaf, expr)
+          newLeaf
         } else {
           newLeaf <- if (runif(1) <= constprob) { # create constant
             constfactory <- randelt(conset$all, prob = attr(conset$all, "probabilityWeight"))
@@ -394,7 +402,7 @@ mutateDeleteSubtree <- function(func, funcset, inset, conset,
           } else { # create input variable
             toName(randelt(inset$all, prob = attr(inset$all, "probabilityWeight")))
           }
-          withAttributesOf(newLeaf, expr)
+          newLeaf
         }
       } else expr
     } else if (is.call(expr)) {
@@ -403,14 +411,14 @@ mutateDeleteSubtree <- function(func, funcset, inset, conset,
       } else {
         restExpr <- rest(expr)
         mutatedExpr <- as.call(append(expr[[1]], Map(mutateExpressionDeleteSubtree, restExpr)))
-        withAttributesOf(mutatedExpr, expr)
+        mutatedExpr
       }
     } else if (is.symbol(expr) || is.numeric(expr) || is.logical(expr)) {
       expr
     } else stop("mutateDeleteSubtree: Unsupported expression: ", expr, ".")
   }
   doMutation <- function() {
-    mutant <- new.function()
+    mutant <- new.function(envir = funcset$envir)
     formals(mutant) <- formals(func)
     body(mutant) <- mutateExpressionDeleteSubtree(body(func))
     mutant
@@ -473,3 +481,24 @@ mutateDeleteInsert <- function(func, funcset, inset, conset,
                            breedingFitness = breedingFitness,
                            breedingTries = breedingTries)
 class(mutateDeleteInsert) <- c("mutationOperator", "function")
+
+##' @rdname expressionMutation
+##' @export
+mutateFuncFast <- function(funcbody, funcset, mutatefuncprob = 0.1)
+  .Call("mutate_functions_R", funcbody, mutatefuncprob, funcset$all, as.integer(funcset$arities))
+class(mutateFuncFast) <- c("mutationOperator", "function")
+
+##' @rdname expressionMutation
+##' @export
+mutateSubtreeFast <- function(funcbody, funcset, inset, constmin, constmax, insertprob, deleteprob, subtreeprob, constprob, maxsubtreedepth)
+  .Call("mutate_subtrees_R", funcbody, insertprob, deleteprob,
+                             funcset$all, as.integer(funcset$arities),
+                             inset$all, constmin, constmax, subtreeprob, constprob, as.integer(maxsubtreedepth))
+class(mutateSubtreeFast) <- c("mutationOperator", "function")
+
+##' @rdname expressionMutation
+##' @export
+mutateNumericConstFast <- function(funcbody, mutateconstprob = 0.1, mu = 0.0, sigma = 1.0)
+  .Call("mutate_constants_normal_R", funcbody, mutateconstprob, mu, sigma)
+class(mutateNumericConstFast) <- c("mutationOperator", "function")
+
