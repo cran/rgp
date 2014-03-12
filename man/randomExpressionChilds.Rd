@@ -3,9 +3,9 @@
 \alias{randsubtree}
 \title{Select random childs or subtrees of an expression}
 \usage{
-  randchild(expr)
+randchild(expr)
 
-  randsubtree(expr, subtreeprob = 0.1)
+randsubtree(expr, subtreeprob = 0.1)
 }
 \arguments{
   \item{expr}{The expression to select random childs or
@@ -16,9 +16,9 @@
   via an recursive call.}
 }
 \description{
-  \code{randchild} returns a uniformly random direct child
-  of an expression. \code{randsubtree} returns a uniformly
-  random subtree of an expression. Note that this subtree
-  must not be a direct child.
+\code{randchild} returns a uniformly random direct child of
+an expression. \code{randsubtree} returns a uniformly
+random subtree of an expression. Note that this subtree
+must not be a direct child.
 }
 

@@ -2,10 +2,10 @@
 \alias{plotFunctions}
 \title{Show an overlayed plot of multiple functions}
 \usage{
-  plotFunctions(funcs, from = 0, to = 1, steps = 1024,
-    type = "l", lty = 1:5, lwd = 1, lend = par("lend"),
-    pch = NULL, col = 1:6, cex = NULL, bg = NA, xlab = "x",
-    ylab = "y", legendpos = "bottomright", bty = "n", ...)
+plotFunctions(funcs, from = 0, to = 1, steps = 1024, type = "l",
+  lty = 1:5, lwd = 1, lend = par("lend"), pch = NULL, col = 1:6,
+  cex = NULL, bg = NA, xlab = "x", ylab = "y",
+  legendpos = "bottomright", bty = "n", ...)
 }
 \arguments{
   \item{funcs}{A list of functions of one variable to
@@ -60,8 +60,8 @@
   \code{main} parameter to set a title.}
 }
 \description{
-  Creates and shows and overlayed plot of one or more
-  functions of one variable \eqn{y = f(x)}.
+Creates and shows and overlayed plot of one or more
+functions of one variable \eqn{y = f(x)}.
 }
 \examples{
 plotFunctions(list(function(x) sin(x),

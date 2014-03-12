@@ -2,23 +2,19 @@
 \alias{symbolicRegression}
 \title{Symbolic regression via untyped standard genetic programming}
 \usage{
-  symbolicRegression(formula, data,
-    stopCondition = makeTimeStopCondition(5),
-    population = NULL, populationSize = 100,
-    eliteSize = ceiling(0.1 * populationSize),
-    elite = list(), extinctionPrevention = FALSE,
-    archive = FALSE, individualSizeLimit = 64,
-    penalizeGenotypeConstantIndividuals = FALSE,
-    subSamplingShare = 1, functionSet = mathFunctionSet,
-    constantSet = numericConstantSet,
-    crossoverFunction = crossover, mutationFunction = NULL,
-    restartCondition = makeEmptyRestartCondition(),
-    restartStrategy = makeLocalRestartStrategy(),
-    searchHeuristic = makeAgeFitnessComplexityParetoGpSearchHeuristic(),
-    breedingFitness = function(individual) TRUE,
-    breedingTries = 50, errorMeasure = rmse,
-    progressMonitor = NULL, envir = parent.frame(),
-    verbose = TRUE)
+symbolicRegression(formula, data, stopCondition = makeTimeStopCondition(5),
+  population = NULL, populationSize = 100, eliteSize = ceiling(0.1 *
+  populationSize), elite = list(), extinctionPrevention = FALSE,
+  archive = FALSE, individualSizeLimit = 64,
+  penalizeGenotypeConstantIndividuals = FALSE, subSamplingShare = 1,
+  functionSet = mathFunctionSet, constantSet = numericConstantSet,
+  crossoverFunction = NULL, mutationFunction = NULL,
+  restartCondition = makeEmptyRestartCondition(),
+  restartStrategy = makeLocalRestartStrategy(),
+  searchHeuristic = makeAgeFitnessComplexityParetoGpSearchHeuristic(),
+  breedingFitness = function(individual) TRUE, breedingTries = 50,
+  errorMeasure = rmse, progressMonitor = NULL, envir = parent.frame(),
+  verbose = TRUE)
 }
 \arguments{
   \item{formula}{A \code{\link{formula}} describing the
@@ -133,19 +129,19 @@
   \item{verbose}{Whether to print progress messages.}
 }
 \value{
-  An symbolic regression model that contains an untyped GP
-  population.
+An symbolic regression model that contains an untyped GP
+population.
 }
 \description{
-  Perform symbolic regression via untyped genetic
-  programming. The regression task is specified as a
-  \code{\link{formula}}. Only simple formulas without
-  interactions are supported. The result of the symbolic
-  regression run is a symbolic regression model containing
-  an untyped GP population of model functions.
+Perform symbolic regression via untyped genetic
+programming. The regression task is specified as a
+\code{\link{formula}}. Only simple formulas without
+interactions are supported. The result of the symbolic
+regression run is a symbolic regression model containing an
+untyped GP population of model functions.
 }
 \seealso{
-  \code{\link{predict.symbolicRegressionModel}},
-  \code{\link{geneticProgramming}}
+\code{\link{predict.symbolicRegressionModel}},
+\code{\link{geneticProgramming}}
 }
 

@@ -2,7 +2,7 @@
 \alias{inputVariablesOfIndividual}
 \title{Functions for analysing GP individuals}
 \usage{
-  inputVariablesOfIndividual(ind, inset)
+inputVariablesOfIndividual(ind, inset)
 }
 \arguments{
   \item{ind}{A GP individual, represented as a R function.}
@@ -10,8 +10,8 @@
   \item{inset}{A set of input variables.}
 }
 \description{
-  \code{inputVariablesOfIndividual} returns a list of input
-  variables in \code{inset} that are used by the GP
-  individual \code{ind}.
+\code{inputVariablesOfIndividual} returns a list of input
+variables in \code{inset} that are used by the GP
+individual \code{ind}.
 }
 

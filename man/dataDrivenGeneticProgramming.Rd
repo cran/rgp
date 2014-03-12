@@ -2,22 +2,18 @@
 \alias{dataDrivenGeneticProgramming}
 \title{Data-driven untyped standard genetic programming}
 \usage{
-  dataDrivenGeneticProgramming(formula, data,
-    fitnessFunctionFactory,
-    fitnessFunctionFactoryParameters = list(),
-    stopCondition = makeTimeStopCondition(5),
-    population = NULL, populationSize = 100,
-    eliteSize = ceiling(0.1 * populationSize),
-    elite = list(), extinctionPrevention = FALSE,
-    archive = FALSE, functionSet = mathFunctionSet,
-    constantSet = numericConstantSet,
-    crossoverFunction = crossover, mutationFunction = NULL,
-    restartCondition = makeEmptyRestartCondition(),
-    restartStrategy = makeLocalRestartStrategy(),
-    searchHeuristic = makeAgeFitnessComplexityParetoGpSearchHeuristic(),
-    breedingFitness = function(individual) TRUE,
-    breedingTries = 50, progressMonitor = NULL,
-    verbose = TRUE)
+dataDrivenGeneticProgramming(formula, data, fitnessFunctionFactory,
+  fitnessFunctionFactoryParameters = list(),
+  stopCondition = makeTimeStopCondition(5), population = NULL,
+  populationSize = 100, eliteSize = ceiling(0.1 * populationSize),
+  elite = list(), extinctionPrevention = FALSE, archive = FALSE,
+  functionSet = mathFunctionSet, constantSet = numericConstantSet,
+  crossoverFunction = NULL, mutationFunction = NULL,
+  restartCondition = makeEmptyRestartCondition(),
+  restartStrategy = makeLocalRestartStrategy(),
+  searchHeuristic = makeAgeFitnessComplexityParetoGpSearchHeuristic(),
+  breedingFitness = function(individual) TRUE, breedingTries = 50,
+  progressMonitor = NULL, verbose = TRUE)
 }
 \arguments{
   \item{formula}{A \code{\link{formula}} describing the
@@ -121,23 +117,23 @@
   \item{verbose}{Whether to print progress messages.}
 }
 \value{
-  A model structure that contains the formula and an
-  untyped GP population.
+A model structure that contains the formula and an untyped
+GP population.
 }
 \description{
-  Perform an untyped genetic programming using a fitness
-  function that depends on a R data frame. Typical
-  applications are data mining tasks such as symbolic
-  regression or classification. The task is specified as a
-  \code{\link{formula}} and a fitness function factory.
-  Only simple formulas without interactions are supported.
-  The result of the data-driven GP run is a model structure
-  containing the formulas and an untyped GP population.
-  This function is primarily an intermediate for
-  extensions. End-users will probably use more specialized
-  GP tools such as \code{\link{symbolicRegression}}.
+Perform an untyped genetic programming using a fitness
+function that depends on a R data frame. Typical
+applications are data mining tasks such as symbolic
+regression or classification. The task is specified as a
+\code{\link{formula}} and a fitness function factory. Only
+simple formulas without interactions are supported. The
+result of the data-driven GP run is a model structure
+containing the formulas and an untyped GP population. This
+function is primarily an intermediate for extensions.
+End-users will probably use more specialized GP tools such
+as \code{\link{symbolicRegression}}.
 }
 \seealso{
-  \code{\link{geneticProgramming}}
+\code{\link{geneticProgramming}}
 }
 

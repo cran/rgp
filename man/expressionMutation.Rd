@@ -15,69 +15,55 @@
 \alias{mutateSubtreeTyped}
 \title{Random mutation of functions and expressions}
 \usage{
-  mutateFunc(func, funcset, mutatefuncprob = 0.1,
-    breedingFitness = function(individual) TRUE,
-    breedingTries = 50)
+mutateFunc(func, funcset, mutatefuncprob = 0.1,
+  breedingFitness = function(individual) TRUE, breedingTries = 50)
 
-  mutateSubtree(func, funcset, inset, conset,
-    mutatesubtreeprob = 0.1, maxsubtreedepth = 5,
-    breedingFitness = function(individual) TRUE,
-    breedingTries = 50)
+mutateSubtree(func, funcset, inset, conset, mutatesubtreeprob = 0.1,
+  maxsubtreedepth = 5, breedingFitness = function(individual) TRUE,
+  breedingTries = 50)
 
-  mutateNumericConst(func, mutateconstprob = 0.1,
-    breedingFitness = function(individual) TRUE,
-    breedingTries = 50, mu = 0, sigma = 1)
+mutateNumericConst(func, mutateconstprob = 0.1,
+  breedingFitness = function(individual) TRUE, breedingTries = 50, mu = 0,
+  sigma = 1)
 
-  mutateFuncTyped(func, funcset, mutatefuncprob = 0.1,
-    breedingFitness = function(individual) TRUE,
-    breedingTries = 50)
+mutateFuncTyped(func, funcset, mutatefuncprob = 0.1,
+  breedingFitness = function(individual) TRUE, breedingTries = 50)
 
-  mutateSubtreeTyped(func, funcset, inset, conset,
-    mutatesubtreeprob = 0.1, maxsubtreedepth = 5,
-    breedingFitness = function(individual) TRUE,
-    breedingTries = 50)
+mutateSubtreeTyped(func, funcset, inset, conset, mutatesubtreeprob = 0.1,
+  maxsubtreedepth = 5, breedingFitness = function(individual) TRUE,
+  breedingTries = 50)
 
-  mutateNumericConstTyped(func, mutateconstprob = 0.1,
-    breedingFitness = function(individual) TRUE,
-    breedingTries = 50)
+mutateNumericConstTyped(func, mutateconstprob = 0.1,
+  breedingFitness = function(individual) TRUE, breedingTries = 50)
 
-  mutateChangeLabel(func, funcset, inset, conset,
-    strength = 1,
-    breedingFitness = function(individual) TRUE,
-    breedingTries = 50)
+mutateChangeLabel(func, funcset, inset, conset, strength = 1,
+  breedingFitness = function(individual) TRUE, breedingTries = 50)
 
-  mutateInsertSubtree(func, funcset, inset, conset,
-    strength = 1, subtreeDepth = 2,
-    breedingFitness = function(individual) TRUE,
-    breedingTries = 50)
+mutateInsertSubtree(func, funcset, inset, conset, strength = 1,
+  subtreeDepth = 2, breedingFitness = function(individual) TRUE,
+  breedingTries = 50)
 
-  mutateDeleteSubtree(func, funcset, inset, conset,
-    strength = 1, subtreeDepth = 2, constprob = 0.2,
-    breedingFitness = function(individual) TRUE,
-    breedingTries = 50)
+mutateDeleteSubtree(func, funcset, inset, conset, strength = 1,
+  subtreeDepth = 2, constprob = 0.2,
+  breedingFitness = function(individual) TRUE, breedingTries = 50)
 
-  mutateChangeDeleteInsert(func, funcset, inset, conset,
-    strength = 1, subtreeDepth = 2, constprob = 0.2,
-    iterations = 1, changeProbability = 1/3,
-    deleteProbability = 1/3, insertProbability = 1/3,
-    breedingFitness = function(individual) TRUE,
-    breedingTries = 50)
+mutateChangeDeleteInsert(func, funcset, inset, conset, strength = 1,
+  subtreeDepth = 2, constprob = 0.2, iterations = 1,
+  changeProbability = 1/3, deleteProbability = 1/3,
+  insertProbability = 1/3, breedingFitness = function(individual) TRUE,
+  breedingTries = 50)
 
-  mutateDeleteInsert(func, funcset, inset, conset,
-    strength = 1, subtreeDepth = 2, constprob = 0.2,
-    iterations = 1, deleteProbability = 0.5,
-    insertProbability = 0.5,
-    breedingFitness = function(individual) TRUE,
-    breedingTries = 50)
+mutateDeleteInsert(func, funcset, inset, conset, strength = 1,
+  subtreeDepth = 2, constprob = 0.2, iterations = 1,
+  deleteProbability = 0.5, insertProbability = 0.5,
+  breedingFitness = function(individual) TRUE, breedingTries = 50)
 
-  mutateFuncFast(funcbody, funcset, mutatefuncprob = 0.1)
+mutateFuncFast(funcbody, funcset, mutatefuncprob = 0.1)
 
-  mutateSubtreeFast(funcbody, funcset, inset, constmin,
-    constmax, insertprob, deleteprob, subtreeprob,
-    constprob, maxsubtreedepth)
+mutateSubtreeFast(funcbody, funcset, inset, constmin, constmax, insertprob,
+  deleteprob, subtreeprob, constprob, maxsubtreedepth)
 
-  mutateNumericConstFast(funcbody, mutateconstprob = 0.1,
-    mu = 0, sigma = 1)
+mutateNumericConstFast(funcbody, mutateconstprob = 0.1, mu = 0, sigma = 1)
 }
 \arguments{
   \item{func}{The function to mutate randomly.}
@@ -151,68 +137,67 @@
   \item{breedingTries}{The number of breeding steps.}
 }
 \value{
-  The randomly mutated function.
+The randomly mutated function.
 }
 \description{
-  RGP implements two sets of mutation operators. The first
-  set is inspired by classical GP systems. Mutation
-  strength is controlled by giving mutation probabilities:
-  \code{mutateFunc} mutates a function \eqn{f} by
-  recursively replacing inner function labels in \eqn{f}
-  with probability \code{mutatefuncprob}.
-  \code{mutateSubtree} mutates a function by recursively
-  replacing inner nodes with newly grown subtrees of
-  maximum depth \code{maxsubtreedepth}.
-  \code{mutateNumericConst} mutates a function by
-  perturbing each numeric (double) constant \eqn{c} with
-  probability \code{mutateconstprob} by setting \eqn{c := c
-  + rnorm(1, mean = mu, sd = sigma)}.  Note that constants
-  of other typed than \code{double} (e.g \code{integer}s)
-  are not affected.
+RGP implements two sets of mutation operators. The first
+set is inspired by classical GP systems. Mutation strength
+is controlled by giving mutation probabilities:
+\code{mutateFunc} mutates a function \eqn{f} by recursively
+replacing inner function labels in \eqn{f} with probability
+\code{mutatefuncprob}. \code{mutateSubtree} mutates a
+function by recursively replacing inner nodes with newly
+grown subtrees of maximum depth \code{maxsubtreedepth}.
+\code{mutateNumericConst} mutates a function by perturbing
+each numeric (double) constant \eqn{c} with probability
+\code{mutateconstprob} by setting \eqn{c := c + rnorm(1,
+mean = mu, sd = sigma)}.  Note that constants of other
+typed than \code{double} (e.g \code{integer}s) are not
+affected.
 }
 \details{
-  \code{mutateFuncTyped}, \code{mutateSubtreeTyped}, and
-  \code{mutateNumericConstTyped} are variants of the above
-  functions that only create well-typed result expressions.
+\code{mutateFuncTyped}, \code{mutateSubtreeTyped}, and
+\code{mutateNumericConstTyped} are variants of the above
+functions that only create well-typed result expressions.
 
-  \code{mutateFuncFast}, \code{mutateSubtreeFast},
-  \code{mutateNumericConstFast} are variants of the above
-  untyped mutation function implemented in C. They offer a
-  considerably faster execution speed for the price of
-  limited flexibility. These variants take function bodies
-  as arguments (obtain these via R's \code{body} function)
-  and return function bodies as results. To turn a function
-  body into a function, use RGP's \code{\link{makeClosure}}
-  tool function.
+\code{mutateFuncFast}, \code{mutateSubtreeFast},
+\code{mutateNumericConstFast} are variants of the above
+untyped mutation function implemented in C. They offer a
+considerably faster execution speed for the price of
+limited flexibility. These variants take function bodies as
+arguments (obtain these via R's \code{body} function) and
+return function bodies as results. To turn a function body
+into a function, use RGP's \code{\link{makeClosure}} tool
+function.
 
-  The second set of mutation operators features a more
-  orthogonal design, with each individual operator having a
-  only a small effect on the genotype. Mutation strength is
-  controlled by the integral \code{strength} parameter.
-  \code{mutateChangeLabel} Selects a node (inner node or
-  leaf) by uniform random sampling and replaces the label
-  of this node by a new label of matching type.
-  \code{mutateInsertSubtree} Selects a leaf by uniform
-  random sampling and replaces it with a matching subtree
-  of the exact depth of \code{subtreeDepth}.
-  \code{mutateDeleteSubtree} Selects a subree of the exact
-  depth of \code{subtreeDepth} by uniform random sampling
-  and replaces it with a matching leaf.
-  \code{mutateChangeDeleteInsert} Either applies
-  \code{mutateChangeLabel}, \code{mutateInsertSubtree}, or
-  \code{mutateDeleteSubtree}. The probability weights for
-  selecting an operator can be supplied via the
-  ...Probability arguments (probability weights are
-  normalized to a sum of 1). \code{mutateDeleteInsert}
-  Either applies \code{mutateDeleteSubtree} or
-  \code{mutateInsertSubtree}. The probability weights for
-  selecting an operator can be supplied via the
-  ...Probability arguments (probability weights are
-  normalized to a sum of 1). The above functions
-  automatically create well-typed result expressions when
-  used in a strongly typed GP run.
+The second set of mutation operators features a more
+orthogonal design, with each individual operator having a
+only a small effect on the genotype. Mutation strength is
+controlled by the integral \code{strength} parameter.
+\code{mutateChangeLabel} Selects a node (inner node or
+leaf) by uniform random sampling and replaces the label of
+this node by a new label of matching type.
+\code{mutateInsertSubtree} Selects a leaf by uniform random
+sampling and replaces it with a matching subtree of the
+exact depth of \code{subtreeDepth}.
+\code{mutateDeleteSubtree} Selects a subree of the exact
+depth of \code{subtreeDepth} by uniform random sampling and
+replaces it with a matching leaf.
+\code{mutateChangeDeleteInsert} Either applies
+\code{mutateChangeLabel}, \code{mutateInsertSubtree}, or
+\code{mutateDeleteSubtree}. The probability weights for
+selecting an operator can be supplied via the
+...Probability arguments (probability weights are
+normalized to a sum of 1). \code{mutateDeleteInsert} Either
+applies \code{mutateDeleteSubtree} or
+\code{mutateInsertSubtree}. The probability weights for
+selecting an operator can be supplied via the
+...Probability arguments (probability weights are
+normalized to a sum of 1). The above functions
+automatically create well-typed result expressions when
+used in a strongly typed GP run.
 
-  All RGP mutation operators have the S3 class
-  \code{c("mutationOperator", "function")}.
+All RGP mutation operators have the S3 class
+\code{c("mutationOperator", "function")}.
 }
 

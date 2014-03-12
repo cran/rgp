@@ -2,7 +2,7 @@
 \alias{randterminalTyped}
 \title{Create a random terminal node}
 \usage{
-  randterminalTyped(typeString, inset, conset, constprob)
+randterminalTyped(typeString, inset, conset, constprob)
 }
 \arguments{
   \item{typeString}{The string label of the type of the
@@ -16,10 +16,10 @@
   versus an input variable.}
 }
 \value{
-  A random terminal node, i.e. an input variable or a
-  constant.
+A random terminal node, i.e. an input variable or a
+constant.
 }
 \description{
-  Create a random terminal node
+Create a random terminal node
 }
 

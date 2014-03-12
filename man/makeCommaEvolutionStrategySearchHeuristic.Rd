@@ -2,7 +2,7 @@
 \alias{makeCommaEvolutionStrategySearchHeuristic}
 \title{Comma Evolution Strategy Search Heuristic for RGP}
 \usage{
-  makeCommaEvolutionStrategySearchHeuristic(mu = 1)
+makeCommaEvolutionStrategySearchHeuristic(mu = 1)
 }
 \arguments{
   \item{mu}{The number of surviving parents for the
@@ -12,14 +12,14 @@
   \code{length(pop)}.}
 }
 \value{
-  An RGP search heuristic.
+An RGP search heuristic.
 }
 \description{
-  The search-heuristic, i.e. the concrete GP search
-  algorithm, is a modular component of RGP.
-  \code{makeCommaEvolutionStrategySearchHeuristic} creates
-  a RGP search-heuristic that implements a (mu, lambda)
-  Evolution Strategy. The lambda parameter is fixed to the
-  population size. TODO description based on Luke09a
+The search-heuristic, i.e. the concrete GP search
+algorithm, is a modular component of RGP.
+\code{makeCommaEvolutionStrategySearchHeuristic} creates a
+RGP search-heuristic that implements a (mu, lambda)
+Evolution Strategy. The lambda parameter is fixed to the
+population size. TODO description based on Luke09a
 }
 

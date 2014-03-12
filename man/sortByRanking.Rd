@@ -2,7 +2,7 @@
 \alias{sortByRanking}
 \title{Sort a vector or list via a given ranking}
 \usage{
-  sortByRanking(xs, ranking = rank(xs))
+sortByRanking(xs, ranking = rank(xs))
 }
 \arguments{
   \item{xs}{The vector or list to reorder.}
@@ -11,10 +11,10 @@
   to \code{rank(xs)}.}
 }
 \value{
-  The result of reordering \code{xs} by \code{ranking}.
+The result of reordering \code{xs} by \code{ranking}.
 }
 \description{
-  Reorders a vector or list according to a given ranking
-  \code{ranking}.
+Reorders a vector or list according to a given ranking
+\code{ranking}.
 }
 

@@ -157,21 +157,21 @@ arity.primitive <- function(f) {
     stop("could not determine arity of primitive")
 }
 
-##' Tabulate a function
+##' Tabulate an n-ary function
 ##'
-##' Creates a data frame of values for the function \code{f} at the domain points
-##' given in \code{...}. This function works like \code{\link{mapply}}, but returns
-##' a data frame that also contains the domain points instead of a simple vector that
-##' only contains (range) values of \code{f}. When using element names in \code{...},
-##' these names must match the formal parameter names of \code{f}.
+##' Creates a data frame of values for the n-ary function \code{f} at the sample
+##' locations given in \code{...}.
 ##'
 ##' @param f The function to tabulate.
-##' @param ... The points to tabulate \code{f} at.
+##' @param ... For each dimension, a vector of sample points to calculate \code{f} at.
 ##' @return A data frame of function values of \code{f}.
-##' @seealso \code{\link{mapply}}
-##' @export
+##' @export 
 tabulateFunction <- function(f, ...) {
-  xs <- list(...)
-  y <- mapply(f, ...)
-  data.frame(xs, y)
-}
+  xs <- expand.grid(...)
+  colnames(xs) <- NULL
+  ys <- apply(xs, 1, function(args) do.call(f, as.list(args)))
+  functionTable <- cbind(xs, ys)
+  colnames(functionTable) <- c(paste("x", 1:length(list(...)), sep = ""), "y")
+  functionTable
+} 
+

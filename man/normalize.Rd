@@ -2,16 +2,16 @@
 \alias{normalize}
 \title{Normalize a vector into the interval [0, 1]}
 \usage{
-  normalize(x)
+normalize(x)
 }
 \arguments{
   \item{x}{The vector to normalize, so that each element
   lies in the interval [0, 1].}
 }
 \value{
-  The normalized vector.
+The normalized vector.
 }
 \description{
-  Normalize a vector into the interval [0, 1]
+Normalize a vector into the interval [0, 1]
 }
 

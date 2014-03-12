@@ -2,10 +2,9 @@
 \alias{makeLocalRestartStrategy}
 \title{Evolution restart strategies}
 \usage{
-  makeLocalRestartStrategy(populationType = NULL,
-    extinctionPrevention = FALSE,
-    breedingFitness = function(individual) TRUE,
-    breedingTries = 50)
+makeLocalRestartStrategy(populationType = NULL,
+  extinctionPrevention = FALSE, breedingFitness = function(individual) TRUE,
+  breedingTries = 50)
 }
 \arguments{
   \item{populationType}{The sType of the replacement
@@ -23,18 +22,18 @@
   \item{breedingTries}{The number of breeding steps.}
 }
 \description{
-  Evolution restart strategies are functions of the
-  signature \code{function(fitnessFunction, population,
-  populationSize, functionSet, inputVariables,
-  constantSet)} that return a list of two obtjects: First,
-  a population that replace the run's current population.
-  Second, a list of elite individuals to keep.
+Evolution restart strategies are functions of the signature
+\code{function(fitnessFunction, population, populationSize,
+functionSet, inputVariables, constantSet)} that return a
+list of two obtjects: First, a population that replace the
+run's current population. Second, a list of elite
+individuals to keep.
 }
 \details{
-  \code{makeLocalRestartStrategy} creates a restart
-  strategy that replaces all individuals with new
-  individuals. The single best individual is returned as
-  the elite. When using a multi-criterial fitness function,
-  only the first component counts in the fitness sorting.
+\code{makeLocalRestartStrategy} creates a restart strategy
+that replaces all individuals with new individuals. The
+single best individual is returned as the elite. When using
+a multi-criterial fitness function, only the first
+component counts in the fitness sorting.
 }
 

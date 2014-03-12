@@ -117,7 +117,7 @@ makeComplexityTournamentSelection <- function(tournamentSize = 30,
                                               tournamentDeterminism = 1.0,
                                               vectorizedFitness = FALSE,
                                               rankingStrategy = orderByParetoCrowdingDistance,
-                                              complexityMeasure = funcVisitationLength) {
+                                              complexityMeasure = fastFuncVisitationLength) {
   selectionFunction <- makeMultiObjectiveTournamentSelection(tournamentSize, selectionSize,
                                                              tournamentDeterminism, rankingStrategy)
   # TODO add support for vectorizedFitness
@@ -142,11 +142,13 @@ makeComplexityTournamentSelection <- function(tournamentSize = 30,
 ##' @return A permutation to rearrange \code{values} based on a Pareto based ranking.
 ##'
 ##' @rdname paretoSorting
+##' @import emoa
 ##' @export
 orderByParetoCrowdingDistance <- function(values)
   orderByParetoMeasure(values, measure = crowding_distance)
 
 ##' @rdname paretoSorting
+##' @import emoa
 ##' @export
 orderByParetoHypervolumeContribution <- function(values)
   orderByParetoMeasure(values, measure = hypervolume_contribution)
@@ -162,6 +164,8 @@ orderByParetoHypervolumeContribution <- function(values)
 ##' @param measure The measure used for ranking points that lie on the same Pareto front,
 ##'   defaults to \code{crowding_distance}.
 ##' @return A permutation to rearrange \code{values} based on a Pareto based ranking.
+##'
+##' @import emoa
 orderByParetoMeasure <- function(values, measure = crowding_distance) {
   ndsRanks <- nds_rank(values)
   indicesOrderedByMeasure <- c()

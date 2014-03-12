@@ -2,8 +2,7 @@
 \alias{joinElites}
 \title{Join elite lists}
 \usage{
-  joinElites(individuals, elite, eliteSize,
-    fitnessFunction)
+joinElites(individuals, elite, eliteSize, fitnessFunction)
 }
 \arguments{
   \item{individuals}{The list of individuals to insert.}
@@ -17,13 +16,12 @@
   \item{fitnessFunction}{The fitness function.}
 }
 \value{
-  The \code{elite} with \code{individuals} inserted, sorted
-  by fitness in ascending order, i.e. lower fitnesses
-  first.
+The \code{elite} with \code{individuals} inserted, sorted
+by fitness in ascending order, i.e. lower fitnesses first.
 }
 \description{
-  Inserts a list of new individuals into an elite list,
-  replacing the worst individuals in this list to make
-  place, if needed.
+Inserts a list of new individuals into an elite list,
+replacing the worst individuals in this list to make place,
+if needed.
 }
 

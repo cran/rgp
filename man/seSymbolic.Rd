@@ -2,7 +2,7 @@
 \alias{seSymbolic}
 \title{Symbolic squared error (SE)}
 \usage{
-  seSymbolic(f, g, lower, upper, subdivisions = 100)
+seSymbolic(f, g, lower, upper, subdivisions = 100)
 }
 \arguments{
   \item{f}{An R function.}
@@ -18,14 +18,13 @@
   for numeric integration.}
 }
 \value{
-  The area of the squared differences between \code{f} and
-  \code{g}, or \code{Inf} if integration is not possible in
-  the limits given.
+The area of the squared differences between \code{f} and
+\code{g}, or \code{Inf} if integration is not possible in
+the limits given.
 }
 \description{
-  Given to functions \code{f} and \code{g}, returns the
-  area the squared differences between \code{f} and
-  \code{g} in the integration limits \code{lower} and
-  \code{upper}.
+Given to functions \code{f} and \code{g}, returns the area
+the squared differences between \code{f} and \code{g} in
+the integration limits \code{lower} and \code{upper}.
 }
 

@@ -2,8 +2,8 @@
 \alias{summary.geneticProgrammingResult}
 \title{Summary reports of genetic programming run result objects}
 \usage{
-  \method{summary}{geneticProgrammingResult} (object,
-    reportFitness = FALSE, orderByFitness = TRUE, ...)
+\method{summary}{geneticProgrammingResult}(object, reportFitness = FALSE,
+  orderByFitness = TRUE, ...)
 }
 \arguments{
   \item{object}{The genetic programming run result object
@@ -23,12 +23,12 @@
   \item{...}{Ignored in this summary function.}
 }
 \description{
-  Create a summary report of a genetic programming result
-  object as returned by \code{\link{geneticProgramming}} or
-  \code{\link{symbolicRegression}}, for example.
+Create a summary report of a genetic programming result
+object as returned by \code{\link{geneticProgramming}} or
+\code{\link{symbolicRegression}}, for example.
 }
 \seealso{
-  \code{\link{geneticProgramming}},
-  \code{\link{symbolicRegression}}
+\code{\link{geneticProgramming}},
+\code{\link{symbolicRegression}}
 }
 

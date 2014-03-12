@@ -79,8 +79,9 @@
 ##' @param archive If set to \code{TRUE}, all GP individuals evaluated are stored in an
 ##'   archive list \code{archiveList} that is returned as part of the result of this function. 
 ##' @param progressMonitor A function of signature
-##'   \code{function(population, fintessValues, fitnessfunction, stepNumber, evaluationNumber,
-##'   bestFitness, timeElapsed)} to be called with each evolution step.
+##'   \code{function(population, objectiveVectors, fitnessFunction, stepNumber, evaluationNumber,
+##'   bestFitness, timeElapsed, ...)} to be called with each evolution step. Seach heuristics
+##'   may pass additional information via the \code{...} parameter.
 ##' @param verbose Whether to print progress messages.
 ##' @return A genetic programming result object that contains a GP population in the
 ##'   field \code{population}, as well as metadata describing the run parameters.
@@ -114,13 +115,13 @@ geneticProgramming <- function(fitnessFunction,
       message(sprintf(msg, ...))
   }
   nonVerboseProgmon <- if (is.null(progressMonitor)) {
-    function(pop, fitnessValues, fitnessFunction, stepNumber, evaluationNumber, bestFitness, timeElapsed) NULL
+    function(pop, objectiveVectors, fitnessFunction, stepNumber, evaluationNumber, bestFitness, timeElapsed, ...) NULL
   } else {
     progressMonitor
   }
   progmon <- if (verbose) {
-    function(pop, fitnessValues, fitnessFunction, stepNumber, evaluationNumber, bestFitness, timeElapsed) {
-      nonVerboseProgmon(pop, fitnessValues, fitnessFunction, stepNumber, evaluationNumber, bestFitness, timeElapsed)
+    function(pop, objectiveVectors, fitnessFunction, stepNumber, evaluationNumber, bestFitness, timeElapsed, ...) {
+      nonVerboseProgmon(pop, objectiveVectors, fitnessFunction, stepNumber, evaluationNumber, bestFitness, timeElapsed, ...)
       if (stepNumber %% 100 == 0) {
         logmsg("evolution step %i, fitness evaluations: %i, best fitness: %f, time elapsed: %s",
                stepNumber, evaluationNumber, bestFitness, formatSeconds(timeElapsed))

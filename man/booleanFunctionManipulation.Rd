@@ -5,13 +5,13 @@
 \alias{numberOfDifferentBits}
 \title{Tools for manipulating boolean functions}
 \usage{
-  integerToLogicals(i, width = floor(log(base = 2, i) + 1))
+integerToLogicals(i, width = floor(log(base = 2, i) + 1))
 
-  booleanFunctionAsList(f)
+booleanFunctionAsList(f)
 
-  numberOfDifferentBits(a, b)
+numberOfDifferentBits(a, b)
 
-  makeBooleanFitnessFunction(targetFunction)
+makeBooleanFitnessFunction(targetFunction)
 }
 \arguments{
   \item{i}{A scalar positive integer.}
@@ -27,19 +27,18 @@
   \item{targetFunction}{A boolean function.}
 }
 \value{
-  The function result as described above.
+The function result as described above.
 }
 \description{
-  \code{integerToBoolean} converts a scalar positive
-  integer (or zero) to its binary representation as list of
-  logicals. \code{booleanFunctionVector} returns the
-  boolean vector of result values of \code{f}, given a
-  boolean function \code{f}. \code{numberOfDifferentBits}
-  given two lists of booleans of equal length, returns the
-  number of differing bits.
-  \code{makeBooleanFitnessFunction} given a boolean target
-  function, returns a fitness function that returns the
-  number of different places in the output of a given
-  boolean function and the target function.
+\code{integerToBoolean} converts a scalar positive integer
+(or zero) to its binary representation as list of logicals.
+\code{booleanFunctionVector} returns the boolean vector of
+result values of \code{f}, given a boolean function
+\code{f}. \code{numberOfDifferentBits} given two lists of
+booleans of equal length, returns the number of differing
+bits. \code{makeBooleanFitnessFunction} given a boolean
+target function, returns a fitness function that returns
+the number of different places in the output of a given
+boolean function and the target function.
 }
 

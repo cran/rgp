@@ -2,11 +2,9 @@
 \alias{latinHypercubeDesign}
 \title{Create a latin hypercube design (LHD)}
 \usage{
-  latinHypercubeDesign(dimension,
-    size = max(11 * dimension, 1 + 3 * dimension + dimension * (dimension - 1)/2 + 1),
-    lowerBounds = replicate(dimension, 0),
-    upperBounds = replicate(dimension, 1),
-    retries = 2 * dimension)
+latinHypercubeDesign(dimension, size = max(11 * dimension, 1 + 3 * dimension +
+  dimension * (dimension - 1)/2 + 1), lowerBounds = replicate(dimension, 0),
+  upperBounds = replicate(dimension, 1), retries = 2 * dimension)
 }
 \arguments{
   \item{dimension}{Dimension of the problem (will be no. of
@@ -29,10 +27,10 @@
   is \code{2 * dimension}.}
 }
 \value{
-  A LHD matrix.
+A LHD matrix.
 }
 \description{
-  Produces a LHD matrix with \code{dimension} columns and
-  \code{size} rows.
+Produces a LHD matrix with \code{dimension} columns and
+\code{size} rows.
 }
 

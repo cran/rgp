@@ -2,8 +2,8 @@
 \alias{breed}
 \title{Breeding of GP individuals}
 \usage{
-  breed(individualFactory, breedingFitness, breedingTries,
-    warnOnFailure = TRUE, stopOnFailure = FALSE)
+breed(individualFactory, breedingFitness, breedingTries, warnOnFailure = TRUE,
+  stopOnFailure = FALSE)
 }
 \arguments{
   \item{individualFactory}{A function of no parameters that
@@ -28,23 +28,22 @@
   was not fulfilled after \code{breedingTries} tries.}
 }
 \value{
-  The GP individual that was bred.
+The GP individual that was bred.
 }
 \description{
-  Breeds GP individuals by repeated application of an
-  individual factory function. \code{individualFactory}.
-  The \code{breedingFitness} must be a function of domain
-  logical (a single boolean value) or numeric (a single
-  real number). In case of a boolean breeding function,
-  candidate individuals are created via the
-  \code{individualFactory} function and tested by the
-  \code{breedingFitness} predicate until the
-  \code{breedingFitness} predicate is \code{TRUE} or
-  \code{breedingTries} tries were done, in which case the
-  last individual created and tested is returned. In case
-  of a numerical breeding function, \code{breedingTries}
-  individuals are created and evaluated by the
-  \code{breedingFitness} function. The individual with the
-  minimal breeding fitness is returned.
+Breeds GP individuals by repeated application of an
+individual factory function. \code{individualFactory}. The
+\code{breedingFitness} must be a function of domain logical
+(a single boolean value) or numeric (a single real number).
+In case of a boolean breeding function, candidate
+individuals are created via the \code{individualFactory}
+function and tested by the \code{breedingFitness} predicate
+until the \code{breedingFitness} predicate is \code{TRUE}
+or \code{breedingTries} tries were done, in which case the
+last individual created and tested is returned. In case of
+a numerical breeding function, \code{breedingTries}
+individuals are created and evaluated by the
+\code{breedingFitness} function. The individual with the
+minimal breeding fitness is returned.
 }
 

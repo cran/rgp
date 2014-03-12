@@ -32,7 +32,7 @@
 ##' \code{TRUE} as soon as a node that satisfies \code{p} is encountered.
 ##' \code{subtreeAt} returns the subtree at \code{index}.
 ##' \code{replaceSubtreeAt} replaces the subtree at \code{index} with
-##' \code{replacement} and returns the result. 
+##' \code{replacement} and returns the result. 
 ##'
 ##' @param f The function to apply.
 ##' @param functions Whether to apply \code{f} to the function symbols

@@ -19,7 +19,7 @@
 ##' @keywords package
 ##' @useDynLib rgp
 
-NA
+NULL
 
 ## Package startup functions used to initialize static objects...
 .onLoad <- function(libname, pkgname) {
@@ -50,7 +50,9 @@ NA
   # show startup message
   packageStartupMessage("*** RGP version ", (sessionInfo())$otherPkg$rgp$Version, " initialized successfully.\n",
                         "    Type 'help(package=\"rgp\")' to bring up the RGP help pages,\n",
-                        "    or type 'vignette(\"rgp_introduction\")' to show RGP's package vignette.")
+                        "    or type 'vignette(\"rgp_introduction\")' to show RGP's package vignette.\n",
+                        "    Type 'symbolicRegressionUi()' to bring up the symbolic regression UI if\n",
+                        "    the optional package 'rgpui' is installed.")
 }
 
 ## ... .

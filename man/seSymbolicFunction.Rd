@@ -2,7 +2,7 @@
 \alias{seSymbolicFunction}
 \title{Symbolic squared error function (SE)}
 \usage{
-  seSymbolicFunction(f, g)
+seSymbolicFunction(f, g)
 }
 \arguments{
   \item{f}{An R function.}
@@ -11,13 +11,13 @@
   \code{f}.}
 }
 \value{
-  A function representing the squared error between
-  \code{f} and \code{g}.
+A function representing the squared error between \code{f}
+and \code{g}.
 }
 \description{
-  Given to functions \code{f} and \code{g}, returns a
-  function whose body is the symbolic representation of the
-  squared error between \code{f} and \code{g}, i.e.
-  \code{function(x) (f(x) - g(x))^2}.
+Given two functions \code{f} and \code{g}, returns a
+function whose body is the symbolic representation of the
+squared error between \code{f} and \code{g}, i.e.
+\code{function(x) (f(x) - g(x))^2}.
 }
 

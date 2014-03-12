@@ -2,25 +2,20 @@
 \alias{multiNicheSymbolicRegression}
 \title{Symbolic regression via multi-niche standard genetic programming}
 \usage{
-  multiNicheSymbolicRegression(formula, data,
-    stopCondition = makeTimeStopCondition(25),
-    passStopCondition = makeTimeStopCondition(5),
-    numberOfNiches = 2,
-    clusterFunction = groupListConsecutive,
-    joinFunction = function(niches) Reduce(c, niches),
-    population = NULL, populationSize = 100,
-    eliteSize = ceiling(0.1 * populationSize),
-    elite = list(), individualSizeLimit = 64,
-    penalizeGenotypeConstantIndividuals = FALSE,
-    functionSet = mathFunctionSet,
-    constantSet = numericConstantSet,
-    selectionFunction = makeTournamentSelection(),
-    crossoverFunction = crossover, mutationFunction = NULL,
-    restartCondition = makeEmptyRestartCondition(),
-    restartStrategy = makeLocalRestartStrategy(),
-    progressMonitor = NULL, verbose = TRUE,
-    clusterApply = sfClusterApplyLB,
-    clusterExport = sfExport)
+multiNicheSymbolicRegression(formula, data,
+  stopCondition = makeTimeStopCondition(25),
+  passStopCondition = makeTimeStopCondition(5), numberOfNiches = 2,
+  clusterFunction = groupListConsecutive, joinFunction = function(niches)
+  Reduce(c, niches), population = NULL, populationSize = 100,
+  eliteSize = ceiling(0.1 * populationSize), elite = list(),
+  individualSizeLimit = 64, penalizeGenotypeConstantIndividuals = FALSE,
+  functionSet = mathFunctionSet, constantSet = numericConstantSet,
+  selectionFunction = makeTournamentSelection(),
+  crossoverFunction = crossover, mutationFunction = NULL,
+  restartCondition = makeEmptyRestartCondition(),
+  restartStrategy = makeLocalRestartStrategy(), progressMonitor = NULL,
+  verbose = TRUE, clusterApply = sfClusterApplyLB,
+  clusterExport = sfExport)
 }
 \arguments{
   \item{formula}{A \code{\link{formula}} describing the
@@ -100,9 +95,11 @@
   See \link{makeLocalRestartStrategy} for details.}
 
   \item{progressMonitor}{A function of signature
-  \code{function(population, fitnessfunction, stepNumber,
-  evaluationNumber, bestFitness, timeElapsed)} to be called
-  with each evolution step.}
+  \code{function(population, objectiveVectors,
+  fitnessFunction, stepNumber, evaluationNumber,
+  bestFitness, timeElapsed, ...)} to be called with each
+  evolution step. Seach heuristics may pass additional
+  information via the \code{...} parameter.}
 
   \item{verbose}{Whether to print progress messages.}
 
@@ -115,19 +112,19 @@
   snowfall's \code{sfExport}.}
 }
 \value{
-  An symbolic regression model that contains an untyped GP
-  population.
+An symbolic regression model that contains an untyped GP
+population.
 }
 \description{
-  Perform symbolic regression via untyped multi-niche
-  genetic programming. The regression task is specified as
-  a \code{\link{formula}}. Only simple formulas without
-  interactions are supported. The result of the symbolic
-  regression run is a symbolic regression model containing
-  an untyped GP population of model functions.
+Perform symbolic regression via untyped multi-niche genetic
+programming. The regression task is specified as a
+\code{\link{formula}}. Only simple formulas without
+interactions are supported. The result of the symbolic
+regression run is a symbolic regression model containing an
+untyped GP population of model functions.
 }
 \seealso{
-  \code{\link{predict.symbolicRegressionModel}},
-  \code{\link{geneticProgramming}}
+\code{\link{predict.symbolicRegressionModel}},
+\code{\link{geneticProgramming}}
 }
 

@@ -2,10 +2,9 @@
 \alias{makeRegressionFitnessFunction}
 \title{Create a fitness function for symbolic regression}
 \usage{
-  makeRegressionFitnessFunction(formula, data, envir,
-    errorMeasure = rmse, indsizelimit = NA,
-    penalizeGenotypeConstantIndividuals = FALSE,
-    subSamplingShare = 1)
+makeRegressionFitnessFunction(formula, data, envir, errorMeasure = rmse,
+  indsizelimit = NA, penalizeGenotypeConstantIndividuals = FALSE,
+  subSamplingShare = 1)
 }
 \arguments{
   \item{formula}{A formula object describing the regression
@@ -33,14 +32,14 @@
   \code{1.0}.}
 }
 \value{
-  A fitness function to be used in symbolic regression.
+A fitness function to be used in symbolic regression.
 }
 \description{
-  Creates a fitness function that calculates an error
-  measure with respect to a given set of data variables. A
-  simplified version of the formula syntax is used to
-  describe the regression task. When an \code{indsizelimit}
-  is given, individuals exceeding this limit will receive a
-  fitness of \code{Inf}.
+Creates a fitness function that calculates an error measure
+with respect to a given set of data variables. A simplified
+version of the formula syntax is used to describe the
+regression task. When an \code{indsizelimit} is given,
+individuals exceeding this limit will receive a fitness of
+\code{Inf}.
 }
 

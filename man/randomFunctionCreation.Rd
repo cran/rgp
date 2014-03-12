@@ -3,15 +3,13 @@
 \alias{randfuncRampedHalfAndHalf}
 \title{Creates an R function with a random expression as its body}
 \usage{
-  randfunc(funcset, inset, conset, maxdepth = 8,
-    constprob = 0.2, exprfactory = randexprGrow,
-    breedingFitness = function(individual) TRUE,
-    breedingTries = 50)
+randfunc(funcset, inset, conset, maxdepth = 8, constprob = 0.2,
+  exprfactory = randexprGrow, breedingFitness = function(individual) TRUE,
+  breedingTries = 50)
 
-  randfuncRampedHalfAndHalf(funcset, inset, conset,
-    maxdepth = 8, constprob = 0.2,
-    breedingFitness = function(individual) TRUE,
-    breedingTries = 50)
+randfuncRampedHalfAndHalf(funcset, inset, conset, maxdepth = 8,
+  constprob = 0.2, breedingFitness = function(individual) TRUE,
+  breedingTries = 50)
 }
 \arguments{
   \item{funcset}{The function set.}
@@ -38,10 +36,9 @@
   \item{breedingTries}{The number of breeding steps.}
 }
 \value{
-  A randomly generated R function.
+A randomly generated R function.
 }
 \description{
-  Creates an R function with a random expression as its
-  body
+Creates an R function with a random expression as its body
 }
 

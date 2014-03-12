@@ -2,24 +2,19 @@
 \alias{multiNicheGeneticProgramming}
 \title{Cluster-based multi-niche genetic programming}
 \usage{
-  multiNicheGeneticProgramming(fitnessFunction,
-    stopCondition = makeTimeStopCondition(25),
-    passStopCondition = makeTimeStopCondition(5),
-    numberOfNiches = 2,
-    clusterFunction = groupListConsecutive,
-    joinFunction = function(niches) Reduce(c, niches),
-    population = NULL, populationSize = 100,
-    eliteSize = ceiling(0.1 * populationSize),
-    elite = list(), functionSet = mathFunctionSet,
-    inputVariables = inputVariableSet("x"),
-    constantSet = numericConstantSet,
-    crossoverFunction = crossover, mutationFunction = NULL,
-    restartCondition = makeEmptyRestartCondition(),
-    restartStrategy = makeLocalRestartStrategy(),
-    searchHeuristic = makeAgeFitnessComplexityParetoGpSearchHeuristic(),
-    progressMonitor = NULL, verbose = TRUE,
-    clusterApply = sfClusterApplyLB,
-    clusterExport = sfExport)
+multiNicheGeneticProgramming(fitnessFunction,
+  stopCondition = makeTimeStopCondition(25),
+  passStopCondition = makeTimeStopCondition(5), numberOfNiches = 2,
+  clusterFunction = groupListConsecutive, joinFunction = function(niches)
+  Reduce(c, niches), population = NULL, populationSize = 100,
+  eliteSize = ceiling(0.1 * populationSize), elite = list(),
+  functionSet = mathFunctionSet, inputVariables = inputVariableSet("x"),
+  constantSet = numericConstantSet, crossoverFunction = crossover,
+  mutationFunction = NULL, restartCondition = makeEmptyRestartCondition(),
+  restartStrategy = makeLocalRestartStrategy(),
+  searchHeuristic = makeAgeFitnessComplexityParetoGpSearchHeuristic(),
+  progressMonitor = NULL, verbose = TRUE, clusterApply = sfClusterApplyLB,
+  clusterExport = sfExport)
 }
 \arguments{
   \item{fitnessFunction}{In case of a single-objective
@@ -93,10 +88,11 @@
   See \link{makeLocalRestartStrategy} for details.}
 
   \item{progressMonitor}{A function of signature
-  \code{function(population, fitnessValues,
+  \code{function(population, objectiveVectors,
   fitnessFunction, stepNumber, evaluationNumber,
-  bestFitness, timeElapsed)} to be called with each
-  evolution step.}
+  bestFitness, timeElapsed, ...)} to be called with each
+  evolution step. Seach heuristics may pass additional
+  information via the \code{...} parameter.}
 
   \item{verbose}{Whether to print progress messages.}
 
@@ -109,36 +105,36 @@
   \code{sfExport}.}
 }
 \value{
-  A genetic programming result object that contains a GP
-  population in the field \code{population}, as well as
-  metadata describing the run parameters.
+A genetic programming result object that contains a GP
+population in the field \code{population}, as well as
+metadata describing the run parameters.
 }
 \description{
-  Perform a multi-niche genetic programming run. The
-  required argument \code{fitnessFunction} must be supplied
-  with an objective function that assigns a numerical
-  fitness value to an R function. Fitness values are
-  minimized, i.e. smaller values mean higher/better
-  fitness. If a multi-objective \code{selectionFunction} is
-  used, \code{fitnessFunction} return a numerical vector of
-  fitness values. In a multi-niche genetic programming run,
-  the initial population is clustered via a
-  \code{clusterFunction} into \code{numberOfNiches} niches.
-  In each niche, a genetic programming run is executed with
-  \code{passStopCondition} as stop condition. These runs
-  are referred to as a parallel pass. After each parallel
-  pass, the niches are joined again using a
-  \code{joinFunction} into a population. From here, the
-  process starts again with a clustering step, until the
-  global \code{stopCondition} is met. The result of the
-  multi-niche genetic programming run is a genetic
-  programming result object containing a GP population of R
-  functions. \code{summary.geneticProgrammingResult} can be
-  used to create summary views of a GP result object.
+Perform a multi-niche genetic programming run. The required
+argument \code{fitnessFunction} must be supplied with an
+objective function that assigns a numerical fitness value
+to an R function. Fitness values are minimized, i.e.
+smaller values mean higher/better fitness. If a
+multi-objective \code{selectionFunction} is used,
+\code{fitnessFunction} return a numerical vector of fitness
+values. In a multi-niche genetic programming run, the
+initial population is clustered via a
+\code{clusterFunction} into \code{numberOfNiches} niches.
+In each niche, a genetic programming run is executed with
+\code{passStopCondition} as stop condition. These runs are
+referred to as a parallel pass. After each parallel pass,
+the niches are joined again using a \code{joinFunction}
+into a population. From here, the process starts again with
+a clustering step, until the global \code{stopCondition} is
+met. The result of the multi-niche genetic programming run
+is a genetic programming result object containing a GP
+population of R functions.
+\code{summary.geneticProgrammingResult} can be used to
+create summary views of a GP result object.
 }
 \seealso{
-  \code{\link{geneticProgramming}},
-  \code{\link{summary.geneticProgrammingResult}},
-  \code{\link{symbolicRegression}}
+\code{\link{geneticProgramming}},
+\code{\link{summary.geneticProgrammingResult}},
+\code{\link{symbolicRegression}}
 }
 

@@ -61,7 +61,7 @@ normalizedDesign <- function(dimension, size, calcMinDistance = FALSE) {
 
 ##' Create a latin hypercube design (LHD)
 ##'
-##' Produces a LHD matrix with \code{dimension} columns and \code{size}
+##' Produces a LHD matrix with \code{dimension} columns and \code{size}
 ##' rows.
 ##'
 ##' @param dimension Dimension of the problem (will be no. of columns of the result matrix).

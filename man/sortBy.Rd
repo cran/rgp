@@ -2,7 +2,7 @@
 \alias{sortBy}
 \title{Sort a vector or list by the result of applying a function}
 \usage{
-  sortBy(xs, byFunc)
+sortBy(xs, byFunc)
 }
 \arguments{
   \item{xs}{A vector or list.}
@@ -11,10 +11,10 @@
   \code{numeric}.}
 }
 \value{
-  The result of sorting \code{xs} by \code{byfunc}.
+The result of sorting \code{xs} by \code{byfunc}.
 }
 \description{
-  Sorts a vector or a list by the numerical result of
-  applying the function \code{byFunc}.
+Sorts a vector or a list by the numerical result of
+applying the function \code{byFunc}.
 }
 

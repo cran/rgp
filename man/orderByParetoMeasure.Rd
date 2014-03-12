@@ -2,7 +2,7 @@
 \alias{orderByParetoMeasure}
 \title{Rearrange points via an arbitrary Pareto-based ranking}
 \usage{
-  orderByParetoMeasure(values, measure = crowding_distance)
+orderByParetoMeasure(values, measure = crowding_distance)
 }
 \arguments{
   \item{values}{The value matrix to return the ordering
@@ -14,13 +14,13 @@
   \code{crowding_distance}.}
 }
 \value{
-  A permutation to rearrange \code{values} based on a
-  Pareto based ranking.
+A permutation to rearrange \code{values} based on a Pareto
+based ranking.
 }
 \description{
-  Returns a permutation that rearranges points, given as
-  columns in a value matrix, via Pareto-based ranking.
-  Points are ranked by their Pareto front number, ties are
-  broken by the values of \code{measure}.
+Returns a permutation that rearranges points, given as
+columns in a value matrix, via Pareto-based ranking. Points
+are ranked by their Pareto front number, ties are broken by
+the values of \code{measure}.
 }
 

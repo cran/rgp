@@ -2,7 +2,7 @@
 \alias{iterate}
 \title{Repeatedly apply a function}
 \usage{
-  iterate(n, f, arg, ...)
+iterate(n, f, arg, ...)
 }
 \arguments{
   \item{n}{The number of times to apply \code{f}, must be
@@ -16,13 +16,13 @@
   each application.}
 }
 \value{
-  The result of repeatedly applying \code{f}.
+The result of repeatedly applying \code{f}.
 }
 \description{
-  Repeatedly apply a function \code{f} to an argument
-  \code{arg}, additional arguments \code{...} are supplied
-  unchanged in each call. E.g. \code{iterate(3, foo, 42.14,
-  "bar")} is equivalent to \code{foo(foo(foo(42.14, "bar"),
-  "bar"), "bar")}.
+Repeatedly apply a function \code{f} to an argument
+\code{arg}, additional arguments \code{...} are supplied
+unchanged in each call. E.g. \code{iterate(3, foo, 42.14,
+"bar")} is equivalent to \code{foo(foo(foo(42.14, "bar"),
+"bar"), "bar")}.
 }
 

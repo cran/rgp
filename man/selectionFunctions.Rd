@@ -4,20 +4,20 @@
 \alias{makeTournamentSelection}
 \title{GP selection functions}
 \usage{
-  makeTournamentSelection(tournamentSize = 10,
-    selectionSize = ceiling(tournamentSize/2),
-    tournamentDeterminism = 1, vectorizedFitness = FALSE)
+makeTournamentSelection(tournamentSize = 10,
+  selectionSize = ceiling(tournamentSize/2), tournamentDeterminism = 1,
+  vectorizedFitness = FALSE)
 
-  makeMultiObjectiveTournamentSelection(tournamentSize = 30,
-    selectionSize = ceiling(tournamentSize/2),
-    tournamentDeterminism = 1, vectorizedFitness = FALSE,
-    rankingStrategy = orderByParetoCrowdingDistance)
+makeMultiObjectiveTournamentSelection(tournamentSize = 30,
+  selectionSize = ceiling(tournamentSize/2), tournamentDeterminism = 1,
+  vectorizedFitness = FALSE,
+  rankingStrategy = orderByParetoCrowdingDistance)
 
-  makeComplexityTournamentSelection(tournamentSize = 30,
-    selectionSize = ceiling(tournamentSize/2),
-    tournamentDeterminism = 1, vectorizedFitness = FALSE,
-    rankingStrategy = orderByParetoCrowdingDistance,
-    complexityMeasure = funcVisitationLength)
+makeComplexityTournamentSelection(tournamentSize = 30,
+  selectionSize = ceiling(tournamentSize/2), tournamentDeterminism = 1,
+  vectorizedFitness = FALSE,
+  rankingStrategy = orderByParetoCrowdingDistance,
+  complexityMeasure = fastFuncVisitationLength)
 }
 \arguments{
   \item{complexityMeasure}{The function used to measure the
@@ -54,45 +54,45 @@
   \code{orderByParetoCrowdingDistance}.}
 }
 \value{
-  A selection function.
+A selection function.
 }
 \description{
-  A GP selection function determines which individuals in a
-  population should survive, i.e. are selected for
-  variation or cloning, and which individuals of a
-  population should be replaced. Single-objective selection
-  functions base their selection decision on scalar fitness
-  function, whereas multi-objective selection functions
-  support vector-valued fitness functions. Every selection
-  function takes a population and a (possibly
-  vector-valued) fitness function as required arguments. It
-  returns a list of two tables \code{selected} and
-  \code{discarded}, with columns \code{index} and
-  \code{fitness} each. The returned list also contains a
-  single integer \code{numberOfFitnessEvaluations} that
-  contains the number of fitness evaluations used to make
-  the selection (Note that in the multi-objective case,
-  evaluating all fitness functions once counts as a single
-  evaluation). The first table contains the population
-  indices of the individuals selected as survivors, the
-  second table contains the population indices of the
-  individuals that should be discarded and replaced. This
-  definition simplifies the implementation of
-  \emph{steady-state} evolutionary strategies where most of
-  the individuals in a population are unchanged in each
-  selection step. In a GP context, steady-state strategies
-  are often more efficient than generational strategies.
+A GP selection function determines which individuals in a
+population should survive, i.e. are selected for variation
+or cloning, and which individuals of a population should be
+replaced. Single-objective selection functions base their
+selection decision on scalar fitness function, whereas
+multi-objective selection functions support vector-valued
+fitness functions. Every selection function takes a
+population and a (possibly vector-valued) fitness function
+as required arguments. It returns a list of two tables
+\code{selected} and \code{discarded}, with columns
+\code{index} and \code{fitness} each. The returned list
+also contains a single integer
+\code{numberOfFitnessEvaluations} that contains the number
+of fitness evaluations used to make the selection (Note
+that in the multi-objective case, evaluating all fitness
+functions once counts as a single evaluation). The first
+table contains the population indices of the individuals
+selected as survivors, the second table contains the
+population indices of the individuals that should be
+discarded and replaced. This definition simplifies the
+implementation of \emph{steady-state} evolutionary
+strategies where most of the individuals in a population
+are unchanged in each selection step. In a GP context,
+steady-state strategies are often more efficient than
+generational strategies.
 }
 \details{
-  \code{makeTournamentSelection} returns a classic
-  single-objective tournament selection function.
-  \code{makeMultiObjectiveTournamentSelection} returns a
-  multi-objective tournament selection function that
-  selects individuals based on multiple objectives.
-  \code{makeComplexityTournamentSelection} returns a
-  multi-objective selection function that implements the
-  common case of dual-objective tournament selection with
-  high solution quality as the first objective and low
-  solution complexity as the second objective.
+\code{makeTournamentSelection} returns a classic
+single-objective tournament selection function.
+\code{makeMultiObjectiveTournamentSelection} returns a
+multi-objective tournament selection function that selects
+individuals based on multiple objectives.
+\code{makeComplexityTournamentSelection} returns a
+multi-objective selection function that implements the
+common case of dual-objective tournament selection with
+high solution quality as the first objective and low
+solution complexity as the second objective.
 }
 

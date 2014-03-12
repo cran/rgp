@@ -26,6 +26,8 @@ rgpSTypeEnvironment <- new.env(parent = emptyenv())
 ##' \code{sObject} is the root of the sType hierarchy, i.e. the most general type.
 ##'
 ##' @param baseTypeName The name of the base sType to create.
+##' @param domainTypes The \code{domain} sType of a function sType.
+##' @param rangeType The \code{range} sType of a function sType.
 ##' @return The created sType.
 ##'
 ##' @examples
@@ -93,11 +95,16 @@ print.sType <- function(x, ...) {
 ##' \code{getSTypeFromFormalsStack} and \code{setSTypeOnFormalsStack} get or set the sType
 ##' of a formal argument \code{x} and a \code{formalsStack}, respectively.
 ##'
+##' The function \code{configureSTypeInference} is used to configure the type inference
+##' engine for special needs.
+##'
 ##' @param x The object to operate on.
 ##' @param value An sType. 
 ##' @param typeEnvir The type environment, containing user-supplied sTypes of building blocks.
 ##' @param formalsStack A stack of formal arguments with their sTypes.
 ##' @param returnNullOnFailure Return NULL on failure instead of stopping, defaults to FALSE.
+##' @param constantSTypeFunction A function of one parameter to be used to calculate constant types.
+##'   If set to \code{NA} (the default), types of constants are named after the constant's R class. 
 ##'
 ##' @seealso sTypeConstructors
 ##' @rdname sTypeInference
@@ -105,13 +112,29 @@ print.sType <- function(x, ...) {
 sType <- function(x, typeEnvir = rgpSTypeEnvironment, returnNullOnFailure = FALSE)
   calculateSTypeRecursive(x, typeEnvir = typeEnvir, returnNullOnFailure = returnNullOnFailure)$type
 
+# sType configuration is stored as a R closure to avoid global variables
+makeSTypeConfiguration <- function() {
+  constantSTypeFunctionInternal <- function(x) st(as.character(class(x))) # get constant type from R class by default
+  function(constantSTypeFunction = NULL) {
+    if (!is.null(constantSTypeFunction)) constantSTypeFunctionInternal <<- constantSTypeFunction
+    list(constantSTypeFunction = constantSTypeFunctionInternal)
+  }
+}
+
+sTypeConfiguration <- makeSTypeConfiguration()
+
+##' @rdname sTypeInference
+##' @export
+configureSTypeInference <- function(constantSTypeFunction = NA) {
+  sTypeConfiguration(constantSTypeFunction = constantSTypeFunction)
+}
+
 ##' @rdname sTypeInference
 calculateSTypeRecursive <- function(x, typeEnvir = rgpSTypeEnvironment, formalsStack = list(),
                                     returnNullOnFailure = FALSE) {
   if (!is.language(x)) {
-    ## a constant: get type from the constant' R class
-    list(type = st(as.character(class(x))),
-         formalsStack = formalsStack)
+    ## a constant: get type from constantSTypeFunction 
+    list(type = sTypeConfiguration()$constantSTypeFunction(x), formalsStack = formalsStack)
   } else if (is.symbol(x)) {
     ## a symbol: get type from formals Stack or from type environment
     sTypeFromFormalsStack <- getSTypeFromFormalsStack(as.character(x), formalsStack)
@@ -129,7 +152,8 @@ calculateSTypeRecursive <- function(x, typeEnvir = rgpSTypeEnvironment, formalsS
     formalNames <- names(x[[2]])
     formalsFrame <- Map(function(formal) list(formal, sObject), formalNames)
     typeAndStackOfBody <- calculateSTypeRecursive(x[[3]], typeEnvir = rgpSTypeEnvironment,
-                                                  formalsStack = c(list(formalsFrame), formalsStack))
+                                                  formalsStack = c(list(formalsFrame), formalsStack),
+                                                  returnNullOnFailure = returnNullOnFailure)
     bodyFormalsStack <- typeAndStackOfBody$formalsStack
     domainTypes <- Map(function(formalName) {
                          getSTypeFromFormalsStack(as.character(formalName), bodyFormalsStack)
@@ -143,17 +167,20 @@ calculateSTypeRecursive <- function(x, typeEnvir = rgpSTypeEnvironment, formalsS
     if (identical(formalsStack, list())) {
       ## use shortcut if no formal variable types have to be inferred
       list(type = calculateSTypeRecursive(x[[1]], typeEnvir = rgpSTypeEnvironment,
-                                          formalsStack = formalsStack)$type$range,
+                                          formalsStack = formalsStack,
+                                          returnNullOnFailure = returnNullOnFailure)$type$range,
            formalsStack = formalsStack)
     } else {
       functionType <- calculateSTypeRecursive(x[[1]], typeEnvir = rgpSTypeEnvironment,
-                                              formalsStack = formalsStack)$type
+                                              formalsStack = formalsStack,
+                                              returnNullOnFailure = returnNullOnFailure)$type
       updatedFormalsStack <- formalsStack
       for (i in 1:length(functionType$domain)) {
         actualArgument <- x[[i + 1]]
         expectedArgumentType <- functionType$domain[[i]]
         actualArgumentTypeAndStack <- calculateSTypeRecursive(actualArgument, typeEnvir = rgpSTypeEnvironment,
-                                                              formalsStack = updatedFormalsStack)
+                                                              formalsStack = updatedFormalsStack,
+                                                              returnNullOnFailure = returnNullOnFailure)
         actualArgumentType <- actualArgumentTypeAndStack$type
         updatedFormalsStack <- actualArgumentTypeAndStack$formalsStack
         if (!is.null(getSTypeFromFormalsStack(as.character(actualArgument), updatedFormalsStack))) {
@@ -171,8 +198,9 @@ calculateSTypeRecursive <- function(x, typeEnvir = rgpSTypeEnvironment, formalsS
 }
 
 ##' @rdname sTypeInference
-sTypeq <- function(x, typeEnvir = rgpSTypeEnvironment)
-  sType(substitute(x), typeEnvir = typeEnvir)
+sTypeq <- function(x, typeEnvir = rgpSTypeEnvironment, returnNullOnFailure = FALSE)
+  sType(substitute(x), typeEnvir = typeEnvir,
+        returnNullOnFailure = returnNullOnFailure)
 
 ##' @rdname sTypeInference
 getSTypeFromFormalsStack <- function(x, formalsStack) {

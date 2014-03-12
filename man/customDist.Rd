@@ -2,7 +2,7 @@
 \alias{customDist}
 \title{A \code{dist} function that supports custom metrics}
 \usage{
-  customDist(x, metric, diag = FALSE, upper = FALSE)
+customDist(x, metric, diag = FALSE, upper = FALSE)
 }
 \arguments{
   \item{x}{A vector or list of objects.}
@@ -19,17 +19,17 @@
   distance matrix should be printed by \code{print.dist}.}
 }
 \value{
-  A distance matrix.
+A distance matrix.
 }
 \description{
-  This function computes and returns the distance matrix
-  computed by using the given metric to compute the
-  distances between the rows of a data list or vector. Note
-  that in contrast to \code{\link{dist}}, \code{x} has to
-  be a vector and the the distance \code{metric} is an
-  arbitrary function that must be symmetric and definite.
+This function computes and returns the distance matrix
+computed by using the given metric to compute the distances
+between the rows of a data list or vector. Note that in
+contrast to \code{\link{dist}}, \code{x} has to be a vector
+and the the distance \code{metric} is an arbitrary function
+that must be symmetric and definite.
 }
 \seealso{
-  \code{\link{dist}}
+\code{\link{dist}}
 }
 

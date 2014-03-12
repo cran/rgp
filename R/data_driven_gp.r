@@ -90,7 +90,7 @@ dataDrivenGeneticProgramming <- function(formula, data, fitnessFunctionFactory,
                                          archive = FALSE,
                                          functionSet = mathFunctionSet,
                                          constantSet = numericConstantSet,
-                                         crossoverFunction = crossover,
+                                         crossoverFunction = NULL,
                                          mutationFunction = NULL,
                                          restartCondition = makeEmptyRestartCondition(),
                                          restartStrategy = makeLocalRestartStrategy(),
@@ -108,6 +108,22 @@ dataDrivenGeneticProgramming <- function(formula, data, fitnessFunctionFactory,
   ## Create inputVariableSet
   inVarSet <- inputVariableSet(list=as.list(variableNames))
   fitFunc <- do.call(fitnessFunctionFactory, c(list(formula(mf), mf), fitnessFunctionFactoryParameters))
+
+  symbolicRegressionMutationFunction <- function(ind) {
+     # subtree Mutation alone seems to give good results...
+    subtreeMutantBody <- mutateSubtreeFast(body(ind), functionSet, inVarSet, -10.0, 10.0, insertprob = 0.5, deleteprob = 0.5, subtreeprob = 1.0, constprob = 0.5, maxsubtreedepth = 8)
+    makeClosure(subtreeMutantBody, inVarSet$all, envir = functionSet$envir)
+  }
+  mutationFunction <- if (is.null(mutationFunction)) symbolicRegressionMutationFunction else mutationFunction
+
+  symbolicRegressionCrossoverFunction <- function(func1, func2, crossoverprob = 1,
+                                                  breedingFitness = function(individual) TRUE,
+                                                  breedingTries = 1) {
+    childBody <- crossoverexprFast(body(func1), body(func2))
+    makeClosure(childBody, inVarSet$all, envir = functionSet$envir)
+  }
+  crossoverFunction <- if (is.null(crossoverFunction)) symbolicRegressionCrossoverFunction else crossoverFunction
+
   gpModel <- geneticProgramming(fitFunc,
                                 stopCondition = stopCondition,
                                 population = population,

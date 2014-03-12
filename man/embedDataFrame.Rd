@@ -2,7 +2,7 @@
 \alias{embedDataFrame}
 \title{Embed columns in a data frame}
 \usage{
-  embedDataFrame(x, cols = NULL, dimension = 1)
+embedDataFrame(x, cols = NULL, dimension = 1)
 }
 \arguments{
   \item{x}{The data frame containing the columns to embed.}
@@ -14,11 +14,11 @@
   when embedding.}
 }
 \value{
-  The data frame, augmented with embedded columns,
-  shortended by \code{dimension} rows.
+The data frame, augmented with embedded columns, shortended
+by \code{dimension} rows.
 }
 \description{
-  Embeds the columns named \code{cols} in the data frame
-  \code{x} into a space of dimension \code{dimension}.
+Embeds the columns named \code{cols} in the data frame
+\code{x} into a space of dimension \code{dimension}.
 }
 

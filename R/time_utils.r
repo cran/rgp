@@ -20,6 +20,7 @@
 ##'   Defaults to 2.
 ##' @return A character vector containg a human-readable representation of the
 ##'   given date/time.
+##' @export
 formatSeconds <- function(seconds, secondDecimals = 2) {
   formSecs <- function(seconds) {
     days <- floor(seconds / 86400)

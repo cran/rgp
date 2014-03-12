@@ -4,11 +4,11 @@
 \alias{hasBuildingBlockTag}
 \title{Building block tags}
 \usage{
-  buildingBlockTag(x)
+buildingBlockTag(x)
 
-  buildingBlockTag(x) <- value
+buildingBlockTag(x) <- value
 
-  hasBuildingBlockTag(x)
+hasBuildingBlockTag(x)
 }
 \arguments{
   \item{x}{An expression node.}
@@ -17,8 +17,8 @@
   a numerical in the interval [0.0 1.0].}
 }
 \description{
-  To implement buidling blocks, i.e. subexpression
-  protected from variation, expression nodes may be tagged
-  with \code{buildingBlockTags}. TODO
+To implement buidling blocks, i.e. subexpression protected
+from variation, expression nodes may be tagged with
+\code{buildingBlockTags}. TODO
 }
 

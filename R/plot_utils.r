@@ -100,7 +100,6 @@ plotFunction3d <- function (func = function(x) sum(x^2),
   }
 }
 
-
 ##' Convert a function to an expression plottable by plotmath
 ##'
 ##' Tries to convert a function \code{func} to an expression plottable by \code{\link{plotmath}}
@@ -196,3 +195,38 @@ exprToGraph <- function(expr) {
   list(vertices = vertices,
        edges = edges[-2:-1]) # the first edge is the reflexive root edge
 }
+
+##' Plot a GP Pareto Front 
+##'
+##' Plots fitness/complexity/age Pareto fronts for multi-objective 
+##' GP. The z-coordinate represents individual age and is shown in form
+##' of a color scale, where younger individuals are bright green, individuals
+##' with age \code{maxZ} are black. Individuals not on the first Pareto
+##' front are shown as small gray circles, regardless of age. 
+##'
+##' @param x A vector of type \code{numeric} representing individual fitness.
+##' @param y A vector of type \code{numeric} representing individual complexity. 
+##' @param z A vector of type \code{integer} representing individual age.
+##' @param indicesToMark A index vector of points to mark with red crosses.
+##' @param maxZ The individual age at the large end of the age color scale.
+##' @param main The plot's title.
+##' @param ... Graphic parameters for \code{\link{par}} and further arguments to \code{plot}.
+##'   For example, use the \code{main} parameter to set a title.
+##'
+##' @seealso \code{\link{funcToIgraph}}
+##' @import emoa
+##' @export
+plotParetoFront <- function(x, y, z, indicesToMark = integer(), maxZ = 50,
+                            main = sprintf("Population Pareto Front Plot (% Individuals)", length(x)), ...) {
+  ranks <- nds_rank(rbind(x, y, z))
+  zColorScale <- colorRamp(c("#00FF00", "#006600","#0000FF", "#000000"))
+  rankOneXs <- x[ranks == 1]; rankOneYs <- y[ranks == 1]; rankOneAges <- z[ranks == 1]
+  zColorScaleIndex <- pmin(rankOneAges / maxZ, 1.0)
+  rankOneAgeColors <- rgb(zColorScale(zColorScaleIndex), maxColorValue = 255)
+
+  plot(rankOneXs, rankOneYs,
+       col = rankOneAgeColors, pch = 19, main = main, ...)
+  points(x[ranks > 1], y[ranks > 1], col = "gray", pch = 1)
+  points(x[indicesToMark], y[indicesToMark], col = "red", pch = 4)
+}
+

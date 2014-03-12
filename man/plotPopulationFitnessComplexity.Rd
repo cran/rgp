@@ -2,10 +2,9 @@
 \alias{plotPopulationFitnessComplexity}
 \title{Fitness/Complexity plot for populations}
 \usage{
-  plotPopulationFitnessComplexity(pop, fitnessFunction,
-    complexityFunction = funcVisitationLength,
-    showIndices = TRUE, showParetoFront = TRUE,
-    hideOutliers = 0, ...)
+plotPopulationFitnessComplexity(pop, fitnessFunction,
+  complexityFunction = fastFuncVisitationLength, showIndices = TRUE,
+  showParetoFront = TRUE, hideOutliers = 0, ...)
 }
 \arguments{
   \item{pop}{A population to plot.}
@@ -29,7 +28,7 @@
   to \code{\link{plot}}.}
 }
 \description{
-  Plots the fitness against the complexity of each
-  individual in a population.
+Plots the fitness against the complexity of each individual
+in a population.
 }
 

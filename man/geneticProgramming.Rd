@@ -3,36 +3,29 @@
 \alias{typedGeneticProgramming}
 \title{Standard typed and untyped genetic programming}
 \usage{
-  geneticProgramming(fitnessFunction,
-    stopCondition = makeTimeStopCondition(5),
-    population = NULL, populationSize = 100,
-    eliteSize = ceiling(0.1 * populationSize),
-    elite = list(), functionSet = mathFunctionSet,
-    inputVariables = inputVariableSet("x"),
-    constantSet = numericConstantSet,
-    crossoverFunction = crossover, mutationFunction = NULL,
-    restartCondition = makeEmptyRestartCondition(),
-    restartStrategy = makeLocalRestartStrategy(),
-    searchHeuristic = makeAgeFitnessComplexityParetoGpSearchHeuristic(),
-    breedingFitness = function(individual) TRUE,
-    breedingTries = 50, extinctionPrevention = FALSE,
-    archive = FALSE, progressMonitor = NULL,
-    verbose = TRUE)
+geneticProgramming(fitnessFunction, stopCondition = makeTimeStopCondition(5),
+  population = NULL, populationSize = 100, eliteSize = ceiling(0.1 *
+  populationSize), elite = list(), functionSet = mathFunctionSet,
+  inputVariables = inputVariableSet("x"), constantSet = numericConstantSet,
+  crossoverFunction = crossover, mutationFunction = NULL,
+  restartCondition = makeEmptyRestartCondition(),
+  restartStrategy = makeLocalRestartStrategy(),
+  searchHeuristic = makeAgeFitnessComplexityParetoGpSearchHeuristic(),
+  breedingFitness = function(individual) TRUE, breedingTries = 50,
+  extinctionPrevention = FALSE, archive = FALSE, progressMonitor = NULL,
+  verbose = TRUE)
 
-  typedGeneticProgramming(fitnessFunction, type,
-    stopCondition = makeTimeStopCondition(5),
-    population = NULL, populationSize = 100,
-    eliteSize = ceiling(0.1 * populationSize),
-    elite = list(), functionSet, inputVariables,
-    constantSet, crossoverFunction = crossoverTyped,
-    mutationFunction = NULL,
-    restartCondition = makeEmptyRestartCondition(),
-    restartStrategy = makeLocalRestartStrategy(populationType = type),
-    searchHeuristic = makeAgeFitnessComplexityParetoGpSearchHeuristic(),
-    breedingFitness = function(individual) TRUE,
-    breedingTries = 50, extinctionPrevention = FALSE,
-    archive = FALSE, progressMonitor = NULL,
-    verbose = TRUE)
+typedGeneticProgramming(fitnessFunction, type,
+  stopCondition = makeTimeStopCondition(5), population = NULL,
+  populationSize = 100, eliteSize = ceiling(0.1 * populationSize),
+  elite = list(), functionSet, inputVariables, constantSet,
+  crossoverFunction = crossoverTyped, mutationFunction = NULL,
+  restartCondition = makeEmptyRestartCondition(),
+  restartStrategy = makeLocalRestartStrategy(populationType = type),
+  searchHeuristic = makeAgeFitnessComplexityParetoGpSearchHeuristic(),
+  breedingFitness = function(individual) TRUE, breedingTries = 50,
+  extinctionPrevention = FALSE, archive = FALSE, progressMonitor = NULL,
+  verbose = TRUE)
 }
 \arguments{
   \item{fitnessFunction}{In case of a single-objective
@@ -125,48 +118,47 @@
   of this function.}
 
   \item{progressMonitor}{A function of signature
-  \code{function(population, fintessValues,
-  fitnessfunction, stepNumber, evaluationNumber,
-  bestFitness, timeElapsed)} to be called with each
-  evolution step.}
+  \code{function(population, objectiveVectors,
+  fitnessFunction, stepNumber, evaluationNumber,
+  bestFitness, timeElapsed, ...)} to be called with each
+  evolution step. Seach heuristics may pass additional
+  information via the \code{...} parameter.}
 
   \item{verbose}{Whether to print progress messages.}
 }
 \value{
-  A genetic programming result object that contains a GP
-  population in the field \code{population}, as well as
-  metadata describing the run parameters.
+A genetic programming result object that contains a GP
+population in the field \code{population}, as well as
+metadata describing the run parameters.
 }
 \description{
-  Perform a standard genetic programming (GP) run. Use
-  \code{geneticProgramming} for untyped genetic programming
-  or \code{typedGeneticProgramming} for typed genetic
-  programming runs. The required argument
-  \code{fitnessFunction} must be supplied with an objective
-  function that assigns a numerical fitness value to an R
-  function. Fitness values are minimized, i.e. smaller
-  values denote higher/better fitness. If a multi-objective
-  \code{selectionFunction} is used, \code{fitnessFunction}
-  return a numerical vector of fitness values. The result
-  of the GP run is a GP result object containing a GP
-  population of R functions.
-  \code{summary.geneticProgrammingResult} can be used to
-  create summary views of a GP result object. During the
-  run, restarts are triggered by the
-  \code{restartCondition}. When a restart is triggered, the
-  restartStrategy is executed, which returns a new
-  population to replace the current one as well as a list
-  of elite individuals. These are added to the runs elite
-  list, where fitter individuals replace individuals with
-  lesser fittness. The runs elite list is always sorted by
-  fitness in ascending order. Only the first component of a
-  multi-criterial fitness counts in this sorting. After a
-  GP run, the population is inserted into the elite list.
-  The elite list is returned as part of the GP result
-  object.
+Perform a standard genetic programming (GP) run. Use
+\code{geneticProgramming} for untyped genetic programming
+or \code{typedGeneticProgramming} for typed genetic
+programming runs. The required argument
+\code{fitnessFunction} must be supplied with an objective
+function that assigns a numerical fitness value to an R
+function. Fitness values are minimized, i.e. smaller values
+denote higher/better fitness. If a multi-objective
+\code{selectionFunction} is used, \code{fitnessFunction}
+return a numerical vector of fitness values. The result of
+the GP run is a GP result object containing a GP population
+of R functions. \code{summary.geneticProgrammingResult} can
+be used to create summary views of a GP result object.
+During the run, restarts are triggered by the
+\code{restartCondition}. When a restart is triggered, the
+restartStrategy is executed, which returns a new population
+to replace the current one as well as a list of elite
+individuals. These are added to the runs elite list, where
+fitter individuals replace individuals with lesser
+fittness. The runs elite list is always sorted by fitness
+in ascending order. Only the first component of a
+multi-criterial fitness counts in this sorting. After a GP
+run, the population is inserted into the elite list. The
+elite list is returned as part of the GP result object.
 }
 \seealso{
-  \code{\link{summary.geneticProgrammingResult}},
-  \code{\link{symbolicRegression}}
+\code{\link{summary.geneticProgrammingResult}},
+\code{\link{symbolicRegression}}
 }
 

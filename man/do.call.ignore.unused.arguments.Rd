@@ -2,8 +2,8 @@
 \alias{do.call.ignore.unused.arguments}
 \title{A variant of do.call that ignores unused arguments}
 \usage{
-  do.call.ignore.unused.arguments(what, args,
-    quote = FALSE, envir = parent.frame())
+do.call.ignore.unused.arguments(what, args, quote = FALSE,
+  envir = parent.frame())
 }
 \arguments{
   \item{what}{What to call (either a function or a
@@ -18,9 +18,9 @@
   call.}
 }
 \value{
-  The result of the call.
+The result of the call.
 }
 \description{
-  A variant of do.call that ignores unused arguments
+A variant of do.call that ignores unused arguments
 }
 

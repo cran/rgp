@@ -2,17 +2,17 @@
 \alias{exprLabel}
 \title{Return the "label" at the Root Node of an Expression Tree}
 \usage{
-  exprLabel(expr)
+exprLabel(expr)
 }
 \arguments{
   \item{expr}{The expression to return the root label for.}
 }
 \value{
-  The expression's root label.
+The expression's root label.
 }
 \description{
-  Internal tool function that returns the function name if
-  \code{expr} is a call, or otherwise just \code{expr}
-  itself.
+Internal tool function that returns the function name if
+\code{expr} is a call, or otherwise just \code{expr}
+itself.
 }
 

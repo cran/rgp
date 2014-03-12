@@ -2,15 +2,15 @@
 \alias{arity}
 \title{Determine the number of arguments of a function}
 \usage{
-  arity(f)
+arity(f)
 }
 \arguments{
   \item{f}{The function to determine the arity for.}
 }
 \value{
-  The arity of the function \code{f}.
+The arity of the function \code{f}.
 }
 \description{
-  Tries to determine the number of arguments of function.
+Tries to determine the number of arguments of function.
 }
 

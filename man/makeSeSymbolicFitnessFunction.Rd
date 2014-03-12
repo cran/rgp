@@ -2,8 +2,8 @@
 \alias{makeSeSymbolicFitnessFunction}
 \title{Create a fitness function based on symbolic squared error (SE)}
 \usage{
-  makeSeSymbolicFitnessFunction(func, lower, upper,
-    subdivisions = 100, indsizelimit = NA)
+makeSeSymbolicFitnessFunction(func, lower, upper, subdivisions = 100,
+  indsizelimit = NA)
 }
 \arguments{
   \item{func}{The reference function.}
@@ -19,14 +19,14 @@
   will get a fitness of \code{Inf}.}
 }
 \value{
-  A fitness function based on the reference function
-  \code{func}.
+A fitness function based on the reference function
+\code{func}.
 }
 \description{
-  Creates a fitness function that calculates the squared
-  error of an individual with respect to a reference
-  function \code{func}. When an \code{indsizelimit} is
-  given, individuals exceeding this limit will receive a
-  fitness of \code{Inf}.
+Creates a fitness function that calculates the squared
+error of an individual with respect to a reference function
+\code{func}. When an \code{indsizelimit} is given,
+individuals exceeding this limit will receive a fitness of
+\code{Inf}.
 }
 

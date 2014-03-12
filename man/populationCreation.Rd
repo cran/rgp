@@ -1,25 +1,24 @@
 \name{makePopulation}
+\alias{fastMakePopulation}
 \alias{makePopulation}
 \alias{makeTypedPopulation}
 \alias{print.population}
 \alias{summary.population}
 \title{Classes for populations of individuals represented as functions}
 \usage{
-  makePopulation(size, funcset, inset, conset,
-    maxfuncdepth = 8, constprob = 0.2,
-    breedingFitness = function(individual) TRUE,
-    breedingTries = 50, extinctionPrevention = FALSE,
-    funcfactory = NULL)
+makePopulation(size, funcset, inset, conset, maxfuncdepth = 8,
+  constprob = 0.2, breedingFitness = function(individual) TRUE,
+  breedingTries = 50, extinctionPrevention = FALSE, funcfactory = NULL)
 
-  makeTypedPopulation(size, type, funcset, inset, conset,
-    maxfuncdepth = 8, constprob = 0.2,
-    breedingFitness = function(individual) TRUE,
-    breedingTries = 50, extinctionPrevention = FALSE,
-    funcfactory = NULL)
+fastMakePopulation(size, funcset, inset, maxfuncdepth, constMin, constMax)
 
-  \method{print}{population} (x, ...)
+makeTypedPopulation(size, type, funcset, inset, conset, maxfuncdepth = 8,
+  constprob = 0.2, breedingFitness = function(individual) TRUE,
+  breedingTries = 50, extinctionPrevention = FALSE, funcfactory = NULL)
 
-  \method{summary}{population} (object, ...)
+\method{print}{population}(x, ...)
+
+\method{summary}{population}(object, ...)
 }
 \arguments{
   \item{size}{The population size in number of
@@ -33,6 +32,12 @@
   \item{inset}{The set of input variables.}
 
   \item{conset}{The set of constant factories.}
+
+  \item{constMin}{For \code{fastMakePopulation}, the
+  minimum constant to create.}
+
+  \item{constMax}{For \code{fastMakePopulation}, the
+  maximum constant to create.}
 
   \item{maxfuncdepth}{The maximum depth of the functions of
   the new population.}
@@ -68,13 +73,15 @@
   to their default implementation).}
 }
 \value{
-  A new population of functions.
+A new population of functions.
 }
 \description{
-  \code{makePopulation} creates a population of untyped
-  individuals, whereas \code{makeTypedPopulation} creates a
-  population of typed individuals. \code{print.population}
-  prints the population. \code{summary.population} returns
-  a summary view of a population.
+\code{makePopulation} creates a population of untyped
+individuals, whereas \code{makeTypedPopulation} creates a
+population of typed individuals. \code{fastMakePopulation}
+is a faster variant of \code{makePopulation} with fewer
+options. \code{print.population} prints the population.
+\code{summary.population} returns a summary view of a
+population.
 }
 

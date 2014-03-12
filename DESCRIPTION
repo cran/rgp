@@ -1,33 +1,25 @@
 Package: rgp
-Version: 0.3-4
+Version: 0.4-0
 Title: R genetic programming framework
-Description: RGP is a simple modular Genetic Programming (GP) system
-        build in pure R. In addition to general GP tasks, the system
-        supports Symbolic Regression by GP through the familiar R model
-        formula interface. GP individuals are represented as R
-        expressions, an (optional) type system enables domain-specific
-        function sets containing functions of diverse domain- and range
-        types. A basic set of genetic operators for variation (mutation
-        and crossover) and selection is provided.
-Author: Oliver Flasch, Olaf Mersmann, Thomas Bartz-Beielstein, Joerg
-        Stork, Martin Zaefferer
+Description: RGP is a simple modular Genetic Programming (GP) system build in
+    pure R. In addition to general GP tasks, the system supports Symbolic
+    Regression by GP through the familiar R model formula interface. GP
+    individuals are represented as R expressions, an (optional) type system
+    enables domain-specific function sets containing functions of diverse
+    domain- and range types. A basic set of genetic operators for variation
+    (mutation and crossover) and selection is provided.
+Author: Oliver Flasch, Olaf Mersmann, Thomas Bartz-Beielstein, Joerg Stork,
+    Martin Zaefferer
 Maintainer: Oliver Flasch <oliver.flasch@fh-koeln.de>
 License: GPL-2
 URL: http://rsymbolic.org/projects/show/rgp
 LazyData: yes
-Depends: R (>= 3.0.0), methods, utils, emoa (>= 0.5-0), rrules (>=
-        0.1-0)
-Suggests: igraph (>= 0.5.5), snowfall (>= 1.84-4), twiddler (>= 0.4-0)
-Collate: 'breeding.R' 'building_blocks.R' 'complexity.R' 'creation.R'
-        'data_driven_gp.R' 'data_utils.R' 'design_of_experiments.R'
-        'evolution.R' 'expression_utils.R' 'fitness.R'
-        'function_utils.R' 'individual.R' 'list_utils.R' 'mutation.R'
-        'niching.R' 'plot_utils.R' 'population.R' 'recombination.R'
-        'rgp.R' 'search_heuristics.R' 'search_space.R' 'selection.R'
-        'similarity.R' 'stypes.R' 'symbolic_regression.R'
-        'test_utils.R' 'time_utils.R'
+Depends: R (>= 3.0.0), utils
+Imports: emoa (>= 0.5-0)
+Suggests: igraph (>= 0.5.5), rrules (>= 0.1-0), rgpui (>= 0.1-0),
+        snowfall (>= 1.84-4)
 Date:
-Packaged: 2013-06-25 09:03:15 UTC; oflasch
+Packaged: 2014-03-12 17:23:48 UTC; oflasch
 NeedsCompilation: yes
 Repository: CRAN
-Date/Publication: 2013-06-25 11:22:39
+Date/Publication: 2014-03-12 18:45:45

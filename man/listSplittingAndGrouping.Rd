@@ -6,15 +6,15 @@
 \alias{splitList}
 \title{Splitting and grouping of lists}
 \usage{
-  splitList(l, groupAssignment)
+splitList(l, groupAssignment)
 
-  groupListConsecutive(l, numberOfGroups)
+groupListConsecutive(l, numberOfGroups)
 
-  groupListDistributed(l, numberOfGroups)
+groupListDistributed(l, numberOfGroups)
 
-  flatten(l, recursive = FALSE)
+flatten(l, recursive = FALSE)
 
-  intersperse(xs, ys, pairConstructor = list)
+intersperse(xs, ys, pairConstructor = list)
 }
 \arguments{
   \item{l}{A list.}
@@ -36,26 +36,25 @@
   sublists or vectors.}
 }
 \value{
-  A list of lists, where each member represents a group.
+A list of lists, where each member represents a group.
 }
 \description{
-  Functions for splitting and grouping lists into sublists.
-  \code{splitList} splits a list \code{l} into
-  \code{max(groupAssignment)} groups. The integer indices
-  of \code{groupAssignment} determine in which group each
-  element of \code{l} goes. \code{groupListConsecutive}
-  splits \code{l} into \code{numberOfGroups} consecutive
-  sublists (or groups). \code{groupListDistributed}
-  distributes \code{l} into \code{numberOfGroups} sublists
-  (or groups). \code{flatten} flattens a list \code{l} of
-  lists into a flat list by concatenation. If
-  \code{recursive} is \code{TRUE} (defaults to
-  \code{FALSE}), flatten will be recursively called on each
-  argument first. \code{intersperse} joins two lists
-  \code{xs} and \code{ys} into a list of pairs containig
-  every possible pair, i.e. \code{intersperse(xs, ys)}
-  equals the product list of \code{xs} and \code{ys}. The
-  \code{pairConstructor} parameter can be used to change
-  the type of pairs returned.
+Functions for splitting and grouping lists into sublists.
+\code{splitList} splits a list \code{l} into
+\code{max(groupAssignment)} groups. The integer indices of
+\code{groupAssignment} determine in which group each
+element of \code{l} goes. \code{groupListConsecutive}
+splits \code{l} into \code{numberOfGroups} consecutive
+sublists (or groups). \code{groupListDistributed}
+distributes \code{l} into \code{numberOfGroups} sublists
+(or groups). \code{flatten} flattens a list \code{l} of
+lists into a flat list by concatenation. If
+\code{recursive} is \code{TRUE} (defaults to \code{FALSE}),
+flatten will be recursively called on each argument first.
+\code{intersperse} joins two lists \code{xs} and \code{ys}
+into a list of pairs containig every possible pair, i.e.
+\code{intersperse(xs, ys)} equals the product list of
+\code{xs} and \code{ys}. The \code{pairConstructor}
+parameter can be used to change the type of pairs returned.
 }
 

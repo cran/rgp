@@ -3,11 +3,10 @@
 \alias{rgpBenchmark}
 \title{Utility functions for testing and benchmarking the RGP system}
 \usage{
-  rgpBenchmark(fitnessFunction = function(ind) 0,
-    samples = 1, time = 10, ...)
+rgpBenchmark(fitnessFunction = function(ind) 0, samples = 1, time = 10,
+  ...)
 
-  evaluationsPerSecondBenchmark(f, samples = 1, time = 10,
-    ...)
+evaluationsPerSecondBenchmark(f, samples = 1, time = 10, ...)
 }
 \arguments{
   \item{f}{The function under test.}
@@ -24,18 +23,17 @@
   \item{...}{Options as passed to the function under test.}
 }
 \value{
-  The number of fitness evaluations per second performed by
-  RGP.
+The number of fitness evaluations per second performed by
+RGP.
 }
 \description{
-  \code{rgpBenchmark} measures the number of fitness
-  evaluations per second performed by
-  \code{\link{geneticProgramming}}. A number of
-  \code{samples} experiments are performed.
+\code{rgpBenchmark} measures the number of fitness
+evaluations per second performed by
+\code{\link{geneticProgramming}}. A number of
+\code{samples} experiments are performed.
 }
 \details{
-  \code{evaluationsPerSecondBenchmark} measures the number
-  of times a function can be called per second in a tight
-  loop.
+\code{evaluationsPerSecondBenchmark} measures the number of
+times a function can be called per second in a tight loop.
 }
 

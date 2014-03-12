@@ -8,19 +8,19 @@
 \alias{orStopCondition}
 \title{Evolution stop conditions}
 \usage{
-  makeStepsStopCondition(stepLimit)
+makeStepsStopCondition(stepLimit)
 
-  makeEvaluationsStopCondition(evaluationLimit)
+makeEvaluationsStopCondition(evaluationLimit)
 
-  makeFitnessStopCondition(fitnessLimit)
+makeFitnessStopCondition(fitnessLimit)
 
-  makeTimeStopCondition(timeLimit)
+makeTimeStopCondition(timeLimit)
 
-  andStopCondition(e1, e2)
+andStopCondition(e1, e2)
 
-  orStopCondition(e1, e2)
+orStopCondition(e1, e2)
 
-  notStopCondition(e1)
+notStopCondition(e1)
 }
 \arguments{
   \item{stepLimit}{The maximum number of evolution steps
@@ -41,28 +41,27 @@
   \item{e2}{A stop condition.}
 }
 \description{
-  Evolution stop conditions are predicates (functions that
-  return a single logical value) of the signature
-  \code{function(population, stepNumber, evaluationNumber,
-  bestFitness, timeElapsed)}. They are used to decide when
-  to finish a GP evolution run. Stop conditions must be
-  members of the S3 class \code{c("stopCondition",
-  "function")}. They can be combined using the functions
-  \code{andStopCondition}, \code{orStopCondition} and
-  \code{notStopCondition}.
+Evolution stop conditions are predicates (functions that
+return a single logical value) of the signature
+\code{function(population, stepNumber, evaluationNumber,
+bestFitness, timeElapsed)}. They are used to decide when to
+finish a GP evolution run. Stop conditions must be members
+of the S3 class \code{c("stopCondition", "function")}. They
+can be combined using the functions
+\code{andStopCondition}, \code{orStopCondition} and
+\code{notStopCondition}.
 }
 \details{
-  \code{makeStepsStopCondition} creates a stop condition
-  that is fulfilled if the number of evolution steps
-  exceeds a given limit.
-  \code{makeEvaluationsStopCondition} creates a stop
-  condition that is fulfilled if the number of fitness
-  function evaluations exceeds a given limit.
-  \code{makeFitnessStopCondition} creates a stop condition
-  that is fulfilled if the number best fitness seen in an
-  evaluation run undercuts a certain limit.
-  \code{makeTimeStopCondition} creates a stop condition
-  that is fulfilled if the run time (in seconds) of an
-  evolution run exceeds a given limit.
+\code{makeStepsStopCondition} creates a stop condition that
+is fulfilled if the number of evolution steps exceeds a
+given limit. \code{makeEvaluationsStopCondition} creates a
+stop condition that is fulfilled if the number of fitness
+function evaluations exceeds a given limit.
+\code{makeFitnessStopCondition} creates a stop condition
+that is fulfilled if the number best fitness seen in an
+evaluation run undercuts a certain limit.
+\code{makeTimeStopCondition} creates a stop condition that
+is fulfilled if the run time (in seconds) of an evolution
+run exceeds a given limit.
 }
 

@@ -1,0 +1,33 @@
+\name{paretoFrontKneeIndex}
+\alias{paretoFrontKneeIndex}
+\title{Find the knee of a two dimensional pareto front}
+\usage{
+paretoFrontKneeIndex(m, normalize = TRUE)
+}
+\arguments{
+  \item{m}{A matrix of two rows and n columns, representing
+  the solutions of a two-dimensional optimization problem.}
+
+  \item{normalize}{Whether to normalize both objectives to
+  the interval of [0, 1], defaults to \code{TRUE}.}
+}
+\value{
+The knee point index, i.e. the column index in m of the
+point of minimum euclidean distance to the utopia point.
+}
+\description{
+Given a matrix \code{m} of two rows and n columns,
+representing solutions of a two-dimensional optimization
+problem, returns the column index of the point with minimum
+euclidean distance to the utopia point. The utopia point is
+the point consisting of the row minima of \code{m}.
+\code{NA} or \code{NaN} values of \code{m} are ommited.
+}
+\examples{
+m1 <- matrix(runif(200), ncol = 100)
+plot(t(m1))
+points(t(m1[,emoa::nds_rank(m1) == 1]), col = "red", pch = 16)
+pKnee <- m1[, paretoFrontKneeIndex(m1)]
+points(t(pKnee), col = "green4", pch = 16)
+}
+

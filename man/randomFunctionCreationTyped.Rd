@@ -3,15 +3,13 @@
 \alias{randfuncTypedRampedHalfAndHalf}
 \title{Creates a well-typed R function with a random expression as its body}
 \usage{
-  randfuncTyped(type, funcset, inset, conset, maxdepth = 8,
-    constprob = 0.2, exprfactory = randexprTypedGrow,
-    breedingFitness = function(individual) TRUE,
-    breedingTries = 50)
+randfuncTyped(type, funcset, inset, conset, maxdepth = 8, constprob = 0.2,
+  exprfactory = randexprTypedGrow, breedingFitness = function(individual)
+  TRUE, breedingTries = 50)
 
-  randfuncTypedRampedHalfAndHalf(type, funcset, inset,
-    conset, maxdepth = 8, constprob = 0.2,
-    breedingFitness = function(individual) TRUE,
-    breedingTries = 50)
+randfuncTypedRampedHalfAndHalf(type, funcset, inset, conset, maxdepth = 8,
+  constprob = 0.2, breedingFitness = function(individual) TRUE,
+  breedingTries = 50)
 }
 \arguments{
   \item{type}{The range type of the random function to
@@ -41,10 +39,10 @@
   \item{breedingTries}{The number of breeding steps.}
 }
 \value{
-  A randomly generated well-typed R function.
+A randomly generated well-typed R function.
 }
 \description{
-  Creates a well-typed R function with a random expression
-  as its body
+Creates a well-typed R function with a random expression as
+its body
 }
 
