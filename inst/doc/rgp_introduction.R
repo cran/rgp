@@ -89,7 +89,7 @@ lines(y = pendulum2(interval1), x = interval1, lty = 2)
 
 
 ###################################################
-### code chunk number 13: rgp_introduction.Rnw:481-482
+### code chunk number 13: rgp_introduction.Rnw:483-484
 ###################################################
 interval1 <- seq(from = 0, to = 10, by = 0.05)
 plot(y = pendulum1(interval1), x = interval1, type = "l",

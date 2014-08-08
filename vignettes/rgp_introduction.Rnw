@@ -1,7 +1,7 @@
 % rgp_introduction.Rnw
 %\VignetteIndexEntry{A Friendly Introduction to RGP}
 %
-% 2013 Oliver Flasch
+% 2013-2014 Oliver Flasch
 % SPOTSeven group / rsymbolic project
 % Cologne University of Applied Sciences
 %
@@ -37,6 +37,7 @@
 \def\gp{{\sc GP}\xspace}
 \def\rlang{{\sf R}\xspace}
 \def\rgp{{\sf RGP}\xspace}
+\def\rgpui{{\sf RGPUI}\xspace}
 \def\rmse{{\sc RMSE}\xspace}
 \def\roi{{\sc ROI}\xspace}
 \def\rproject{{\sf R Project}\xspace}
@@ -56,7 +57,7 @@
   citecolor = citecol,
   urlcolor = linkcol}
 \title[RGP Introduction]{A Friendly Introduction to RGP}
-\date{4 March 2013 (RGP release 0.3-1)}
+\date{7. August 2014 (RGP release 0.4-1)}
 \author[Oliver Flasch]{Oliver Flasch}
 
 
@@ -257,14 +258,14 @@ purpose, \rgp implements multiple complexity measures for \gp individuals.
 
 \begin{figure*}[h]
   \centering
-  \fbox{\includegraphics[width=1\linewidth]{figures/rgp_visual_sr_1088x682.png}}
+  \fbox{\includegraphics[width=1\linewidth]{figures/rgpui.png}}
   \caption{\rgp's graphical user interface for symbolic regression: Although
   \rgp is basically a command-line driven system, much like the underlying
   \rlang environment, graphical user interfaces are provided where they ease
-  interaction and exploration. The graphical user interface for symbolic
-  regression allows the direct manipulation of the most important \gp
-  parameters.}
-  \label{fig:visual_sr}
+  interaction and exploration. The web-based graphical user interface for symbolic
+  regression, available in form of the \cran package \rgpui, allows the direct
+  manipulation of the most important \gp parameters.}
+  \label{fig:rgpui}
   \setfloatalignment{t}
 \end{figure*}
 
@@ -285,9 +286,10 @@ applications of each visualization and analysis technique.
 
 Although \rgp is basically a command-line driven system, like the underlying
 \rlang package, graphical user interfaces are provided where they ease
-interaction and exploration. The graphical user interface for symbolic
-regression (see figure~\ref{fig:visual_sr}) allows direct manipulation of
-the most important \gp parameters.
+interaction and exploration. The web-based graphical user interface for symbolic
+regression (see figure~\ref{fig:rgpui}) allows direct manipulation of
+the most important \gp parameters. The graphical user interface \rgpui is
+delivered as an add-on package for \rgp and available on \cran. 
 
 
 \section{Tutorials}\label{sec:tutorials}

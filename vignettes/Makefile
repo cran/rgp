@@ -15,7 +15,8 @@ pdf: rgp_introduction.tex
 	bibtex rgp_introduction
 	pdflatex rgp_introduction.tex
 	pdflatex rgp_introduction.tex
-	"$(R_HOME)/bin/Rscript" -e "tools::compactPDF('rgp_introduction.pdf', gs_quality='printer')"
+	"$(R_HOME)/bin/Rscript" -e "tools::compactPDF('rgp_introduction.pdf', gs_quality='ebook')"
+	rm -f Rplots.pdf
 	echo "DONE."
 
 clean:

@@ -1,5 +1,5 @@
 Package: rgp
-Version: 0.4-0
+Version: 0.4-1
 Title: R genetic programming framework
 Description: RGP is a simple modular Genetic Programming (GP) system build in
     pure R. In addition to general GP tasks, the system supports Symbolic
@@ -19,7 +19,7 @@ Imports: emoa (>= 0.5-0)
 Suggests: igraph (>= 0.5.5), rrules (>= 0.1-0), rgpui (>= 0.1-0),
         snowfall (>= 1.84-4)
 Date:
-Packaged: 2014-03-12 17:23:48 UTC; oflasch
+Packaged: 2014-08-08 10:05:41 UTC; oflasch
 NeedsCompilation: yes
 Repository: CRAN
-Date/Publication: 2014-03-12 18:45:45
+Date/Publication: 2014-08-08 14:05:23
